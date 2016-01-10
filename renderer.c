@@ -39,7 +39,7 @@ int RendererInit()
 
 	s_Rend.wSurface = SDL_GetWindowSurface(s_Rend.window);
 	SDL_FillRect(s_Rend.wSurface, NULL, SDL_MapRGB(s_Rend.wSurface->format,
-						255, 255, 255));
+						0, 0, 0));
 	SDL_UpdateWindowSurface(s_Rend.window);
 
 	return 0;
@@ -67,7 +67,7 @@ int RendererFrame()
 		return 1;
 	}
 
-	SDL_Delay(2000);
+	SDL_UpdateWindowSurface(s_Rend.window);
 
 	return 0;
 }
