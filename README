@@ -1,0 +1,5 @@
+This is the source code for Titan. I'm not sure what it will be yet but
+I'm very excited about it.
+
+Run build.sh to build everything. (I despise make.) ../bin/ will be filled
+with the built executables. Enjoy.
