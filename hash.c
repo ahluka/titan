@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+/*
+ * Hash
+ *	ELF Hash implementation.
+ */
 uint32_t Hash(void *data, int32_t len)
 {
 	uint8_t *p = data;

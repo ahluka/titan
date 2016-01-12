@@ -4,6 +4,8 @@
 
 struct ConfigData g_Config = {0};
 
+
+
 /*
  * LoadConfig
  *	Load config data from the given file into g_Config.

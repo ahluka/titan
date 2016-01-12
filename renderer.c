@@ -14,17 +14,13 @@ typedef struct RInfo_s {
 
 static RInfo s_Rend;
 
-int RendererInit()
+ecode_t Rend_Init()
 {
-	if (s_Rend.window != NULL) {
-		Panic("RendererInit(): window already created");
-		return 1;
-	}
+	if (s_Rend.window != NULL)
+		Panic("Window already created");
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		Panic("RendererInit(): SDL_Init() failed");
-		return 1;
-	}
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+		Panic("SDL_Init() failed");
 
 	s_Rend.window = SDL_CreateWindow(g_Globs.windowTitle,
 				SDL_WINDOWPOS_UNDEFINED,
@@ -32,10 +28,8 @@ int RendererInit()
 				g_Globs.windowWidth,
 				g_Globs.windowHeight,
 				SDL_WINDOW_SHOWN);
-	if (!s_Rend.window) {
-		Panic("RendererInit(): failed to create window");
-		return 1;
-	}
+	if (!s_Rend.window)
+		Panic("Failed to create window");
 
 	s_Rend.wSurface = SDL_GetWindowSurface(s_Rend.window);
 	SDL_FillRect(s_Rend.wSurface, NULL, SDL_MapRGB(s_Rend.wSurface->format,
@@ -45,7 +39,7 @@ int RendererInit()
 	return 0;
 }
 
-int RendererShutdown()
+ecode_t Rend_Shutdown()
 {
 	if (s_Rend.window != NULL) {
 		SDL_DestroyWindow(s_Rend.window);
@@ -57,17 +51,25 @@ int RendererShutdown()
 		return 0;
 	}
 
+	Trace("RendererShutdown called unnecessarily");
+
 	return 1;
 }
 
-int RendererFrame()
+ecode_t Rend_Frame()
 {
-	if (!s_Rend.window) {
-		Panic("RendererFrame(): renderer not initialised");
-		return 1;
-	}
+	if (!s_Rend.window)
+		Panic("Renderer not initialised");
 
 	SDL_UpdateWindowSurface(s_Rend.window);
 
 	return 0;
+}
+
+SDL_Window *Rend_GetWindow()
+{
+	if (!s_Rend.window)
+		Panic("Renderer not initialised");
+
+	return s_Rend.window;
 }
