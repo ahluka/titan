@@ -4,9 +4,7 @@
 #include "panic.h"
 #include <SDL2/SDL.h>
 
-/*
- * 
- */
+
 typedef struct RInfo_s {
 	SDL_Window *window;
 	SDL_Surface *wSurface;
@@ -22,11 +20,11 @@ ecode_t Rend_Init()
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		Panic("SDL_Init() failed");
 
-	s_Rend.window = SDL_CreateWindow(g_Globs.windowTitle,
+	s_Rend.window = SDL_CreateWindow(g_Globals.windowTitle,
 				SDL_WINDOWPOS_UNDEFINED,
 				SDL_WINDOWPOS_UNDEFINED,
-				g_Globs.windowWidth,
-				g_Globs.windowHeight,
+				g_Globals.windowWidth,
+				g_Globals.windowHeight,
 				SDL_WINDOW_SHOWN);
 	if (!s_Rend.window)
 		Panic("Failed to create window");
@@ -36,7 +34,7 @@ ecode_t Rend_Init()
 						0, 0, 0));
 	SDL_UpdateWindowSurface(s_Rend.window);
 
-	return 0;
+	return EOK;
 }
 
 ecode_t Rend_Shutdown()
@@ -48,12 +46,12 @@ ecode_t Rend_Shutdown()
 		s_Rend.window = NULL;
 		s_Rend.wSurface = NULL;
 
-		return 0;
+		return EOK;
 	}
 
 	Trace("RendererShutdown called unnecessarily");
 
-	return 1;
+	return EFAIL;
 }
 
 ecode_t Rend_Frame()
@@ -63,7 +61,7 @@ ecode_t Rend_Frame()
 
 	SDL_UpdateWindowSurface(s_Rend.window);
 
-	return 0;
+	return EOK;
 }
 
 SDL_Window *Rend_GetWindow()

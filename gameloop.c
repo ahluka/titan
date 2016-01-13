@@ -6,23 +6,26 @@
 #include "renderer.h"
 #include "timer.h"
 #include "memory.h"
+#include "globals.h"
+#include "panic.h"
 #include <SDL2/SDL.h>
 
 /*
  * UpdateGameworld
  *	Update the gameworld state.
  */
-void UpdateGameworld(uint32_t time, float dT)
+void UpdateGameworld(float dT)
 {
 }
 
 /*
+ * Mainloop
  * Enter the main loop. Each iteration:
  *	- Read user input
  *	- Update gameworld (run AI, etc.)
  *	- Render view
  */
-void Mainloop()
+ecode_t Mainloop()
 {
 	SDL_Event event;
 	bool quit = false;
@@ -31,7 +34,11 @@ void Mainloop()
 	uint32_t frameCount = 0;
 
 	Timer_Start(&fpsTimer);
-	Rend_Init();
+
+	if (Rend_Init() != EOK) {
+		Trace("Mainloop failed to init renderer");
+		return EFAIL;
+	}
 
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
@@ -46,17 +53,23 @@ void Mainloop()
 			}
 		}
 
-		float avgFPS = frameCount / (Timer_GetTicks(&fpsTimer) / 1000.f);
+		//float avgFPS = frameCount / (Timer_GetTicks(&fpsTimer) / 1000.f);
+
+		/* Update gameworld */
 		float dT = Timer_GetTicks(&stepTimer) / 1000.f;
-
-		printf("FPS: %f, dT: %f\n", avgFPS, dT);
-
-		UpdateGameworld(Timer_GetTicks(&fpsTimer), dT);
+		g_Globals.timeNowMs = Timer_GetTicks(&fpsTimer);
+		UpdateGameworld(dT);
 		Timer_Start(&stepTimer);
 
+		/* Render */
 		Rend_Frame();
 		frameCount++;
 	}
 
-	Rend_Shutdown();
+	if (Rend_Shutdown() != EOK) {
+		Trace("Mainloop failed to shutdown renderer");
+		return EFAIL;
+	}
+
+	return EOK;
 }

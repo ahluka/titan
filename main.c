@@ -19,15 +19,16 @@ int main(int argc, char **argv)
 
 	MTRSeed((uint64_t) time(NULL));
 
-	printf("%s version %d.%d\n", g_Globs.gameName,
-		g_Globs.verMajor, g_Globs.verMinor);
+	printf("%s version %d.%d\n", g_Globals.gameName,
+		g_Globals.verMajor, g_Globals.verMinor);
 
-	if (LoadConfig(CONFIG_FILENAME) != 0)
+	if (LoadConfig(CONFIG_FILENAME) != EOK)
 		Panic("Failed to load configuration");
 
-	Mainloop();
+	if (Mainloop() != EOK)
+		Panic("Failed to enter main loop");
 
-	if (WriteConfig(CONFIG_FILENAME) != 0)
+	if (WriteConfig(CONFIG_FILENAME) != EOK)
 		Panic("Failed to write configuration");
 
 	return 0;

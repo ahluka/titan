@@ -1,21 +1,20 @@
 #include "base.h"
 #include "globals.h"
 
-Globals g_Globs;
+Globals g_Globals;
 
 void InitGlobals()
 {
-	if (g_Globs.initialised)
+	if (g_Globals.initialised)
 		return;
 
-	g_Globs.gameName = "Titan";
-	g_Globs.verMajor = 0;
-	g_Globs.verMinor = 1;
+	g_Globals.gameName = "Titan";
+	g_Globals.verMajor = 0;
+	g_Globals.verMinor = 1;
 
-	g_Globs.windowTitle = "titan";
-	g_Globs.windowWidth = 800;
-	g_Globs.windowHeight = 600;
+	g_Globals.windowTitle = "titan";
+	g_Globals.windowWidth = 800;
+	g_Globals.windowHeight = 600;
 
-	g_Globs.initialised = true;
+	g_Globals.initialised = true;
 }
-

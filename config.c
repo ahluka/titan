@@ -17,7 +17,7 @@ ecode_t LoadConfig(const char *filename)
 
 	g_Config.filename = filename;
 
-	return 0;
+	return EOK;
 }
 
 /*
@@ -27,5 +27,5 @@ ecode_t LoadConfig(const char *filename)
 ecode_t WriteConfig(const char *filename)
 {
 
-	return 0;
+	return EOK;
 }
