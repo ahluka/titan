@@ -7,7 +7,6 @@
 #include "config.h"
 
 
-
 #define CONFIG_FILENAME "config.ini"
 
 /*
@@ -18,7 +17,7 @@ int main(int argc, char **argv)
 	InitGlobals();
 	MTRSeed((uint64_t) time(NULL));
 
-	if (LoadConfig(CONFIG_FILENAME) != EOK)
+	if (Config_Load(CONFIG_FILENAME) != EOK)
 		Panic("Failed to load configuration");
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
@@ -26,7 +25,7 @@ int main(int argc, char **argv)
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");
 
-	if (WriteConfig(CONFIG_FILENAME) != EOK)
+	if (Config_Save(CONFIG_FILENAME) != EOK)
 		Panic("Failed to write configuration");
 
 	return 0;

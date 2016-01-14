@@ -32,15 +32,15 @@ static void CloseLog()
  * Trace
  *	Write the given message to stdout and the log file.
  */
-void Trace(const char *message)
+void _Trace(const char *file, long line, const char *func, const char *message)
 {
 	if (!s_Logfile) {
 		OpenLog();
 		atexit(CloseLog);
 	}
 
-	printf("%s\n", message);
-	fprintf(s_Logfile, "%s\n", message);
+	printf("[T] (%s:%ld) %s: %s\n", file, line, func, message);
+	fprintf(s_Logfile, "[T] %s: %s\n", func, message);
 	fflush(s_Logfile);
 }
 
@@ -49,7 +49,7 @@ void Trace(const char *message)
  * 	Prints the given message to stderr and the log file, then exit()'s.
  *	We like simple error handling. Crash and burn.
  */
-void _Panic(const char *file, long line, const char * fn, const char *message)
+void _Panic(const char *file, long line, const char *func, const char *message)
 {
 	if (!s_Logfile) {
 		OpenLog();
@@ -57,9 +57,9 @@ void _Panic(const char *file, long line, const char * fn, const char *message)
 	}
 
 	fprintf(stderr, "\nPANIC:\n\tfile: %s\n\tfunc: %s\n\tline: %ld\n\t%s\n\n",
-			file, fn, line, message);
+			file, func, line, message);
 	fprintf(s_Logfile, "\nPANIC:\n\tfile: %s\n\tfunc: %s\n\tline: %ld\n\t%s\n\n",
-			file, fn, line, message);
+			file, func, line, message);
 	fflush(s_Logfile);
 	exit(EXIT_FAILURE);
 }

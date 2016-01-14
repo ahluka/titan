@@ -20,7 +20,7 @@ struct ConfigData {
 
 extern struct ConfigData g_Config;
 
-ecode_t LoadConfig(const char *filename);
-ecode_t WriteConfig(const char *filename);
+ecode_t Config_Load(const char *filename);
+ecode_t Config_Save(const char *filename);
 
 #endif /* __CONFIG_H__ */

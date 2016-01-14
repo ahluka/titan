@@ -12,5 +12,5 @@ echo "Building $EXE..."
 gcc *.c $CFLAGS $LIBS -o $BINDIR/$EXE
 
 # build tscript
-echo "Building $SCRIPTEXE..."
-gcc tscript/*.c $CFLAGS -o $BINDIR/$SCRIPTEXE
+#echo "Building $SCRIPTEXE..."
+#gcc tscript/*.c $CFLAGS -o $BINDIR/$SCRIPTEXE

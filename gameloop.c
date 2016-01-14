@@ -36,7 +36,7 @@ ecode_t Mainloop()
 	Timer_Start(&fpsTimer);
 
 	if (Rend_Init() != EOK) {
-		Trace("Mainloop failed to init renderer");
+		Trace("failed to init renderer");
 		return EFAIL;
 	}
 
@@ -67,7 +67,7 @@ ecode_t Mainloop()
 	}
 
 	if (Rend_Shutdown() != EOK) {
-		Trace("Mainloop failed to shutdown renderer");
+		Trace("failed to shutdown renderer");
 		return EFAIL;
 	}
 

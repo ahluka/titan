@@ -3,6 +3,8 @@
 #include "panic.h"
 #include "ini.h"
 
+//#define DEBUG_CONFIG
+
 struct ConfigData g_Config = {0};
 
 /*
@@ -13,10 +15,11 @@ struct ConfigData g_Config = {0};
  * sec: Section the key=value pair was found in.
  * Returns 1 back to ini_parse() to indicate success, 0 for failure.
  */
+#define MATCH(s, k) strcmp(sec, s) == 0 && strcmp(key, k) == 0
+
 static int
 INIHandler(void *usr, const char *sec, const char *key, const char *val)
 {
-#define MATCH(s, k) strcmp(sec, s) == 0 && strcmp(key, k) == 0
 	if (MATCH("general", "Game")) {
 		g_Config.gameName = strdup(val);
 	} else if (MATCH("general", "Version")) {
@@ -31,12 +34,14 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 }
 
 /*
- * LoadConfig
+ * Config_Load
  *	Load config data from the given file into g_Config.
  */
-ecode_t LoadConfig(const char *filename)
+ecode_t Config_Load(const char *filename)
 {
+#ifdef DEBUG_CONFIG
 	Trace(Fmt("Using config file '%s'", filename));
+#endif
 	g_Config.filename = filename;
 
 	int ret = ini_parse(filename, INIHandler, NULL);
@@ -49,10 +54,10 @@ ecode_t LoadConfig(const char *filename)
 }
 
 /*
- * WriteConfig
+ * Config_Save
  *	Write g_Config into the given file and free it.
  */
-ecode_t WriteConfig(const char *filename)
+ecode_t Config_Save(const char *filename)
 {
 	// TODO: Write it
 

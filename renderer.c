@@ -49,7 +49,7 @@ ecode_t Rend_Shutdown()
 		return EOK;
 	}
 
-	Trace("RendererShutdown called unnecessarily");
+	Trace("called unnecessarily");
 
 	return EFAIL;
 }
