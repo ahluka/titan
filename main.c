@@ -8,7 +8,7 @@
 
 
 
-#define CONFIG_FILENAME "config.txt"
+#define CONFIG_FILENAME "config.ini"
 
 /*
  * main
@@ -16,14 +16,12 @@
 int main(int argc, char **argv)
 {
 	InitGlobals();
-
 	MTRSeed((uint64_t) time(NULL));
-
-	printf("%s version %d.%d\n", g_Globals.gameName,
-		g_Globals.verMajor, g_Globals.verMinor);
 
 	if (LoadConfig(CONFIG_FILENAME) != EOK)
 		Panic("Failed to load configuration");
+
+	printf("%s version %s\n", g_Config.gameName, g_Config.version);
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");

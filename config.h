@@ -7,6 +7,15 @@
 struct ConfigData {
 	const char *filename;	/* the filename given to LoadConfig() */
 
+	/* From here keep it laid out the same as the INI file */
+
+	/* general */
+	char *gameName;
+	char *version;
+
+	/* renderer */
+	int windowWidth;
+	int windowHeight;
 };
 
 extern struct ConfigData g_Config;

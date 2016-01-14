@@ -7,8 +7,6 @@
 
 /*
  * MemAlloc
- *	Basically just a wrapper around calloc() that checks for OOM errors
- *	and Panic()'s as necessary.
  */
 void *MemAlloc(size_t sz)
 {

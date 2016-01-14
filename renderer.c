@@ -1,5 +1,5 @@
 #include "base.h"
-#include "globals.h"
+#include "config.h"
 #include "renderer.h"
 #include "panic.h"
 #include <SDL2/SDL.h>
@@ -20,11 +20,11 @@ ecode_t Rend_Init()
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		Panic("SDL_Init() failed");
 
-	s_Rend.window = SDL_CreateWindow(g_Globals.windowTitle,
+	s_Rend.window = SDL_CreateWindow(g_Config.gameName,
 				SDL_WINDOWPOS_UNDEFINED,
 				SDL_WINDOWPOS_UNDEFINED,
-				g_Globals.windowWidth,
-				g_Globals.windowHeight,
+				g_Config.windowWidth,
+				g_Config.windowHeight,
 				SDL_WINDOW_SHOWN);
 	if (!s_Rend.window)
 		Panic("Failed to create window");

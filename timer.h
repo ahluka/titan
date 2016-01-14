@@ -1,5 +1,8 @@
 #pragma once
 
+/* Multipliers for clarity */
+#define MS_SECONDS	1000
+
 struct Timer {
 	uint32_t startTicks;
 	uint32_t pausedTicks;

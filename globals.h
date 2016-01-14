@@ -7,15 +7,6 @@
 typedef struct Globals_s {
 	bool initialised;
 
-	const char *gameName;
-	int verMajor;
-	int verMinor;
-
-	/* TODO: Make these config? */
-	const char *windowTitle;
-	int windowWidth;
-	int windowHeight;
-
 	/* Current game time in milliseconds */
 	uint32_t timeNowMs;
 
