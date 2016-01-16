@@ -10,15 +10,15 @@
 #include <stdbool.h>
 #include <string.h>
 
+/* Uncomment to enable debugging Trace() calls */
+//#define DEBUG_TRACING_ON
 
-/*
- * Widely-used definitions.
+
+/* Error codes
+ *
+ * Functions that might fail and are NOT predicates should return an ecode_t
+ * to signify success or failure, never bool.
  */
- /* Error codes
-  *
-  * Functions that might fail and are NOT predicates should return an ecode_t
-  * to signify success or failure, never bool.
-  */
 typedef int ecode_t;
 #define EOK	0
 #define EFAIL	-1

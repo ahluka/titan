@@ -9,5 +9,6 @@ void InitGlobals()
 		return;
 
 	g_Globals.initialised = true;
+	g_Globals.debugTracingOn = true;
 	g_Globals.timeNowMs = 0;
 }

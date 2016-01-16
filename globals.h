@@ -7,6 +7,8 @@
 typedef struct Globals_s {
 	bool initialised;
 
+	bool debugTracingOn;
+
 	/* Current game time in milliseconds */
 	uint32_t timeNowMs;
 

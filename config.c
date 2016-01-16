@@ -3,8 +3,6 @@
 #include "panic.h"
 #include "ini.h"
 
-//#define DEBUG_CONFIG
-
 struct ConfigData g_Config = {0};
 
 /*
@@ -39,7 +37,7 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
  */
 ecode_t Config_Load(const char *filename)
 {
-#ifdef DEBUG_CONFIG
+#ifdef DEBUG_TRACING_ON
 	Trace(Fmt("Using config file '%s'", filename));
 #endif
 	g_Config.filename = filename;

@@ -2,8 +2,7 @@
 #include "entity.h"
 #include "memory.h"
 #include "panic.h"
-
-//#define DEBUG_ENT_MGMT
+#include "globals.h"
 
 #define MAX_ENTITIES	32
 static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
@@ -21,11 +20,11 @@ ecode_t Ent_Init()
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
-		s_Entities[i] = MemAlloc(sizeof(struct Entity *));
+		s_Entities[i] = MemAlloc(sizeof(struct Entity));
 		s_Entities[i]->inUse = false;
 	}
 
-#ifdef DEBUG_ENT_MGMT
+#ifdef DEBUG_TRACING_ON
 	Trace(Fmt("allocated %d entities", MAX_ENTITIES));
 #endif
 
@@ -48,7 +47,7 @@ ecode_t Ent_Shutdown()
 		s_Entities[i] = NULL;
 	}
 
-#ifdef DEBUG_ENT_MGMT
+#ifdef DEBUG_TRACING_ON
 	Trace(Fmt("freed %d entities", MAX_ENTITIES));
 #endif
 
@@ -56,12 +55,38 @@ ecode_t Ent_Shutdown()
 }
 
 /*
- * ZeroEntity
- *	Set all fields in the given Entity to their zero values.
+ * DefaultEntity
+ *	Set all fields in the given Entity to their default values.
  */
-static void ZeroEntity(struct Entity *ent)
+ecode_t EntityDefaultUpdate(struct Entity *self, float dT)
 {
+	Trace("well, this can't be good");
 
+	if (self->updateType == UPDATE_SCHED)
+		self->nextUpdate = g_Globals.timeNowMs + 500;
+
+	return EOK;
+}
+
+ecode_t EntityDefaultRender(struct Entity *self)
+{
+	Trace("well, this can't be good either");
+
+	if (self->updateType == UPDATE_SCHED)
+		self->nextUpdate = g_Globals.timeNowMs + 500;
+
+	return EOK;
+}
+
+static void DefaultEntity(struct Entity *ent)
+{
+	ent->name = "(unnamed)";
+
+	ent->updateType = UPDATE_ALWAYS;
+	ent->nextUpdate = 0;
+	ent->Update = EntityDefaultUpdate;
+
+	ent->Render = EntityDefaultRender;
 }
 
 /*
@@ -76,10 +101,11 @@ struct Entity *Ent_New()
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (!s_Entities[i]->inUse) {
-#ifdef DEBUG_ENT_MGMT
+#ifdef DEBUG_TRACING_ON
 			Trace(Fmt("entity slot %d selected", i));
 #endif
-			ZeroEntity(s_Entities[i]);
+			DefaultEntity(s_Entities[i]);
+			s_Entities[i]->inUse = true;
 			return s_Entities[i];
 		}
 	}
@@ -100,15 +126,71 @@ ecode_t Ent_Free(struct Entity *ent)
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (s_Entities[i] == ent) {
-#ifdef DEBUG_ENT_MGMT
+#ifdef DEBUG_TRACING_ON
 			Trace(Fmt("marking entity in slot %d as free", i));
 #endif
 			s_Entities[i]->inUse = false;
-			ZeroEntity(s_Entities[i]);
+			DefaultEntity(s_Entities[i]);
 			return EOK;
 		}
 	}
 
 	Panic("Invalid Entity pointer");
 	return EFAIL; /* not reached */
+}
+
+/*
+ * Ent_UpdateAll
+ *	Update all in-use Entities in the pool.
+ */
+ecode_t Ent_UpdateAll(float dT)
+{
+	if (s_Entities[0] == NULL) {
+		Trace("Entity pool not initialised");
+		return EFAIL;
+	}
+
+#ifdef DEBUG_TRACING_ON
+	uint32_t updated = 0;
+#endif
+
+	/* FIXME: This should probably be refactored... */
+	for (int i = 0; i < MAX_ENTITIES; i++) {
+		struct Entity *ent = s_Entities[i];
+
+		if (!ent->inUse)
+			continue;
+
+		switch (ent->updateType) {
+		case UPDATE_ALWAYS:
+			if (ent->Update(ent, dT) != EOK) {
+				Trace(Fmt("entity '%s' in slot %d failed "
+						"to update", ent->name, i));
+				return EFAIL;
+			}
+#ifdef DEBUG_TRACING_ON
+			updated++;
+#endif
+			break;
+		case UPDATE_SCHED:
+			if (ent->nextUpdate <= g_Globals.timeNowMs) {
+				if (ent->Update(ent, dT) != EOK) {
+					Trace(Fmt("entity '%s' in slot %d"
+						"failed to update", ent->name,
+						i));
+					return EFAIL;
+				}
+#ifdef DEBUG_TRACING_ON
+				updated++;
+#endif
+			}
+			break;
+		}
+	}
+
+#ifdef DEBUG_TRACING_ON
+	Trace(Fmt("updated %u entities", updated));
+#endif
+
+	return EOK;
 }

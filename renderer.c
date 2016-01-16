@@ -4,7 +4,6 @@
 #include "panic.h"
 #include <SDL2/SDL.h>
 
-
 typedef struct RInfo_s {
 	SDL_Window *window;
 	SDL_Surface *wSurface;
@@ -12,6 +11,9 @@ typedef struct RInfo_s {
 
 static RInfo s_Rend;
 
+/*
+ * Rend_Init
+ */
 ecode_t Rend_Init()
 {
 	if (s_Rend.window != NULL)
@@ -34,9 +36,17 @@ ecode_t Rend_Init()
 						0, 0, 0));
 	SDL_UpdateWindowSurface(s_Rend.window);
 
+#ifdef DEBUG_TRACING_ON
+	Trace(Fmt("initialised renderer %dx%d", g_Config.windowWidth,
+						g_Config.windowHeight));
+#endif
+
 	return EOK;
 }
 
+/*
+ * Rend_Shutdown
+ */
 ecode_t Rend_Shutdown()
 {
 	if (s_Rend.window != NULL) {
@@ -46,6 +56,10 @@ ecode_t Rend_Shutdown()
 		s_Rend.window = NULL;
 		s_Rend.wSurface = NULL;
 
+#ifdef DEBUG_TRACING_ON
+		Trace("shutdown renderer");
+#endif
+
 		return EOK;
 	}
 
@@ -54,6 +68,10 @@ ecode_t Rend_Shutdown()
 	return EFAIL;
 }
 
+/*
+ * Rend_Frame
+ *	Render the current frame.
+ */
 ecode_t Rend_Frame()
 {
 	if (!s_Rend.window)
@@ -64,6 +82,9 @@ ecode_t Rend_Frame()
 	return EOK;
 }
 
+/*
+ * Rend_GetWindow
+ */
 SDL_Window *Rend_GetWindow()
 {
 	if (!s_Rend.window)

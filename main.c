@@ -6,13 +6,12 @@
 #include "gameloop.h"
 #include "config.h"
 
-
 #define CONFIG_FILENAME "config.ini"
 
 /*
  * main
  */
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	InitGlobals();
 	MTRSeed((uint64_t) time(NULL));

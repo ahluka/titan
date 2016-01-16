@@ -20,9 +20,14 @@ static void OpenLog()
 	}
 }
 
+/*
+ * CloseLog
+ *	Just wraps the fclose() call so we can do it atexit().
+ */
 static void CloseLog()
 {
 	if (s_Logfile != NULL) {
+		fflush(s_Logfile);
 		fclose(s_Logfile);
 		s_Logfile = NULL;
 	}
@@ -41,7 +46,7 @@ void _Trace(const char *file, long line, const char *func, const char *message)
 
 	printf("[T] (%s:%ld) %s: %s\n", file, line, func, message);
 	fprintf(s_Logfile, "[T] %s: %s\n", func, message);
-	fflush(s_Logfile);
+	//fflush(s_Logfile);
 }
 
 /*
@@ -56,10 +61,10 @@ void _Panic(const char *file, long line, const char *func, const char *message)
 		atexit(CloseLog);
 	}
 
-	fprintf(stderr, "\nPANIC:\n\tfile: %s\n\tfunc: %s\n\tline: %ld\n\t%s\n\n",
-			file, func, line, message);
-	fprintf(s_Logfile, "\nPANIC:\n\tfile: %s\n\tfunc: %s\n\tline: %ld\n\t%s\n\n",
-			file, func, line, message);
-	fflush(s_Logfile);
+	fprintf(stderr, "\nPANIC:\n\tin %s (%s:%ld)\n\t%s\n\n",
+			func, file, line, message);
+	fprintf(s_Logfile, "\nPANIC:\n\tin %s (%s:%ld)\n\t%s\n\n",
+			func, file, line, message);
+	//fflush(s_Logfile);
 	exit(EXIT_FAILURE);
 }
