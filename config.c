@@ -18,10 +18,15 @@ struct ConfigData g_Config = {0};
 static int
 INIHandler(void *usr, const char *sec, const char *key, const char *val)
 {
+#ifdef DEBUG_TRACING_ON
+	Trace(Fmt("handling [%s] %s=%s", sec, key, val));
+#endif
 	if (MATCH("general", "Game")) {
 		g_Config.gameName = strdup(val);
 	} else if (MATCH("general", "Version")) {
 		g_Config.version = strdup(val);
+	} else if (MATCH("general", "FilesRoot")) {
+		g_Config.filesRoot = strdup(val);
 	} else if (MATCH("renderer", "WindowWidth")) {
 		g_Config.windowWidth = atoi(val);
 	} else if (MATCH("renderer", "WindowHeight")) {
@@ -62,6 +67,7 @@ ecode_t Config_Save(const char *filename)
 	/* free strings from strdup() */
 	free(g_Config.gameName);
 	free(g_Config.version);
+	free(g_Config.filesRoot);
 
 	return EOK;
 }

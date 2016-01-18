@@ -12,6 +12,7 @@ struct ConfigData {
 	/* general */
 	char *gameName;
 	char *version;
+	char *filesRoot;
 
 	/* renderer */
 	int windowWidth;

@@ -50,6 +50,7 @@ ecode_t Mainloop()
 	}
 
 	while (!quit) {
+		/* input */
 		while (SDL_PollEvent(&event) != 0) {
 			// TODO: This needs to call into an input module, etc.
 			if (event.type == SDL_QUIT)

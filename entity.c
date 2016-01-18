@@ -150,10 +150,6 @@ ecode_t Ent_UpdateAll(float dT)
 		return EFAIL;
 	}
 
-#ifdef DEBUG_TRACING_ON
-	uint32_t updated = 0;
-#endif
-
 	/* FIXME: This should probably be refactored... */
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		struct Entity *ent = s_Entities[i];
@@ -168,9 +164,7 @@ ecode_t Ent_UpdateAll(float dT)
 						"to update", ent->name, i));
 				return EFAIL;
 			}
-#ifdef DEBUG_TRACING_ON
-			updated++;
-#endif
+
 			break;
 		case UPDATE_SCHED:
 			if (ent->nextUpdate <= g_Globals.timeNowMs) {
@@ -180,17 +174,11 @@ ecode_t Ent_UpdateAll(float dT)
 						i));
 					return EFAIL;
 				}
-#ifdef DEBUG_TRACING_ON
-				updated++;
-#endif
 			}
+
 			break;
 		}
 	}
-
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("updated %u entities", updated));
-#endif
 
 	return EOK;
 }

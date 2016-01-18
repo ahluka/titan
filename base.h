@@ -11,7 +11,7 @@
 #include <string.h>
 
 /* Uncomment to enable debugging Trace() calls */
-//#define DEBUG_TRACING_ON
+#define DEBUG_TRACING_ON
 
 
 /* Error codes
