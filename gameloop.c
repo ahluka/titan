@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "panic.h"
 #include "entity.h"
+#include "cmds.h"
 #include <SDL2/SDL.h>
 
 /*
@@ -59,6 +60,9 @@ ecode_t Mainloop()
 				switch (event.key.keysym.sym) {
 				case SDLK_ESCAPE:
 					quit = true;
+					break;
+				case SDLK_F12:
+					Cmd_Execute("cmdlist");
 					break;
 				}
 			}

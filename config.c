@@ -25,12 +25,12 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 		g_Config.gameName = strdup(val);
 	} else if (MATCH("general", "Version")) {
 		g_Config.version = strdup(val);
-	} else if (MATCH("general", "FilesRoot")) {
-		g_Config.filesRoot = strdup(val);
 	} else if (MATCH("renderer", "WindowWidth")) {
 		g_Config.windowWidth = atoi(val);
 	} else if (MATCH("renderer", "WindowHeight")) {
 		g_Config.windowHeight = atoi(val);
+	} else if (MATCH("filesystem", "FilesRoot")) {
+		g_Config.filesRoot = strdup(val);
 	}
 
 	return 1;

@@ -6,6 +6,8 @@
 #include "gameloop.h"
 #include "config.h"
 #include "files.h"
+#include "cmds.h"
+
 
 #define CONFIG_FILENAME "config.ini"
 
@@ -17,6 +19,12 @@ int main(int argc, char *argv[])
 	InitGlobals();
 	MTRSeed((uint64_t) time(NULL));
 
+	/* NOTE: Cmd_Init() should be the first init functoin called; other
+	 *	init functions might call Cmd_Register().
+	 */
+	if (Cmd_Init() != EOK)
+		Panic("Failed to init command system");
+
 	if (Config_Load(CONFIG_FILENAME) != EOK)
 		Panic("Failed to load configuration");
 
@@ -24,10 +32,6 @@ int main(int argc, char *argv[])
 		Panic("Failed to init file system");
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
-	FileHandle hnd = Files_OpenFile("sheet.png");
-	Files_ListOpen();
-	Files_CloseFile(hnd);
-	Files_ListOpen();
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");
@@ -38,5 +42,8 @@ int main(int argc, char *argv[])
 	if (Config_Save(CONFIG_FILENAME) != EOK)
 		Panic("Failed to write configuration");
 
-	return 0;
+	if (Cmd_Shutdown() != EOK)
+		Panic("Failed to shutdown command system");
+
+	return EXIT_SUCCESS;
 }

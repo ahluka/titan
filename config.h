@@ -12,11 +12,13 @@ struct ConfigData {
 	/* general */
 	char *gameName;
 	char *version;
-	char *filesRoot;
 
 	/* renderer */
 	int windowWidth;
 	int windowHeight;
+
+	/* filesystem */
+	char *filesRoot;
 };
 
 extern struct ConfigData g_Config;
