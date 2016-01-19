@@ -11,6 +11,7 @@
 
 #define CONFIG_FILENAME "config.ini"
 
+
 /*
  * main
  */
@@ -32,6 +33,7 @@ int main(int argc, char *argv[])
 		Panic("Failed to init file system");
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
+
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");

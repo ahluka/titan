@@ -103,6 +103,7 @@ static void DestroyFile(struct File *f)
 /*
  * Files_Init
  */
+void Files_ListOpen(int argc, char **argv);
 ecode_t Files_Init(const char *rootDir)
 {
 #ifdef DEBUG_TRACING_ON
@@ -213,7 +214,7 @@ uint8_t *Files_GetData(FileHandle handle)
 /*
  * Files_ListOpen
  */
-void Files_ListOpen()
+void Files_ListOpen(int argc, char **argv)
 {
 	int totalOpen = 0;
 	size_t totalBytes = 0;

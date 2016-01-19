@@ -62,7 +62,7 @@ ecode_t Mainloop()
 					quit = true;
 					break;
 				case SDLK_F12:
-					Cmd_Execute("cmdlist");
+					Cmd_ExecuteBuf("cmdlist");
 					break;
 				}
 			}

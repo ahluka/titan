@@ -20,6 +20,3 @@ void Files_CloseFile(FileHandle handle);
 
 /* Get a pointer to the buffer associated with the given handle */
 uint8_t *Files_GetData(FileHandle handle);
-
-/* Dump a list of open files to stdout */
-void Files_ListOpen();

@@ -31,7 +31,7 @@ static void NewCommand(const char *name, CmdFunction fn)
 /*
  * CmdList
  */
-static void CmdList()
+static void CmdList(int argc, char **argv)
 {
 	uint32_t total = 0;
 	printf("List of commands:\n");
@@ -44,12 +44,21 @@ static void CmdList()
 	printf("\tTotal: %u commands (max is %d)\n", total, MAX_COMMANDS);
 }
 
+static void TestFunc(int argc, char **argv)
+{
+	printf("Got %d args:\n", argc);
+	for (int i = 0; i < argc; i++) {
+		printf("\t%s\n", argv[i]);
+	}
+}
+
 /*
  * Cmd_Init
  */
 ecode_t Cmd_Init()
 {
 	Cmd_Register("cmdlist", CmdList);
+	Cmd_Register("test", TestFunc);
 
 	return EOK;
 }
@@ -86,19 +95,94 @@ ecode_t Cmd_Register(const char *name, CmdFunction func)
 /*
  * Cmd_Execute
  */
-ecode_t Cmd_Execute(const char *name)
+ecode_t Cmd_Execute(const char *cmd, int argc, char **argv)
 {
 	for (int i = 0; i < MAX_COMMANDS; i++) {
-		if (strcmp(name, s_Commands[i]->name) == 0) {
+		if (!s_Commands[i])
+			continue;
+
+		if (strcmp(cmd, s_Commands[i]->name) == 0) {
 #ifdef DEBUG_TRACING_ON
-			Trace(Fmt("executing '%s'", name));
+			Trace(Fmt("executing '%s'", cmd));
 #endif
-			s_Commands[i]->function();
+			s_Commands[i]->function(argc, argv);
 			return EOK;
 		}
 	}
 #ifdef DEBUG_TRACING_ON
-	Trace(Fmt("command '%s' doesn't exist", name));
+	Trace(Fmt("command '%s' doesn't exist", cmd));
 #endif
 	return EFAIL;
+}
+
+
+static int CountArgs(const char *buffer)
+{
+	int count = 0;
+	const char *p = buffer;
+
+	while (*p) {
+		if (*p == ' ') {
+			count++;
+		}
+
+		p++;
+	}
+
+	return count;
+}
+
+/*
+ * Cmd_ExecuteBuf
+ *	Given a buffer containing an arbitrary command string, attempt to
+ *	parse and execute it. Commands are of the form:
+ *		cmd arg1 arg2 ... argN
+ *	TODO: stop using strtok(). Need to be able to parse strings out of the
+ *	buffer and pass them as one argument, amongst other things.
+ */
+ecode_t Cmd_ExecuteBuf(char *buffer)
+{
+	const char *delims = " \n\t\r";
+	char *copy = strdup(buffer);
+	char *token = strtok(copy, delims);
+
+	if (!token) {
+		Panic("malformed command string");
+	}
+
+	char *cmd = strdup(token);
+	char **argv = NULL;
+	int argc = CountArgs(buffer);
+
+	if (!argc) {
+#ifdef DEBUG_TRACING_ON
+		Trace(Fmt("executing %s", cmd));
+#endif
+		Cmd_Execute(cmd, argc, NULL);
+		MemFree(copy);
+		MemFree(cmd);
+		return EOK;
+	}
+
+	argv = MemAlloc(argc * sizeof(char *));
+
+	int argsCopied = 0;
+	while (token != NULL) {
+		token = strtok(NULL, delims);
+		if (!token) break;
+		argv[argsCopied++] = strdup(token);
+	}
+
+#ifdef DEBUG_TRACING_ON
+	Trace(Fmt("executing %s with %d args", cmd, argc));
+#endif
+	Cmd_Execute(cmd, argc, argv);
+
+	for (int i = 0; i < argc; i++) {
+		MemFree(argv[i]);
+	}
+
+	MemFree(copy);
+	MemFree(cmd);
+	return EOK;
 }
