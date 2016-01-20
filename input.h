@@ -1,6 +1,6 @@
 #pragma once
 
-void In_KeyDown(int32_t scode);
-void In_KeyUp(int32_t scode);
-void In_EnableDebugKeys();
-void In_DisableDebugKeys();
+#include <SDL2/SDL.h>
+
+void In_KeyDown(SDL_Scancode scode);
+void In_KeyUp(SDL_Scancode scode);

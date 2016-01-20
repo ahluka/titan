@@ -14,6 +14,18 @@
 #include <SDL2/SDL.h>
 
 /*
+ * CheckDbgKeys
+ */
+static void CheckDbgKeys(SDL_Keycode code)
+{
+	switch (code) {
+	case SDLK_F12:
+		Cmd_ExecuteBuf("files-listopen");
+		break;
+	}
+}
+
+/*
  * UpdateGameworld
  *	Update the gameworld state. This basically involves letting all
  *	entities update themselves.
@@ -59,6 +71,7 @@ ecode_t Mainloop()
 			} else if (event.type == SDL_KEYUP) {
 				In_KeyUp((int32_t) event.key.keysym.scancode);
 			} else if (event.type == SDL_KEYDOWN) {
+				CheckDbgKeys(event.key.keysym.sym);
 				In_KeyDown((int32_t) event.key.keysym.scancode);
 
 				// TODO: this is for debugging only; remove it
