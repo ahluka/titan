@@ -10,6 +10,7 @@
 #include "panic.h"
 #include "entity.h"
 #include "cmds.h"
+#include "input.h"
 #include <SDL2/SDL.h>
 
 /*
@@ -53,17 +54,16 @@ ecode_t Mainloop()
 	while (!quit) {
 		/* input */
 		while (SDL_PollEvent(&event) != 0) {
-			// TODO: This needs to call into an input module, etc.
-			if (event.type == SDL_QUIT)
+			if (event.type == SDL_QUIT) {
 				quit = true;
-			else if (event.type == SDL_KEYDOWN) {
-				switch (event.key.keysym.sym) {
-				case SDLK_ESCAPE:
+			} else if (event.type == SDL_KEYUP) {
+				In_KeyUp((int32_t) event.key.keysym.scancode);
+			} else if (event.type == SDL_KEYDOWN) {
+				In_KeyDown((int32_t) event.key.keysym.scancode);
+
+				// TODO: this is for debugging only; remove it
+				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					quit = true;
-					break;
-				case SDLK_F12:
-					Cmd_ExecuteBuf("cmdlist");
-					break;
 				}
 			}
 		}
