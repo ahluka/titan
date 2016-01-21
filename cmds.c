@@ -137,8 +137,6 @@ static int CountArgs(const char *buffer)
  *	Given a buffer containing an arbitrary command string, attempt to
  *	parse and execute it. Commands are of the form:
  *		cmd arg1 arg2 ... argN
- *	TODO: stop using strtok(). Need to be able to parse strings out of the
- *	buffer and pass them as one argument, amongst other things.
  */
 ecode_t Cmd_ExecuteBuf(char *buffer)
 {
@@ -159,9 +157,7 @@ ecode_t Cmd_ExecuteBuf(char *buffer)
 		Trace(Fmt("executing %s", cmd));
 #endif
 		Cmd_Execute(cmd, argc, NULL);
-		MemFree(copy);
-		MemFree(cmd);
-		return EOK;
+		goto return_eok;
 	}
 
 	argv = MemAlloc(argc * sizeof(char *));
@@ -182,6 +178,7 @@ ecode_t Cmd_ExecuteBuf(char *buffer)
 		MemFree(argv[i]);
 	}
 
+return_eok:
 	MemFree(copy);
 	MemFree(cmd);
 	return EOK;

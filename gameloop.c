@@ -15,6 +15,7 @@
 
 /*
  * CheckDbgKeys
+ *	Checks if a debug key was pressed and runs commands as necessary.
  */
 static void CheckDbgKeys(SDL_Keycode code)
 {
@@ -27,8 +28,7 @@ static void CheckDbgKeys(SDL_Keycode code)
 
 /*
  * UpdateGameworld
- *	Update the gameworld state. This basically involves letting all
- *	entities update themselves.
+ *	Update the gameworld state.
  */
 static void UpdateGameworld(float dT)
 {
@@ -93,7 +93,7 @@ ecode_t Mainloop()
 		float dT = Timer_GetTicks(&stepTimer) / 1000.f;
 		g_Globals.timeNowMs = Timer_GetTicks(&fpsTimer);
 		UpdateGameworld(dT);
-		Timer_Start(&stepTimer);
+		Timer_Start(&stepTimer); /* restart */
 
 		/* Render */
 		Rend_Frame();

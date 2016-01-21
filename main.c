@@ -7,20 +7,21 @@
 #include "config.h"
 #include "files.h"
 #include "cmds.h"
-
+#include "script.h"
 
 #define CONFIG_FILENAME "config.ini"
 
 
 /*
  * main
+ *	TODO: refactor
  */
 int main(int argc, char *argv[])
 {
 	InitGlobals();
 	MTRSeed((uint64_t) time(NULL));
 
-	/* NOTE: Cmd_Init() should be the first init functoin called; other
+	/* NOTE: Cmd_Init() should be the first init function called; other
 	 *	init functions might call Cmd_Register().
 	 */
 	if (Cmd_Init() != EOK)
@@ -32,11 +33,16 @@ int main(int argc, char *argv[])
 	if (Files_Init(g_Config.filesRoot) != EOK)
 		Panic("Failed to init file system");
 
-	printf("%s version %s\n", g_Config.gameName, g_Config.version);
+	if (Script_Init() != EOK)
+		Panic("Failed to init script system");
 
+	printf("%s version %s\n", g_Config.gameName, g_Config.version);
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");
+
+	if (Script_Shutdown() != EOK)
+		Panic("Failed to shutdown script system");
 
 	if (Files_Shutdown() != EOK)
 		Panic("Failed to shutdown file system");
