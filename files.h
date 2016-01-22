@@ -20,3 +20,9 @@ void Files_CloseFile(FileHandle handle);
 
 /* Get a pointer to the buffer associated with the given handle */
 uint8_t *Files_GetData(FileHandle handle);
+
+/* Get the size of the given file */
+size_t Files_GetSize(FileHandle handle);
+
+/* Get a pointer to the file's path */
+const char *Files_GetPath(FileHandle handle);

@@ -211,6 +211,29 @@ uint8_t *Files_GetData(FileHandle handle)
 	return file->data;
 }
 
+size_t Files_GetSize(FileHandle handle)
+{
+	struct File *file = GetFileByHandle(handle);
+	if (!file) {
+		Panic(Fmt("no file for handle %u", handle));
+	}
+
+	return file->size;
+}
+
+/*
+ * Files_GetPath
+ */
+const char *Files_GetPath(FileHandle handle)
+{
+	struct File *file = GetFileByHandle(handle);
+	if (!file) {
+		Panic(Fmt("no file for handle %u", handle));
+	}
+
+	return file->path;
+}
+
 /*
  * Files_ListOpen
  */

@@ -1,5 +1,6 @@
 #include "base.h"
 #include "panic.h"
+#include "script.h"
 #include <lua5.3/lua.h>
 #include <lua5.3/lualib.h>
 #include <lua5.3/lauxlib.h>
@@ -118,7 +119,33 @@ ecode_t Script_ExecString(const char *str)
 		Panic("Script module not initialised");
 	}
 
+	if (luaL_loadstring(s_State, str) != 0) {
+		lua_error(s_State);
+	}
 
+	if (lua_pcall(s_State, 0, LUA_MULTRET, 0) != 0) {
+		lua_error(s_State);
+	}
+
+	return EOK;
+}
+
+/*
+ * Script_ExecFile
+ */
+ecode_t Script_ExecFile(FileHandle handle)
+{
+	const char *contents = (const char *) Files_GetData(handle);
+	const char *path = Files_GetPath(handle);
+	size_t sz = Files_GetSize(handle);
+
+	if (luaL_loadbuffer(s_State, contents, sz, path) != 0) {
+		lua_error(s_State);
+	}
+
+	if (lua_pcall(s_State, 0, LUA_MULTRET, 0) != 0) {
+		lua_error(s_State);
+	}
 
 	return EOK;
 }

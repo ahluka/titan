@@ -11,18 +11,15 @@
 
 #define CONFIG_FILENAME "config.ini"
 
-
 /*
- * main
- *	TODO: refactor
+ * InitModules
+ *	Call the initialisation functions of all modules in succession.
+ *	Panic() if one of them fails.
  */
-int main(int argc, char *argv[])
+static void InitModules()
 {
-	InitGlobals();
-	MTRSeed((uint64_t) time(NULL));
-
 	/* NOTE: Cmd_Init() should be the first init function called; other
-	 *	init functions might call Cmd_Register().
+	 * modules might call into it during initialisation.
 	 */
 	if (Cmd_Init() != EOK)
 		Panic("Failed to init command system");
@@ -35,12 +32,16 @@ int main(int argc, char *argv[])
 
 	if (Script_Init() != EOK)
 		Panic("Failed to init script system");
+}
 
-	printf("%s version %s\n", g_Config.gameName, g_Config.version);
-
-	if (Mainloop() != EOK)
-		Panic("Failed to enter main loop");
-
+/*
+ * ShutdownModules
+ *	Call the shutdown functions of all modules in succession. They should
+ *	be called in reverse of the order in which their counterpart init
+ *	functions were called in InitModules().
+ */
+static void ShutdownModules()
+{
 	if (Script_Shutdown() != EOK)
 		Panic("Failed to shutdown script system");
 
@@ -52,6 +53,24 @@ int main(int argc, char *argv[])
 
 	if (Cmd_Shutdown() != EOK)
 		Panic("Failed to shutdown command system");
+}
 
+/*
+ * main
+ *	Initialise everything then jump into the main loop. Clean up
+ *	afterwards.
+ */
+int main(int argc, char *argv[])
+{
+	InitGlobals();
+	InitModules();
+	MTRSeed((uint64_t) time(NULL));
+
+	printf("%s version %s\n", g_Config.gameName, g_Config.version);
+
+	if (Mainloop() != EOK)
+		Panic("Failed to enter main loop");
+
+	ShutdownModules();
 	return EXIT_SUCCESS;
 }
