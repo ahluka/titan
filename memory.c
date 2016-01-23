@@ -2,8 +2,6 @@
 #include "panic.h"
 #include "memory.h"
 
-#define TAG_MAGIC 0x717A717A
-
 typedef struct MemTag {
 	struct MemTag *next;
 

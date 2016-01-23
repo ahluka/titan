@@ -12,7 +12,7 @@ typedef struct Globals_s {
 	/* Current game time in milliseconds */
 	uint32_t timeNowMs;
 
-	// TODO: Flags
+	// TODO: program flags
 } Globals;
 
 extern Globals g_Globals;

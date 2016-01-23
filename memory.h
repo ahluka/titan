@@ -6,7 +6,9 @@
  *	MemFree().
  */
 
-/* Comment this out to disable detailed memory usage tracking. */
+/* Comment this out to disable detailed memory usage tracking.
+ * Without this defined, only allocation and free counts are tracked.
+ */
 #define DEBUG_MEMORY_BUILD
 
 #ifdef DEBUG_MEMORY_BUILD

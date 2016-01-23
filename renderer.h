@@ -1,6 +1,11 @@
 #ifndef __RENDERER_H__
 #define __RENDERER_H__
 
+/*
+ * renderer.h
+ *	TODO: Write description comment
+ */
+
 #include <SDL2/SDL.h>
 
 ecode_t Rend_Init();

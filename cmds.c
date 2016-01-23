@@ -154,7 +154,7 @@ ecode_t Cmd_ExecuteBuf(char *buffer)
 
 	if (!argc) {
 #ifdef DEBUG_TRACING_ON
-		Trace(Fmt("executing %s", cmd));
+		Trace(Fmt("found command '%s'", cmd));
 #endif
 		Cmd_Execute(cmd, argc, NULL);
 		goto return_eok;
@@ -170,7 +170,7 @@ ecode_t Cmd_ExecuteBuf(char *buffer)
 	}
 
 #ifdef DEBUG_TRACING_ON
-	Trace(Fmt("executing %s with %d args", cmd, argc));
+	Trace(Fmt("found command '%s' with %d args", cmd, argc));
 #endif
 	Cmd_Execute(cmd, argc, argv);
 
@@ -179,7 +179,7 @@ ecode_t Cmd_ExecuteBuf(char *buffer)
 	}
 
 return_eok:
-	MemFree(copy);
-	MemFree(cmd);
+	free(copy);
+	free(cmd);
 	return EOK;
 }

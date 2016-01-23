@@ -20,8 +20,11 @@
 static void CheckDbgKeys(SDL_Keycode code)
 {
 	switch (code) {
-	case SDLK_F12:
+	case SDLK_F1:
 		Cmd_ExecuteBuf("files-listopen");
+		break;
+	case SDLK_F2:
+		Cmd_ExecuteBuf("cmdlist");
 		break;
 #ifdef DEBUG_MEMORY_BUILD
 	case SDLK_F10:
