@@ -35,6 +35,7 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 
 	return 1;
 }
+#undef MATCH
 
 /*
  * Config_Load
