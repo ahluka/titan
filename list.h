@@ -1,5 +1,26 @@
 #pragma once
 
+/*
+ * list.h
+ *	Implements a simple singly-linked list that supports insertion,
+ *	removal, and iteration with a callback. It stores all data as void
+ *	pointers.
+ *
+ *	Use List_Create() to get a pointer to a ListHead, which you will need
+ *	for all other operations. Pass it to List_Destroy() when you're done.
+ *	If you specified LIST_FREE_DATA when calling List_Create(), then
+ *	List_Destroy() will pass your pointers to MemFree() for you.
+ *
+ *	List_Add() appends the given data pointer to the head of the list.
+ *	List_Remove() requires a predicate callback function from you, then
+ *	linearly searches the list, passing each element to said callback.
+ *	When your callback returns true on a given element, that element is
+ *	removed from the list (and its data pointer passed to MemFree() if you
+ *	specified LIST_FREE_DATA).
+ *	List_ForEach() linearly iterates over the list, passing each data
+ *	pointer to a specified callback function.
+ *	List_GetSize() is obvious.
+ */
 typedef struct ListHead ListHead;
 typedef struct ListElem ListElem;
 

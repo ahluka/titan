@@ -59,9 +59,9 @@ uint32_t JenkinsHash(uint8_t *k, uint32_t length, uint32_t initval)
     return c;
 }
 
-uint32_t ElfHash(void *data, int32_t len)
+uint32_t ElfHash(const void *data, int32_t len)
 {
-	uint8_t *p = data;
+	const uint8_t *p = data;
 	uint32_t h = 0, g;
 
 	for (int32_t i = 0; i < len; i++) {
@@ -93,7 +93,7 @@ uint32_t FNVHash(void *data, int32_t len)
  * Hash
  *
  */
-uint32_t Hash(void *data, int32_t len)
+uint32_t Hash(const void *data, int32_t len)
 {
 	return ElfHash(data, len);
 }

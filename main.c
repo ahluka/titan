@@ -2,14 +2,15 @@
 #include "globals.h"
 #include "panic.h"
 #include "mtrand.h"
-#include <time.h>
 #include "gameloop.h"
 #include "config.h"
 #include "files.h"
 #include "cmds.h"
 #include "script.h"
+#include "memory.h"
+#include <time.h>
 
-//#include "ch_hashtable.h"
+#include "ch_hashtable.h"
 
 #define CONFIG_FILENAME "config.ini"
 
@@ -69,11 +70,13 @@ int main(int argc, char *argv[])
 	MTRSeed((uint64_t) time(NULL));
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
-	// HT_Test();
+	HT_Test();
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");
 
 	ShutdownModules();
+
+	Trace(Fmt("Memory usage on exit: %lu bytes", MemCurrentUsage()));
 	return EXIT_SUCCESS;
 }

@@ -4,8 +4,25 @@
  * ch_hashtable.h
  *	Chained hash table.
  */
+typedef struct HashTable HashTable;
 
 void HT_Test();
+
+/* Create a new hash table and return a pointer to it.
+ * Given table size should be a prime number; pick one from below.
+ */
+enum HTFreeType {
+	HT_MANUAL,
+	HT_FREE_DATA
+};
+
+HashTable *HT_Create(int sizePrime, enum HTFreeType freeType);
+
+/* Destroy the given hash table, freeing all memory it used. */
+void HT_Destroy(HashTable *table);
+
+/* Enter the given data into a table. */
+ecode_t HT_Add(HashTable *table, const char *key, void *data);
 
 /* All primes between 1 and 4096. Kept here so I can use them as hash table
  * sizes for different things.

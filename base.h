@@ -13,6 +13,8 @@
 /* Uncomment to enable debugging Trace() calls */
 #define DEBUG_TRACING_ON
 
+/* Place a breakpoint / trap instruction for debugging. */
+#define BREAKPOINT do { __asm__("int $0x3"); } while (0)
 
 /* Error codes
  *

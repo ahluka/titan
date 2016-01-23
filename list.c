@@ -60,7 +60,7 @@ void List_Destroy(ListHead *list)
 		DestroyElem(dead, list->freeData);
 	}
 
-	MemFree(i);
+	//MemFree(i);
 	MemFree(list);
 }
 
@@ -137,6 +137,9 @@ ecode_t List_ForEach(ListHead *list, ListCallbackFn callback)
 	return EOK;
 }
 
+/*
+ * List_GetSize
+ */
 size_t List_GetSize(ListHead *list)
 {
 	if (!list) {

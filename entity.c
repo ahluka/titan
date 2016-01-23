@@ -43,7 +43,8 @@ ecode_t Ent_Shutdown()
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
-		MemFree(s_Entities[i]);
+		if (s_Entities[i] != NULL)
+			MemFree(s_Entities[i]);
 		s_Entities[i] = NULL;
 	}
 
