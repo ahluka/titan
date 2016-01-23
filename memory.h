@@ -1,11 +1,33 @@
 #pragma once
 
 /*
- * All memory allocations should go through MemAlloc().
- * MemFree() exists for symmetry but doesn't do anything other than call free().
+ * memory.h
+ *	All memory allocations should go through MemAlloc(), frees through
+ *	MemFree().
  */
 
-void *MemAlloc(size_t sz);
-void MemFree(void *ptr);
+/* Comment this out to disable detailed memory usage tracking. */
+#define DEBUG_MEMORY_BUILD
+
+#ifdef DEBUG_MEMORY_BUILD
+#define MemAlloc(sz) _MemAlloc(sz, __FILE__, __LINE__, __func__)
+#define MemFree(ptr) _MemFree(ptr)
+
+void *_MemAlloc(size_t sz, const char *file, long line, const char *fn);
+void _MemFree(void *ptr);
+#else
+#define MemAlloc(sz) _MemAlloc(sz);
+#define MemFree(ptr) _MemFree(ptr);
+
+void *_MemAlloc(size_t sz);
+void _MemFree(void *ptr);
+#endif
+
+/* Debugging */
+#ifdef DEBUG_MEMORY_BUILD
 uint64_t MemCurrentUsage();
 uint64_t MemHighWater();
+void MemStats();
+#endif
+uint32_t MemAllocCount();
+uint32_t MemFreeCount();

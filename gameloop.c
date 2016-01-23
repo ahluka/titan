@@ -23,6 +23,7 @@ static void CheckDbgKeys(SDL_Keycode code)
 	case SDLK_F12:
 		Cmd_ExecuteBuf("files-listopen");
 		break;
+#ifdef DEBUG_MEMORY_BUILD
 	case SDLK_F10:
 		Trace(Fmt("Current memory usage: %lu bytes",
 			MemCurrentUsage()));
@@ -31,6 +32,7 @@ static void CheckDbgKeys(SDL_Keycode code)
 		Trace(Fmt("Highest memory usage: %lu bytes",
 			MemHighWater()));
 		break;
+#endif
 	}
 }
 

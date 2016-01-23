@@ -89,6 +89,7 @@ void HT_Destroy(HashTable *table)
 		List_Destroy(table->table[i]);
 	}
 
+	MemFree(table->table);
 	MemFree(table);
 }
 

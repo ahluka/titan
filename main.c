@@ -58,6 +58,30 @@ static void ShutdownModules()
 		Panic("Failed to shutdown command system");
 }
 
+#ifdef DEBUG_MEMORY_BUILD
+/*
+ * CheckMemory
+ *	Gather memory usage stats and output a warning if everything isn't
+ *	apparently hunky-dory. We want to see zero memory usage, and an
+ *	equal number of MemAlloc()s and MemFree()s.
+ */
+static void CheckMemory()
+{
+	uint64_t usage = MemCurrentUsage();
+	uint32_t allocs = MemAllocCount();
+	uint32_t frees = MemFreeCount();
+	uint32_t diff = allocs - frees;
+
+	if (usage > 0 || allocs != frees) {
+		Trace("====== WARNING ======");
+		Trace(Fmt("Memory usage on exit: %lu bytes", usage));
+		Trace(Fmt("%u allocs, %u frees (%u unaccounted for)",
+			allocs, frees, diff));
+		MemStats();
+	}
+}
+#endif
+
 /*
  * main
  *	Initialise everything then jump into the main loop. Clean up
@@ -71,12 +95,14 @@ int main(int argc, char *argv[])
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
 	HT_Test();
+	MemAlloc(128);
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");
 
 	ShutdownModules();
-
-	Trace(Fmt("Memory usage on exit: %lu bytes", MemCurrentUsage()));
+#ifdef DEBUG_MEMORY_BUILD
+	CheckMemory();
+#endif
 	return EXIT_SUCCESS;
 }
