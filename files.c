@@ -89,7 +89,7 @@ static struct File *GetFileByHandle(FileHandle handle)
 static void DestroyFile(struct File *f)
 {
 	close(f->fd);
-	f->fd = -1;	// FIXME: unsure if this should be 0 or -1?
+	f->fd = -1;
 	f->handle = 0;
 	MemFree(f->data);
 	f->data = NULL;

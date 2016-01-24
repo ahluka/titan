@@ -34,7 +34,7 @@ static void NewCommand(const char *name, CmdFunction fn)
 static void CmdList(int argc, char **argv)
 {
 	uint32_t total = 0;
-	printf("List of commands:\n");
+	printf("List of commands y'all:\n");
 	for (int i = 0; i < MAX_COMMANDS; i++) {
 		if (s_Commands[i]) {
 			printf("\t%s\n", s_Commands[i]->name);

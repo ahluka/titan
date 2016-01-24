@@ -95,7 +95,6 @@ int main(int argc, char *argv[])
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
 	HT_Test();
-	MemAlloc(128);
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");
