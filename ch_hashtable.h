@@ -10,13 +10,30 @@ void HT_Test();
 
 /* Create a new hash table and return a pointer to it.
  * Given table size should be a prime number; pick one from below.
+ *
+ * If HT_MANUAL is specified then you are responsible for freeing the memory
+ * used by the keys and whatever you store in the table. If HT_FREE_DATA is
+ * specified, the hash table will automatically pass its keys and values to
+ * MemFree() as necessary.
+ *
+ * If HT_ALLOW_DUPLICATES is specified as the policy, then HT_Add() returns
+ * EOK when a duplicate is added and erases the previous value with the value
+ * given. If HT_UNIQUE is specified as the policy, then HT_Add() returns EFAIL
+ * when a duplicate is found.
  */
 enum HTFreeType {
 	HT_MANUAL,
 	HT_FREE_DATA
 };
 
-HashTable *HT_Create(int sizePrime, enum HTFreeType freeType);
+enum HTPolicy {
+	HT_ALLOW_DUPLICATES,
+	HT_UNIQUE
+};
+
+HashTable *HT_Create(uint32_t sizePrime,
+	enum HTFreeType freeType,
+	enum HTPolicy policy);
 
 /* Destroy the given hash table, freeing all memory it used. */
 void HT_Destroy(HashTable *table);
@@ -24,10 +41,14 @@ void HT_Destroy(HashTable *table);
 /* Enter the given data into a table. */
 ecode_t HT_Add(HashTable *table, const char *key, void *data);
 
+/* Remove the given datum from the table. */
+ecode_t HT_Remove(HashTable *table, const char *key);
+
+ecode_t HT_Get(HashTable *table, const char *key);
+
 /* All primes between 1 and 4096. Kept here so I can use them as hash table
  * sizes for different things.
  */
-
 /* 1,2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233,

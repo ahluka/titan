@@ -32,5 +32,8 @@ typedef int ecode_t;
  */
 const char *Fmt(const char *format, ...);
 
+/* Own implementation of strdup() that used MemAlloc(). */
+char *StrDup(const char *str);
+
 
 #endif /* __BASE_H__ */

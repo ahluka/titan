@@ -1,5 +1,6 @@
+#include "../base.h"
 
-int add(int a, int b)
+ecode_t Gus_Nothing()
 {
-	return a + b;
+	return EOK;
 }

@@ -7,7 +7,6 @@ LIBS="-lSDL2 -lSDL2_image -lSDL2_ttf -llua5.3 -L./gus/ -lgus"
 EXE="titan"
 
 # build gus as a static library
-echo "Building gus..."
 gcc gus/*.c $CFLAGS -c -o gus/gus.o
 ar rcs gus/libgus.a gus/gus.o
 

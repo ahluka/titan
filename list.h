@@ -28,7 +28,7 @@ typedef struct ListElem ListElem;
  * true or false. Used for list element deletion.
  */
 typedef bool (*ListPredFn)(void *data);
-typedef void (*ListCallbackFn)(void *data);
+typedef void (*ListCallbackFn)(void *listItem, void *user);
 
 /* Return a pointer to a new list head, ready for use.
  * If freeType is LIST_FREE_DATA, List_Destroy will free the user data
@@ -51,8 +51,9 @@ ecode_t List_Add(ListHead *list, void *data);
 ecode_t List_Remove(ListHead *list, ListPredFn predFn);
 
 /* Given a list, iterate over it and pass each element to the given
- * callback function.
+ * callback function, as well as the given user data (which can be NULL).
+ *
  */
-ecode_t List_ForEach(ListHead *list, ListCallbackFn callback);
+ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user);
 
 size_t List_GetSize(ListHead *list);

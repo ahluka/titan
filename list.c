@@ -120,7 +120,7 @@ ecode_t List_Remove(ListHead *list, ListPredFn predFn)
 /*
  * List_ForEach
  */
-ecode_t List_ForEach(ListHead *list, ListCallbackFn callback)
+ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user)
 {
 	if (!list) {
 		Panic("invalid list");
@@ -131,7 +131,7 @@ ecode_t List_ForEach(ListHead *list, ListCallbackFn callback)
 	}
 
 	for (ListElem *i = list->head; i; i = i->next) {
-		callback(i->data);
+		callback(i->data, user);
 	}
 
 	return EOK;
