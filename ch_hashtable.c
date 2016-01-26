@@ -99,7 +99,7 @@ static ecode_t FindDatum(HashTable *table, char *key, uint32_t hash, void *data)
 	}
 
 	Datum datum = {key, data};
-	if (List_Contains(table->table[hash], &datum, FindDatum_deepcmp)) {
+	if (List_Contains(table->table[hash], &datum, FindDatum_deepcmp, NULL)) {
 		return EOK;
 	}
 
@@ -168,8 +168,8 @@ ecode_t HT_Add(HashTable *table, char *key, void *data)
 
 	if (FindDatum(table, key, hash, data) == EOK) {
 		if (table->policy == HT_UNIQUE) {
-			Trace(Fmt("WARNING: Duplicate in HT_UNIQUE table"
-				"(key: %s)", key));
+			Trace(Fmt("WARNING: Duplicate in HT_UNIQUE table "
+				"(key: '%s')", key));
 			MemFree(dat);
 			if (table->freeType == HT_FREE_DATA) {
 				MemFree(key);
@@ -195,9 +195,30 @@ ecode_t HT_Remove(HashTable *table, char *key)
 	return EOK;
 }
 
-// TODO: HT_Get
-ecode_t HT_Get(HashTable *table, char *key)
+/*
+ * HT_Get
+ */
+ecode_t HT_Get(HashTable *table, char *key, void **_data)
 {
+	if (!table) {
+		Panic("invalid table");
+	}
+
+	uint32_t hash = HashMod(key, table->size);
+
+	if (table->table[hash] == NULL) {
+		return EFAIL;
+	}
+
+	uint32_t index = 0;
+	Datum cmp = {key, NULL};
+
+	if (!List_Contains(table->table[hash], &cmp, FindDatum_deepcmp, &index)) {
+		return EFAIL;
+	}
+
+	Datum *ret = List_At(table->table[hash], index);
+	*_data = ret->data;
 	return EOK;
 }
 
@@ -208,6 +229,8 @@ void HT_Test()
 	HashTable *t = HT_Create(383, HT_FREE_DATA, HT_UNIQUE);
 
 	TestDataset(t);
+
+
 	HT_Destroy(t);
 }
 
@@ -221,7 +244,7 @@ static void TestDataset(HashTable *table)
 	size_t ofs = 0;
 
 	while (sscanf(txt + ofs, "%s\n", word) != EOF) {
-		HT_Add(table, StrDup(word), 0);
+		HT_Add(table, StrDup(word), NULL);
 		ofs += strlen(word) + 1; /* +1 for the newline */
 	}
 

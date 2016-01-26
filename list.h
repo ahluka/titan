@@ -42,6 +42,8 @@ enum ListFreeType {
 ListHead *List_Create(enum ListFreeType freeType);
 void List_Destroy(ListHead *list);
 
+size_t List_GetSize(ListHead *list);
+
 /* add given data pointer to the list */
 ecode_t List_Add(ListHead *list, void *data);
 
@@ -56,12 +58,17 @@ ecode_t List_Remove(ListHead *list, ListPredFn predFn);
  */
 ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user);
 
-size_t List_GetSize(ListHead *list);
+/* Returns the element at the given index within the list. Indices start at
+ * zero.
+ */
+void *List_At(ListHead *list, uint32_t idx);
 
 /* Check if the given list contains the given datum. If deepCmp is non-NULL
  * then it is used to perform the comparison, and should return true or false
  * appropriately.
- * Returns true if the list contains data.
+ * Returns true if the list contains data. If _idx is non-NULL, it will contains
+ * the index of data within the list when true is returned.
  */
 typedef bool (*DeepCmpFn)(void *a, void *b);
-bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp);
+bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp,
+		uint32_t *_idx);

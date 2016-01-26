@@ -10,7 +10,7 @@ struct ListElem {
 
 struct ListHead {
 	ListElem *head;
-	uint32_t count;
+	uint32_t size;
 	bool freeData;
 };
 
@@ -22,7 +22,7 @@ ListHead *List_Create(enum ListFreeType freeType)
 	ListHead *list = MemAlloc(sizeof(*list));
 
 	list->head = NULL;
-	list->count = 0;
+	list->size = 0;
 	list->freeData = (freeType == LIST_FREE_DATA) ? true : false;
 
 	return list;
@@ -46,7 +46,7 @@ void List_Destroy(ListHead *list)
 		Panic("invalid list");
 	}
 
-	if (list->count == 0) {
+	if (list->size == 0) {
 		MemFree(list);
 		return;
 	}
@@ -78,7 +78,7 @@ ecode_t List_Add(ListHead *list, void *data)
 
 	elem->next = list->head;
 	list->head = elem;
-	list->count++;
+	list->size++;
 
 	return EOK;
 }
@@ -103,13 +103,13 @@ ecode_t List_Remove(ListHead *list, ListPredFn predFn)
 			if (i == list->head) {
 				list->head = i->next;
 				DestroyElem(i, list->freeData);
-				list->count--;
+				list->size--;
 				return EOK;
 			}
 
 			prev->next = i->next;
 			DestroyElem(i, list->freeData);
-			list->count--;
+			list->size--;
 			return EOK;
 		}
 	}
@@ -138,6 +138,30 @@ ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user)
 }
 
 /*
+ * List_At
+ */
+void *List_At(ListHead *list, uint32_t idx)
+{
+	if (!list) {
+		Panic("invalid list");
+	}
+
+	if (idx > list->size) {
+		Panic(Fmt("Invalid index %u, list has %u elements", idx,
+			list->size));
+	}
+
+	for (ListElem *iter = list->head; iter; iter = iter->next, idx--) {
+		if (idx == 0) {
+			return iter->data;
+		}
+	}
+
+	Panic("This shouldn't happen...");
+	return NULL;	/* not reached; shuts up warning */
+}
+
+/*
  * List_GetSize
  */
 size_t List_GetSize(ListHead *list)
@@ -146,13 +170,14 @@ size_t List_GetSize(ListHead *list)
 		Panic("invalid list");
 	}
 
-	return list->count;
+	return list->size;
 }
 
 /*
  * List_Contains
  */
-bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp)
+bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp,
+		uint32_t *_idx)
 {
 	if (!list) {
 		Panic("invalid list");
@@ -162,13 +187,20 @@ bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp)
 		Panic("invalid data pointer");
 	}
 
-	for (ListElem *i = list->head; i; i = i->next) {
+	uint32_t index = 0;
+	for (ListElem *i = list->head; i; i = i->next, index++) {
 		if (deepCmp != NULL) {
 			if (deepCmp(i->data, data)) {
+				if (_idx != NULL) {
+					*_idx = index;
+				}
 				return true;
 			}
 		} else {
 			if (i->data == data) {
+				if (_idx != NULL) {
+					*_idx = index;
+				}
 				return true;
 			}
 		}

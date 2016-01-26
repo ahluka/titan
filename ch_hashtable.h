@@ -43,7 +43,10 @@ ecode_t HT_Add(HashTable *table, char *key, void *data);
 /* Remove the given datum from the table. */
 ecode_t HT_Remove(HashTable *table, char *key);
 
-ecode_t HT_Get(HashTable *table, char *key);
+/* Get a pointer to the data stored with the given key. It will be returned
+ * in _data. Returns EFAIL if datum doesn't exist within table, EOK otherwise.
+ */
+ecode_t HT_Get(HashTable *table, char *key, void **_out);
 
 /* All primes between 1 and 4096. Kept here so I can use them as hash table
  * sizes for different things.
