@@ -92,10 +92,8 @@ static bool FindDatum_deepcmp(void *a, void *b)
 	return false;
 }
 
-static ecode_t FindDatum(HashTable *table, char *key, void *data)
+static ecode_t FindDatum(HashTable *table, char *key, uint32_t hash, void *data)
 {
-	uint32_t hash = HashMod(key, table->size);
-
 	if (table->table[hash] == NULL) {
 		return EFAIL;
 	}
@@ -165,10 +163,10 @@ ecode_t HT_Add(HashTable *table, char *key, void *data)
 		Panic("invalid table");
 	}
 
-	uint32_t index = HashMod(key, table->size);
+	uint32_t hash = HashMod(key, table->size);
 	Datum *dat = NewDatum(key, data);
 
-	if (FindDatum(table, key, data) == EOK) {
+	if (FindDatum(table, key, hash, data) == EOK) {
 		if (table->policy == HT_UNIQUE) {
 			Trace(Fmt("WARNING: Duplicate in HT_UNIQUE table"
 				"(key: %s)", key));
@@ -181,11 +179,11 @@ ecode_t HT_Add(HashTable *table, char *key, void *data)
 		}
 	}
 
-	List_Add(table->table[index], dat);
+	List_Add(table->table[hash], dat);
 
 #ifdef DEBUG_TRACING_ON
 	Trace(Fmt("key '%s' at index '%u', bucket size %d",
-		dat->key, index, List_GetSize(table->table[index])));
+		dat->key, hash, List_GetSize(table->table[hash])));
 #endif
 
 	return EOK;
