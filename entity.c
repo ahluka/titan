@@ -81,6 +81,8 @@ ecode_t EntityDefaultRender(struct Entity *self)
 
 static void DefaultEntity(struct Entity *ent)
 {
+	assert(ent != NULL);
+
 	ent->name = "(unnamed)";
 
 	ent->updateType = UPDATE_ALWAYS;
@@ -120,6 +122,8 @@ struct Entity *Ent_New()
  */
 ecode_t Ent_Free(struct Entity *ent)
 {
+	assert(ent != NULL);
+
 	if (s_Entities[0] == NULL) {
 		Trace("Attempting to free an entity before Ent_Init()");
 		return EFAIL;

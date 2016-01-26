@@ -33,6 +33,8 @@ ListHead *List_Create(enum ListFreeType freeType)
  */
 static void DestroyElem(ListElem *elem, bool freeData)
 {
+	assert(elem != NULL);
+
 	if (freeData) {
 		MemFree(elem->data);
 	}
@@ -42,9 +44,7 @@ static void DestroyElem(ListElem *elem, bool freeData)
 
 void List_Destroy(ListHead *list)
 {
-	if (!list) {
-		Panic("invalid list");
-	}
+	assert(list != NULL);
 
 	if (list->size == 0) {
 		MemFree(list);
@@ -60,7 +60,6 @@ void List_Destroy(ListHead *list)
 		DestroyElem(dead, list->freeData);
 	}
 
-	//MemFree(i);
 	MemFree(list);
 }
 
@@ -69,9 +68,7 @@ void List_Destroy(ListHead *list)
  */
 ecode_t List_Add(ListHead *list, void *data)
 {
-	if (!list) {
-		Panic("invalid list");
-	}
+	assert(list != NULL);
 
 	ListElem *elem = MemAlloc(sizeof(*elem));
 	elem->data = data;
@@ -88,13 +85,8 @@ ecode_t List_Add(ListHead *list, void *data)
  */
 ecode_t List_Remove(ListHead *list, ListPredFn predFn)
 {
-	if (!list) {
-		Panic("invalid list");
-	}
-
-	if (!predFn) {
-		Panic("invalid predicate function");
-	}
+	assert(list != NULL);
+	assert(predFn != NULL);
 
 	for (ListElem *i = list->head, *prev = i; i; prev = i, i = i->next) {
 		if (predFn(i->data)) {
@@ -122,13 +114,8 @@ ecode_t List_Remove(ListHead *list, ListPredFn predFn)
  */
 ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user)
 {
-	if (!list) {
-		Panic("invalid list");
-	}
-
-	if (!callback) {
-		Panic("invalid callback function");
-	}
+	assert(list != NULL);
+	assert(callback != NULL);
 
 	for (ListElem *i = list->head; i; i = i->next) {
 		callback(i->data, user);
@@ -142,9 +129,7 @@ ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user)
  */
 void *List_At(ListHead *list, uint32_t idx)
 {
-	if (!list) {
-		Panic("invalid list");
-	}
+	assert(list != NULL);
 
 	if (idx > list->size) {
 		Panic(Fmt("Invalid index %u, list has %u elements", idx,
@@ -166,9 +151,7 @@ void *List_At(ListHead *list, uint32_t idx)
  */
 size_t List_GetSize(ListHead *list)
 {
-	if (!list) {
-		Panic("invalid list");
-	}
+	assert(list != NULL);
 
 	return list->size;
 }
@@ -179,13 +162,9 @@ size_t List_GetSize(ListHead *list)
 bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp,
 		uint32_t *_idx)
 {
-	if (!list) {
-		Panic("invalid list");
-	}
-
-	if (!data) {
-		Panic("invalid data pointer");
-	}
+	assert(list != NULL);
+	assert(data != NULL);
+	assert(deepCmp != NULL);
 
 	uint32_t index = 0;
 	for (ListElem *i = list->head; i; i = i->next, index++) {

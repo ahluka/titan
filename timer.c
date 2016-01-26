@@ -8,6 +8,8 @@
  */
 void Timer_Init(struct Timer *timer)
 {
+	assert(timer != NULL);
+
 	timer->startTicks = 0;
 	timer->pausedTicks = 0;
 	timer->paused = false;
@@ -19,6 +21,8 @@ void Timer_Init(struct Timer *timer)
  */
 void Timer_Start(struct Timer *timer)
 {
+	assert(timer != NULL);
+
 	timer->started = true;
 	timer->paused = false;
 
@@ -31,6 +35,8 @@ void Timer_Start(struct Timer *timer)
  */
 void Timer_Stop(struct Timer *timer)
 {
+	assert(timer != NULL);
+
 	timer->started = false;
 	timer->paused = false;
 	timer->startTicks = timer->pausedTicks = 0;
@@ -41,6 +47,8 @@ void Timer_Stop(struct Timer *timer)
  */
 void Timer_Pause(struct Timer *timer)
 {
+	assert(timer != NULL);
+
 	if (timer->started && !timer->paused) {
 		timer->paused = true;
 		timer->pausedTicks = SDL_GetTicks() - timer->startTicks;
@@ -53,6 +61,8 @@ void Timer_Pause(struct Timer *timer)
  */
 void Timer_Unpause(struct Timer *timer)
 {
+	assert(timer != NULL);
+
 	if (timer->started && timer->paused) {
 		timer->paused = false;
 		timer->startTicks = SDL_GetTicks() - timer->pausedTicks;
@@ -65,6 +75,8 @@ void Timer_Unpause(struct Timer *timer)
  */
 uint32_t Timer_GetTicks(struct Timer *timer)
 {
+	assert(timer != NULL);
+
 	uint32_t time = 0;
 
 	if (timer->started) {
@@ -82,6 +94,7 @@ uint32_t Timer_GetTicks(struct Timer *timer)
  */
 bool Timer_IsStarted(struct Timer *timer)
 {
+	assert(timer != NULL);
 	return timer->started;
 }
 
@@ -90,5 +103,6 @@ bool Timer_IsStarted(struct Timer *timer)
  */
 bool Timer_IsPaused(struct Timer *timer)
 {
+	assert(timer != NULL);
 	return timer->paused && timer->started;
 }

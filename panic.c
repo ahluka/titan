@@ -39,6 +39,8 @@ static void CloseLog()
  */
 void _Trace(const char *file, long line, const char *func, const char *message)
 {
+	assert(message != NULL);
+
 	if (!s_Logfile) {
 		OpenLog();
 		atexit(CloseLog);
@@ -56,6 +58,8 @@ void _Trace(const char *file, long line, const char *func, const char *message)
  */
 void _Panic(const char *file, long line, const char *func, const char *message)
 {
+	assert(message != NULL);
+
 	if (!s_Logfile) {
 		OpenLog();
 		atexit(CloseLog);

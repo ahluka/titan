@@ -36,6 +36,8 @@ static const char *s_FilesRoot = NULL;
  */
 static char *GetFullPath(const char *relPath)
 {
+	assert(relPath != NULL);
+
 	size_t szRoot = strlen(s_FilesRoot);
 	size_t szRel = strlen(relPath);
 	char *fullPath = MemAlloc(szRoot + szRel + 1);
@@ -170,6 +172,8 @@ static void OpenAndRead(struct File *file)
 
 FileHandle Files_OpenFile(const char *filename)
 {
+	assert(filename != NULL);
+
 	char *fullPath = GetFullPath(filename);
 	struct File *file = NextFreeFile();
 

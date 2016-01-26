@@ -43,6 +43,7 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
  */
 ecode_t Config_Load(const char *filename)
 {
+	assert(filename != NULL);
 #ifdef DEBUG_TRACING_ON
 	Trace(Fmt("Using config file '%s'", filename));
 #endif
@@ -63,6 +64,7 @@ ecode_t Config_Load(const char *filename)
  */
 ecode_t Config_Save(const char *filename)
 {
+	assert(filename != NULL);
 	// TODO: Write it
 
 	/* free strings from strdup() */

@@ -9,6 +9,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+// TODO: Uncomment this for release
+//#define NDEBUG
+#include <assert.h>
 
 /* Uncomment to enable debugging Trace() calls */
 #define DEBUG_TRACING_ON

@@ -50,9 +50,7 @@ static bool IsPrime(int n)
  */
 static void AllocTable(HashTable *table, uint32_t size)
 {
-	if (size == 0) {
-		Panic("Zero table size");
-	}
+	assert(size > 0);
 
 	if (!IsPrime(size)) {
 		Trace(Fmt("WARNING: non-prime table size of %d", size));
@@ -138,9 +136,7 @@ static void FreeListData(void *listItem, void *unused)
 
 void HT_Destroy(HashTable *table)
 {
-	if (!table) {
-		Panic("invalid table");
-	}
+	assert(table != NULL);
 
 	for (int i = 0; i < table->size; i++) {
 		if (table->freeType == HT_FREE_DATA) {
@@ -159,9 +155,8 @@ void HT_Destroy(HashTable *table)
  */
 ecode_t HT_Add(HashTable *table, char *key, void *data)
 {
-	if (!table) {
-		Panic("invalid table");
-	}
+	assert(table != NULL);
+	assert(key != NULL);
 
 	uint32_t hash = HashMod(key, table->size);
 	Datum *dat = NewDatum(key, data);
@@ -200,9 +195,9 @@ ecode_t HT_Remove(HashTable *table, char *key)
  */
 ecode_t HT_Get(HashTable *table, char *key, void **_data)
 {
-	if (!table) {
-		Panic("invalid table");
-	}
+	assert(table != NULL);
+	assert(key != NULL);
+	assert(_data != NULL);
 
 	uint32_t hash = HashMod(key, table->size);
 

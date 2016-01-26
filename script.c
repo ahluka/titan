@@ -115,6 +115,8 @@ ecode_t Script_Shutdown()
  */
 ecode_t Script_ExecString(const char *str)
 {
+	assert(str != NULL);
+
 	if (!s_State) {
 		Panic("Script module not initialised");
 	}

@@ -16,6 +16,9 @@ static struct Command *s_Commands[MAX_COMMANDS] = {NULL};
  */
 static void NewCommand(const char *name, CmdFunction fn)
 {
+	assert(name != NULL);
+	assert(fn != NULL);
+
 	for (int i = 0; i < MAX_COMMANDS; i++) {
 		if (!s_Commands[i]) {
 			s_Commands[i] = MemAlloc(sizeof(struct Command));
@@ -97,6 +100,8 @@ ecode_t Cmd_Register(const char *name, CmdFunction func)
  */
 ecode_t Cmd_Execute(const char *cmd, int argc, char **argv)
 {
+	assert(cmd != NULL);
+
 	for (int i = 0; i < MAX_COMMANDS; i++) {
 		if (!s_Commands[i])
 			continue;

@@ -61,8 +61,7 @@ void *_MemAlloc(size_t sz, const char *file, long line, const char *fn)
 void *_MemAlloc(size_t sz)
 #endif
 {
-	if (sz == 0)
-		Panic("Zero-length allocation");
+	assert(sz > 0);
 
 	uint8_t *bytes = calloc(1, sz);
 #ifdef DEBUG_MEMORY_BUILD
