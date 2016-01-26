@@ -148,3 +148,31 @@ size_t List_GetSize(ListHead *list)
 
 	return list->count;
 }
+
+/*
+ * List_Contains
+ */
+bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp)
+{
+	if (!list) {
+		Panic("invalid list");
+	}
+
+	if (!data) {
+		Panic("invalid data pointer");
+	}
+
+	for (ListElem *i = list->head; i; i = i->next) {
+		if (deepCmp != NULL) {
+			if (deepCmp(i->data, data)) {
+				return true;
+			}
+		} else {
+			if (i->data == data) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}

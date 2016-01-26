@@ -17,9 +17,8 @@ void HT_Test();
  * MemFree() as necessary.
  *
  * If HT_ALLOW_DUPLICATES is specified as the policy, then HT_Add() returns
- * EOK when a duplicate is added and erases the previous value with the value
- * given. If HT_UNIQUE is specified as the policy, then HT_Add() returns EFAIL
- * when a duplicate is found.
+ * EOK when a duplicate is added. If HT_UNIQUE is specified as the policy,
+ * then HT_Add() returns EFAIL when a duplicate is found.
  */
 enum HTFreeType {
 	HT_MANUAL,
@@ -39,12 +38,12 @@ HashTable *HT_Create(uint32_t sizePrime,
 void HT_Destroy(HashTable *table);
 
 /* Enter the given data into a table. */
-ecode_t HT_Add(HashTable *table, const char *key, void *data);
+ecode_t HT_Add(HashTable *table, char *key, void *data);
 
 /* Remove the given datum from the table. */
-ecode_t HT_Remove(HashTable *table, const char *key);
+ecode_t HT_Remove(HashTable *table, char *key);
 
-ecode_t HT_Get(HashTable *table, const char *key);
+ecode_t HT_Get(HashTable *table, char *key);
 
 /* All primes between 1 and 4096. Kept here so I can use them as hash table
  * sizes for different things.

@@ -57,3 +57,11 @@ ecode_t List_Remove(ListHead *list, ListPredFn predFn);
 ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user);
 
 size_t List_GetSize(ListHead *list);
+
+/* Check if the given list contains the given datum. If deepCmp is non-NULL
+ * then it is used to perform the comparison, and should return true or false
+ * appropriately.
+ * Returns true if the list contains data.
+ */
+typedef bool (*DeepCmpFn)(void *a, void *b);
+bool List_Contains(ListHead *list, void *data, DeepCmpFn deepCmp);

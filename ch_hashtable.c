@@ -7,7 +7,7 @@
 #include "files.h"
 
 typedef struct Datum {
-	const char *key;
+	char *key;
 	void *data;
 } Datum;
 
@@ -69,7 +69,7 @@ static void AllocTable(HashTable *table, uint32_t size)
 /*
  * NewDatum
  */
-static Datum *NewDatum(const char *key, void *data)
+static Datum *NewDatum(char *key, void *data)
 {
 	Datum *d = MemAlloc(sizeof(*d));
 	d->key = key;
@@ -80,19 +80,19 @@ static Datum *NewDatum(const char *key, void *data)
 /*
  * FindDatum
  */
-static void __FindDatum(void *listItem, void *user)
+static bool FindDatum_deepcmp(void *a, void *b)
 {
-	const char *key = user;
-	Datum *datum = (Datum *) listItem;
+	Datum *d1 = (Datum *) a;
+	Datum *d2 = (Datum *) b;
 
-	Trace(Fmt("checking '%s' against datum key '%s'", key, datum->key));
-
-	if (strcmp(datum->key, key) == 0) {
-		Trace("found it");
+	if (strcmp(d1->key, d2->key) == 0) {
+		return true;
 	}
+
+	return false;
 }
 
-static ecode_t FindDatum(HashTable *table, const char *key, void *data)
+static ecode_t FindDatum(HashTable *table, char *key, void *data)
 {
 	uint32_t hash = HashMod(key, table->size);
 
@@ -100,7 +100,10 @@ static ecode_t FindDatum(HashTable *table, const char *key, void *data)
 		return EFAIL;
 	}
 
-	List_ForEach(table->table[hash], __FindDatum, (void *) key);
+	Datum datum = {key, data};
+	if (List_Contains(table->table[hash], &datum, FindDatum_deepcmp)) {
+		return EOK;
+	}
 
 	return EFAIL;
 }
@@ -155,9 +158,8 @@ void HT_Destroy(HashTable *table)
 
 /*
  * HT_Add
- *	Add the given data to the given hash table, using the given key.
  */
-ecode_t HT_Add(HashTable *table, const char *key, void *data)
+ecode_t HT_Add(HashTable *table, char *key, void *data)
 {
 	if (!table) {
 		Panic("invalid table");
@@ -166,20 +168,37 @@ ecode_t HT_Add(HashTable *table, const char *key, void *data)
 	uint32_t index = HashMod(key, table->size);
 	Datum *dat = NewDatum(key, data);
 
+	if (FindDatum(table, key, data) == EOK) {
+		if (table->policy == HT_UNIQUE) {
+			Trace(Fmt("WARNING: Duplicate in HT_UNIQUE table"
+				"(key: %s)", key));
+			MemFree(dat);
+			if (table->freeType == HT_FREE_DATA) {
+				MemFree(key);
+			}
+
+			return EFAIL;
+		}
+	}
+
 	List_Add(table->table[index], dat);
 
+#ifdef DEBUG_TRACING_ON
 	Trace(Fmt("key '%s' at index '%u', bucket size %d",
 		dat->key, index, List_GetSize(table->table[index])));
+#endif
 
 	return EOK;
 }
 
-ecode_t HT_Remove(HashTable *table, const char *key)
+// TODO: HT_Remove
+ecode_t HT_Remove(HashTable *table, char *key)
 {
 	return EOK;
 }
 
-ecode_t HT_Get(HashTable *table, const char *key)
+// TODO: HT_Get
+ecode_t HT_Get(HashTable *table, char *key)
 {
 	return EOK;
 }
@@ -188,13 +207,9 @@ ecode_t HT_Get(HashTable *table, const char *key)
 static void TestDataset(HashTable *table);
 void HT_Test()
 {
-	HashTable *t = HT_Create(383, HT_FREE_DATA, HT_ALLOW_DUPLICATES);
+	HashTable *t = HT_Create(383, HT_FREE_DATA, HT_UNIQUE);
 
 	TestDataset(t);
-	if (FindDatum(t, "lee", 0) == EOK) {
-		Trace("Found it!");
-	}
-
 	HT_Destroy(t);
 }
 
@@ -214,45 +229,3 @@ static void TestDataset(HashTable *table)
 
 	Files_CloseFile(hnd);
 }
-/*
-donkey-kong
-super-mario-is-shit
-my-name-is-lee
-ching-chong
-fling-flong
-ping-pong
-bing-bong
-lee
-ricky
-cheryl
-stephen
-annemarie
-sabiha
-maleeha
-ayesha
-gus
-buddy
-nina
-thula
-saffron
-koba
-ca-caa
-info-player-start
-enemy123
-insane-prisoner-1
-insane-prisoner-2
-cowardly-peasant
-bertolli-yay
-christmas-cake
-zone_1874325
-InterestingEntity
-WeaponAK47
-WEAPON_SHOTGUN
-WEAPON_KNIFE
-WEAPON_CROWBAR
-WEAPON_CHEESE
-FavouriteSong
-sightRange
-explosion-radius
-aggro-range
-*/
