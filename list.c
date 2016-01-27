@@ -110,6 +110,37 @@ ecode_t List_Remove(ListHead *list, ListPredFn predFn)
 }
 
 /*
+ * List_RemoveAt
+ */
+ecode_t List_RemoveAt(ListHead *list, uint32_t idx)
+{
+	assert(list != NULL);
+
+	if (idx > list->size) {
+		Panic(Fmt("Invalid index %u, list has %u elements", idx,
+			list->size));
+	}
+
+	for (ListElem *i = list->head, *prev=i; i; prev=i, i = i->next, idx--) {
+		if (i == 0) {
+			if (i == list->head) {
+				list->head = i->next;
+				DestroyElem(i, list->freeData);
+				list->size--;
+				return EOK;
+			}
+
+			prev->next = i->next;
+			DestroyElem(i, list->freeData);
+			list->size--;
+			return EOK;
+		}
+	}
+
+	return EFAIL;
+}
+
+/*
  * List_ForEach
  */
 ecode_t List_ForEach(ListHead *list, ListCallbackFn callback, void *user)

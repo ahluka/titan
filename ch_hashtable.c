@@ -184,9 +184,23 @@ ecode_t HT_Add(HashTable *table, char *key, void *data)
 	return EOK;
 }
 
-// TODO: HT_Remove
+/*
+ * HT_Remove
+ */
 ecode_t HT_Remove(HashTable *table, char *key)
 {
+	assert(table != NULL);
+	assert(key != NULL);
+
+	uint32_t index = 0, hash = HashMod(key, table->size);
+	Datum cmp = {key, NULL};
+
+	if (!List_Contains(table->table[hash], &cmp, FindDatum_deepcmp, &index)) {
+		return EFAIL;
+	}
+
+	List_RemoveAt(table->table[hash], index);
+
 	return EOK;
 }
 
@@ -224,7 +238,6 @@ void HT_Test()
 	HashTable *t = HT_Create(383, HT_FREE_DATA, HT_UNIQUE);
 
 	TestDataset(t);
-
 
 	HT_Destroy(t);
 }

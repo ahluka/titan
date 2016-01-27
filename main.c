@@ -94,7 +94,6 @@ int main(int argc, char *argv[])
 	MTRSeed((uint64_t) time(NULL));
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
-	HT_Test();
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");

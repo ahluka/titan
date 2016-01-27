@@ -51,6 +51,7 @@ ecode_t List_Add(ListHead *list, void *data);
  * element when the predicate returns true.
  */
 ecode_t List_Remove(ListHead *list, ListPredFn predFn);
+ecode_t List_RemoveAt(ListHead *list, uint32_t idx);
 
 /* Given a list, iterate over it and pass each element to the given
  * callback function, as well as the given user data (which can be NULL).
