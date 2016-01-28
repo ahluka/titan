@@ -35,6 +35,9 @@ static void CheckDbgKeys(SDL_Keycode code)
 		Trace(Fmt("Highest memory usage: %lu bytes",
 			MemHighWater()));
 		break;
+	case SDLK_F12:
+		MemStats();
+		break;
 #endif
 	}
 }
@@ -82,10 +85,10 @@ ecode_t Mainloop()
 			if (event.type == SDL_QUIT) {
 				quit = true;
 			} else if (event.type == SDL_KEYUP) {
-				In_KeyUp((int32_t) event.key.keysym.scancode);
+				In_SetKeyUp((int32_t) event.key.keysym.scancode);
 			} else if (event.type == SDL_KEYDOWN) {
 				CheckDbgKeys(event.key.keysym.sym);
-				In_KeyDown((int32_t) event.key.keysym.scancode);
+				In_SetKeyDown((int32_t) event.key.keysym.scancode);
 
 				// TODO: this is for debugging only; remove it
 				if (event.key.keysym.sym == SDLK_ESCAPE) {

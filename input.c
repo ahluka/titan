@@ -1,7 +1,5 @@
 /*
-	TODO
-	update an input table for keys?
-	switchable hardcoded debugging keys
+	TODO: All this crap...
 
 	either fire off input events, or just expose an input table for other
 	modules to examine as and when?
@@ -19,7 +17,7 @@
 static bool s_Keys[SDL_NUM_SCANCODES] = {false};
 
 
-void In_KeyDown(SDL_Scancode scode)
+void In_SetKeyDown(SDL_Scancode scode)
 {
 #ifdef DEBUG_TRACING_ON
 	Trace(Fmt("scancode %d keycode %d", scode, SDL_GetKeyFromScancode(scode)));
@@ -28,7 +26,7 @@ void In_KeyDown(SDL_Scancode scode)
 	s_Keys[scode] = true;
 }
 
-void In_KeyUp(SDL_Scancode scode)
+void In_SetKeyUp(SDL_Scancode scode)
 {
 #ifdef DEBUG_TRACING_ON
 	Trace(Fmt("scancode %d keycode %d", scode, SDL_GetKeyFromScancode(scode)));

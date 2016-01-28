@@ -116,13 +116,45 @@ uint64_t MemHighWater()
 	return s_HighWater;
 }
 
+/*
+ * MemStats
+ */
+static bool SameAlloc(MemTag *tag, MemTag *prev)
+{
+	if (strcmp(tag->file, prev->file) == 0 &&
+		strcmp(tag->func, prev->func) == 0 &&
+		tag->line == prev->line &&
+		tag->blockSize == prev->blockSize) {
+		return true;
+	}
+
+	return false;
+}
+
 void MemStats()
 {
+	int same = 0;
+	uint64_t htotal = 0;
+
 	Trace("Memory blocks being tracked:");
-	for (MemTag *i = s_Tags; i; i = i->next) {
+	for (MemTag *i = s_Tags, *prev = i; i; prev = i, i = i->next) {
+		if (i != s_Tags && SameAlloc(i, prev)) {
+			same++;
+			htotal += i->blockSize;
+			continue;
+		}
+
+		if (same > 0) {
+			Trace(Fmt("  (%d hidden totalling %lu bytes)",
+				same, htotal));
+			same = 0;
+		}
+
 		Trace(Fmt(" %u bytes from %s:%ld in %s",
 			i->blockSize, i->file, i->line, i->func));
 	}
+	Trace(Fmt("Total: %lu bytes, highest: %lu bytes",
+		s_CurrentUsage, s_HighWater));
 }
 #endif
 uint32_t MemAllocCount()

@@ -2,5 +2,5 @@
 
 #include <SDL2/SDL.h>
 
-void In_KeyDown(SDL_Scancode scode);
-void In_KeyUp(SDL_Scancode scode);
+void In_SetKeyDown(SDL_Scancode scode);
+void In_SetKeyUp(SDL_Scancode scode);

@@ -72,7 +72,7 @@ static void CheckMemory()
 	uint32_t frees = MemFreeCount();
 	uint32_t diff = allocs - frees;
 
-	if (usage > 0 || allocs != frees) {
+	if (usage > 0 || diff != 0) {
 		Trace("====== WARNING ======");
 		Trace(Fmt("Memory usage on exit: %lu bytes", usage));
 		Trace(Fmt("%u allocs, %u frees (%u unaccounted for)",

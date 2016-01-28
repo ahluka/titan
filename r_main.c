@@ -86,7 +86,7 @@ ecode_t Rend_Shutdown()
 		s_Rend.wSurface = NULL;
 
 #ifdef DEBUG_TRACING_ON
-		Trace("shutdown renderer");
+		Trace("shutdown");
 #endif
 
 		return EOK;
