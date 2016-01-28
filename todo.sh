@@ -1,5 +1,5 @@
 echo "==== TODO ===="
-grep -n TODO *.c *.h
+grep -n TODO *.c *.h gus/*.c gus/*.h
 
 echo ""
 echo "==== FIXME ===="

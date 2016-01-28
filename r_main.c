@@ -1,10 +1,31 @@
 #include "base.h"
 #include "config.h"
-#include "renderer.h"
+#include "r_main.h"
 #include "panic.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+// TODO: Move this into r_surf or something, doesn't belong here.
+/*
+static SDL_Surface *LoadSurface(const char *path)
+{
+	SDL_Surface *s = NULL, *opt = NULL;
+	//FileHandle hnd = Files_OpenFile(path);
+
+	s = IMG_Load(path);//Files_GetPath();
+	if (!s) {
+		Panic(Fmt("Failed to load %s", path));
+	}
+
+	opt = SDL_ConvertSurface(s, s_Rend.wSurface->format, NULL);
+	SDL_FreeSurface(s);
+	if (!opt) {
+		Panic(Fmt("Failed to optimise %s", path));
+	}
+
+	return opt;
+}
+*/
 typedef struct RInfo_s {
 	SDL_Window *window;
 	SDL_Surface *wSurface;
@@ -82,8 +103,9 @@ ecode_t Rend_Shutdown()
  */
 ecode_t Rend_Frame()
 {
-	if (!s_Rend.window)
+	if (!s_Rend.window) {
 		Panic("Renderer not initialised");
+	}
 
 	SDL_UpdateWindowSurface(s_Rend.window);
 
@@ -95,8 +117,9 @@ ecode_t Rend_Frame()
  */
 SDL_Window *Rend_GetWindow()
 {
-	if (!s_Rend.window)
+	if (!s_Rend.window) {
 		Panic("Renderer not initialised");
+	}
 
 	return s_Rend.window;
 }

@@ -3,7 +3,7 @@
  *	The main loop and gamestate updating.
  */
 #include "base.h"
-#include "renderer.h"
+#include "r_main.h"
 #include "timer.h"
 #include "memory.h"
 #include "globals.h"
