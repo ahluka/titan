@@ -3,6 +3,7 @@
 
 /*
  * The base include file, to be used in most modules.
+ * Probably best to include this first in the modules that use it.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +28,6 @@
 typedef int ecode_t;
 #define EOK	0
 #define EFAIL	-1
-/* TODO: Might define more of these? */
 
 /* vsprintf() into a static buffer and return a pointer to it.
  * Very useful; avoids having to have varargs versions of functions that
@@ -35,7 +35,7 @@ typedef int ecode_t;
  */
 const char *Fmt(const char *format, ...);
 
-/* Own implementation of strdup() that used MemAlloc(). */
+/* Own implementation of strdup() that uses MemAlloc(). */
 char *StrDup(const char *str);
 
 

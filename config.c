@@ -2,6 +2,7 @@
 #include "config.h"
 #include "panic.h"
 #include "ini.h"
+#include "memory.h"
 
 struct ConfigData g_Config = {0};
 
@@ -22,15 +23,15 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 	Trace(Fmt("handling [%s] %s=%s", sec, key, val));
 #endif
 	if (MATCH("general", "Game")) {
-		g_Config.gameName = strdup(val);
+		g_Config.gameName = StrDup(val);
 	} else if (MATCH("general", "Version")) {
-		g_Config.version = strdup(val);
+		g_Config.version = StrDup(val);
 	} else if (MATCH("renderer", "WindowWidth")) {
 		g_Config.windowWidth = atoi(val);
 	} else if (MATCH("renderer", "WindowHeight")) {
 		g_Config.windowHeight = atoi(val);
 	} else if (MATCH("filesystem", "FilesRoot")) {
-		g_Config.filesRoot = strdup(val);
+		g_Config.filesRoot = StrDup(val);
 	}
 
 	return 1;
@@ -67,10 +68,10 @@ ecode_t Config_Save(const char *filename)
 	assert(filename != NULL);
 	// TODO: Write it
 
-	/* free strings from strdup() */
-	free(g_Config.gameName);
-	free(g_Config.version);
-	free(g_Config.filesRoot);
+	/* free strings from StrDup() */
+	MemFree(g_Config.gameName);
+	MemFree(g_Config.version);
+	MemFree(g_Config.filesRoot);
 
 	return EOK;
 }
