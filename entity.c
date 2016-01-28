@@ -25,7 +25,7 @@ ecode_t Ent_Init()
 	}
 
 #ifdef DEBUG_TRACING_ON
-	Trace(Fmt("allocated %d entities", MAX_ENTITIES));
+	Trace(Fmt("allocated entity pool size %d", MAX_ENTITIES));
 #endif
 
 	return EOK;
@@ -99,8 +99,9 @@ static void DefaultEntity(struct Entity *ent)
  */
 struct Entity *Ent_New()
 {
-	if (s_Entities[0] == NULL)
-		Panic("Entity pool not initialised; call Ent_Init() first");
+	if (s_Entities[0] == NULL) {
+		Panic("Entity pool not initialised");
+	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (!s_Entities[i]->inUse) {
@@ -148,6 +149,31 @@ ecode_t Ent_Free(struct Entity *ent)
  * Ent_UpdateAll
  *	Update all in-use Entities in the pool.
  */
+static ecode_t UpdateEntity(struct Entity *ent, float dT)
+{
+	switch (ent->updateType) {
+	case UPDATE_ALWAYS:
+		if (ent->Update(ent, dT) != EOK) {
+			Trace(Fmt("entity '%s' failed to update", ent->name));
+			return EFAIL;
+		}
+
+		break;
+	case UPDATE_SCHED:
+		if (ent->nextUpdate <= g_Globals.timeNowMs) {
+			if (ent->Update(ent, dT) != EOK) {
+				Trace(Fmt("entity '%s' failed to update",
+					ent->name));
+				return EFAIL;
+			}
+		}
+
+		break;
+	}
+
+	return EOK;
+}
+
 ecode_t Ent_UpdateAll(float dT)
 {
 	if (s_Entities[0] == NULL) {
@@ -155,33 +181,14 @@ ecode_t Ent_UpdateAll(float dT)
 		return EFAIL;
 	}
 
-	/* FIXME: This should probably be refactored... */
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		struct Entity *ent = s_Entities[i];
 
 		if (!ent->inUse)
 			continue;
 
-		switch (ent->updateType) {
-		case UPDATE_ALWAYS:
-			if (ent->Update(ent, dT) != EOK) {
-				Trace(Fmt("entity '%s' in slot %d failed "
-						"to update", ent->name, i));
-				return EFAIL;
-			}
-
-			break;
-		case UPDATE_SCHED:
-			if (ent->nextUpdate <= g_Globals.timeNowMs) {
-				if (ent->Update(ent, dT) != EOK) {
-					Trace(Fmt("entity '%s' in slot %d"
-						"failed to update", ent->name,
-						i));
-					return EFAIL;
-				}
-			}
-
-			break;
+		if (UpdateEntity(ent, dT) != EOK) {
+			return EFAIL;
 		}
 	}
 

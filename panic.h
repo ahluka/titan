@@ -5,6 +5,7 @@
 #define Trace(m) do { _Trace(__FILE__, __LINE__, __func__, m); } while (0)
 
 void _Trace(const char *file, long line, const char *func, const char *message);
-void _Panic(const char *file, long line, const char *func, const char *message);
+void _Panic(const char *file, long line, const char *func, const char *message)
+	__attribute__((noreturn));
 
 #endif /* __PANIC_H__ */
