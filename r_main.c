@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "panic.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 typedef struct RInfo_s {
 	SDL_Window *window;
@@ -16,11 +17,17 @@ static RInfo s_Rend;
  */
 ecode_t Rend_Init()
 {
-	if (s_Rend.window != NULL)
+	if (s_Rend.window != NULL) {
 		Panic("Window already created");
+	}
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		Panic("SDL_Init() failed");
+	}
+
+	if (IMG_Init(IMG_INIT_PNG) < 0) {
+		Panic("IMG_Init() failed");
+	}
 
 	s_Rend.window = SDL_CreateWindow(g_Config.gameName,
 				SDL_WINDOWPOS_UNDEFINED,
@@ -50,6 +57,7 @@ ecode_t Rend_Init()
 ecode_t Rend_Shutdown()
 {
 	if (s_Rend.window != NULL) {
+		IMG_Quit();
 		SDL_DestroyWindow(s_Rend.window);
 		SDL_Quit();
 
