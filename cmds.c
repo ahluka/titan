@@ -88,9 +88,9 @@ ecode_t Cmd_Register(const char *name, CmdFunction func)
 {
 	NewCommand(name, func);
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("registered command '%s'", name));
-#endif
+// #ifdef DEBUG_TRACING_ON
+// 	Trace(Fmt("registered command '%s'", name));
+// #endif
 
 	return EOK;
 }

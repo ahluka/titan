@@ -25,43 +25,43 @@ static lua_State *s_State = NULL;
  *	its args and call Lua's built-in print function with a prepended str?
  *	Or even better, just implement it in Lua.
  */
-#define MAX_STR 1024
-static int LuaTrace(lua_State *L)
-{
-	int argc = lua_gettop(L);
-	char str[MAX_STR] = {0};
-
-	for (int i = 1; i <= argc; i++) {
-		Trace(Fmt("Handling %s", lua_typename(L, i)));
-		switch (lua_type(L, i)) {
-		case LUA_TSTRING: {
-			size_t sz = strlen(lua_tostring(L, i));
-			if (strlen(str) + sz >= MAX_STR) {
-				Panic("Argument would overflow buffer");
-			}
-			strncat(str, lua_tostring(L, i), sz);
-		} break;
-		case LUA_TNUMBER: {
-			/* lua will convert to strings for us, yay */
-			const char *ns = lua_tostring(L, i);
-			size_t sz = strlen(ns);
-
-			if (strlen(str) + sz >= MAX_STR) {
-				Panic("Argument would overflow buffer");
-			}
-			strncat(str, ns, sz);
-			strncat(str, " ", 1);
-		} break;
-		default:
-			Panic("u wan sum fuk?");
-		}
-	}
-
-	Trace(Fmt("%s", str));
-
-	return 0;
-}
-#undef MAX_STR
+// #define MAX_STR 1024
+// static int LuaTrace(lua_State *L)
+// {
+// 	int argc = lua_gettop(L);
+// 	char str[MAX_STR] = {0};
+//
+// 	for (int i = 1; i <= argc; i++) {
+// 		Trace(Fmt("Handling %s", lua_typename(L, i)));
+// 		switch (lua_type(L, i)) {
+// 		case LUA_TSTRING: {
+// 			size_t sz = strlen(lua_tostring(L, i));
+// 			if (strlen(str) + sz >= MAX_STR) {
+// 				Panic("Argument would overflow buffer");
+// 			}
+// 			strncat(str, lua_tostring(L, i), sz);
+// 		} break;
+// 		case LUA_TNUMBER: {
+// 			/* lua will convert to strings for us, yay */
+// 			const char *ns = lua_tostring(L, i);
+// 			size_t sz = strlen(ns);
+//
+// 			if (strlen(str) + sz >= MAX_STR) {
+// 				Panic("Argument would overflow buffer");
+// 			}
+// 			strncat(str, ns, sz);
+// 			strncat(str, " ", 1);
+// 		} break;
+// 		default:
+// 			Panic("u wan sum fuk?");
+// 		}
+// 	}
+//
+// 	Trace(Fmt("%s", str));
+//
+// 	return 0;
+// }
+// #undef MAX_STR
 
 /*
  * Script_Init
@@ -75,14 +75,15 @@ ecode_t Script_Init()
 
 	s_State = luaL_newstate();
 	if (!s_State) {
-		Trace("Failed to create interpreter");
+		Trace("Failed to create Lua state");
 		return EFAIL;
 	}
 
 	luaL_openlibs(s_State);
-	lua_register(s_State, "Trace2", LuaTrace);
+	// lua_register(s_State, "Trace2", LuaTrace);
 
-	/* We defer to lua_error() when something goes wrong here,
+	/* Load and run bootstrap script.
+	 * We defer to lua_error() when something goes wrong here,
 	 * as it appears to be the only way to get at any kind of error code
 	 * or message when something goes wrong.
 	 */
@@ -111,7 +112,6 @@ ecode_t Script_Shutdown()
 
 /*
  * Script_ExecString
- *	Execute the given string of Tcl code.
  */
 ecode_t Script_ExecString(const char *str)
 {
@@ -141,6 +141,8 @@ ecode_t Script_ExecFile(FileHandle handle)
 	const char *path = Files_GetPath(handle);
 	size_t sz = Files_GetSize(handle);
 
+	/* We pass the path here so if something goes wrong, lua_error() will
+	 * be able to tell us which file it was. */
 	if (luaL_loadbuffer(s_State, contents, sz, path) != 0) {
 		lua_error(s_State);
 	}

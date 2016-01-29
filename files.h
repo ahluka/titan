@@ -1,9 +1,10 @@
 #pragma once
 
 /*
- * All file accesses for the game should go through here.
- * Error handling here is simple; we always Panic() if a file cannot be found.
- * Hence little use of ecode_t.
+ * files.h
+ *	All file accesses for the game should go through here.
+ *	Error handling here is simple; we always Panic() if a file cannot
+ *	be found, hence little use of ecode_t.
  */
 
 typedef uint32_t FileHandle;
@@ -24,5 +25,5 @@ uint8_t *Files_GetData(FileHandle handle);
 /* Get the size of the given file */
 size_t Files_GetSize(FileHandle handle);
 
-/* Get a pointer to the file's path */
+/* Get a pointer to the file's full path */
 const char *Files_GetPath(FileHandle handle);

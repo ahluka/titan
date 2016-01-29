@@ -19,17 +19,17 @@ static bool s_Keys[SDL_NUM_SCANCODES] = {false};
 
 void In_SetKeyDown(SDL_Scancode scode)
 {
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("scancode %d keycode %d", scode, SDL_GetKeyFromScancode(scode)));
-#endif
+// #ifdef DEBUG_TRACING_ON
+// 	Trace(Fmt("scancode %d keycode %d", scode, SDL_GetKeyFromScancode(scode)));
+// #endif
 
 	s_Keys[scode] = true;
 }
 
 void In_SetKeyUp(SDL_Scancode scode)
 {
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("scancode %d keycode %d", scode, SDL_GetKeyFromScancode(scode)));
-#endif
+// #ifdef DEBUG_TRACING_ON
+// 	Trace(Fmt("scancode %d keycode %d", scode, SDL_GetKeyFromScancode(scode)));
+// #endif
 	s_Keys[scode] = false;
 }

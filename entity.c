@@ -85,7 +85,7 @@ static void DefaultEntity(struct Entity *ent)
 
 	ent->name = "(unnamed)";
 
-	ent->updateType = UPDATE_ALWAYS;
+	ent->updateType = UPDATE_FRAME;
 	ent->nextUpdate = 0;
 	ent->Update = EntityDefaultUpdate;
 
@@ -152,7 +152,7 @@ ecode_t Ent_Free(struct Entity *ent)
 static ecode_t UpdateEntity(struct Entity *ent, float dT)
 {
 	switch (ent->updateType) {
-	case UPDATE_ALWAYS:
+	case UPDATE_FRAME:
 		if (ent->Update(ent, dT) != EOK) {
 			Trace(Fmt("entity '%s' failed to update", ent->name));
 			return EFAIL;

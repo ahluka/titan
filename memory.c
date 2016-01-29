@@ -118,6 +118,8 @@ uint64_t MemHighWater()
 
 /*
  * MemStats
+ *	Output a list of all memory blocks currently being tracked.
+ *
  */
 static bool SameAlloc(MemTag *tag, MemTag *prev)
 {
@@ -148,6 +150,7 @@ void MemStats()
 			Trace(Fmt("  (%d hidden totalling %lu bytes)",
 				same, htotal));
 			same = 0;
+			htotal = 0;
 		}
 
 		Trace(Fmt(" %u bytes from %s:%ld in %s",

@@ -102,5 +102,6 @@ int main(int argc, char *argv[])
 #ifdef DEBUG_MEMORY_BUILD
 	CheckMemory();
 #endif
+
 	return EXIT_SUCCESS;
 }

@@ -9,7 +9,7 @@
 
 /* Determines how Entities are updated */
 enum EntUpdateType {
-	UPDATE_ALWAYS,	/* once per frame */
+	UPDATE_FRAME,	/* once per frame */
 	UPDATE_SCHED	/* when game time >= Entity.nextUpdate */
 };
 
