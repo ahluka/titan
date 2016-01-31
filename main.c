@@ -10,9 +10,9 @@
 #include "memory.h"
 #include <time.h>
 
-#include "ch_hashtable.h"
-
 #define CONFIG_FILENAME "config.ini"
+
+// TODO: Pool and linear allocators
 
 /*
  * InitModules
@@ -91,7 +91,8 @@ int main(int argc, char *argv[])
 {
 	InitGlobals();
 	InitModules();
-	MTRSeed((uint64_t) time(NULL));
+	dSFMT_Init((uint32_t) time(NULL));
+	dSFMT_Test();
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
 

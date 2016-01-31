@@ -1,52 +1,34 @@
-#include <stdint.h>
+#include "base.h"
+#include "panic.h"
+#define DSFMT_MEXP 521
+#include "dSFMT/dSFMT.h"
+
+static dsfmt_t s_State = {0};
 
 /*
- * Mersenne Twister implementation.
+ * dSFMT_Init
  */
-#define N 624
-#define M 397
-#define A 0x9908b0dfUL
-#define U 0x80000000UL
-#define L 0x7fffffffUL
-
-static uint64_t x[N];
-static int32_t next;
-
-void MTRSeed(uint64_t s)
+void dSFMT_Init(uint32_t seed)
 {
-	int32_t i;
-
-	x[0] = s & 0xffffffffUL;
-
-	for (i = 1; i < N; i++) {
-		x[i] = (1812433253UL * (x[i-1] ^ (x[i-1] >> 30)) + i);
-		x[i] &= 0xffffffffUL;
-	}
+	dsfmt_init_gen_rand(&s_State, seed);
 }
 
-uint64_t MTRRand()
+/*
+ * dSFMT_Test
+ *	dsfmt_genrand_open_open() - (0,1), never 0 neither 1
+ *	dsfmt_genrand_close_open() - [0,1), may be 0, never 1
+ *	dsfmt_genrand_open_close() - (0,1], never 0, may be 1
+ *	dsfmt_genrand_close1_open2() - [1, 2), may be 1, never 2
+ */
+void dSFMT_Test()
 {
-	uint64_t y, a;
-
-	if (next == N) {
-		next = 0;
-
-		for (int32_t i = 0; i < N - 1; i++) {
-			y = (x[i] & U) | (x[i+1] & L);
-			a = (y & 0x1UL) ? A : 0x0UL;
-			x[i] = x[(i+M) % N] ^ (y >> 1) ^ a;
-		}
-
-		y = (x[N-1] & U) | (x[0] & L);
-		a = (y & 0x1UL) ? A : 0x0UL;
-		x[N-1] = x[M-1] ^ (y >> 1) ^ a;
+	Trace("Some random uint32's:");
+	for (int i = 0; i < 10; i++) {
+		Trace(Fmt("\t%u", dsfmt_genrand_uint32(&s_State)));
 	}
 
-	y = x[next++];
-	y ^= (y >> 11);
-	y ^= (y << 7) & 0x9d2c5680UL;
-	y ^= (y << 15) & 0xefc60000UL;
-	y ^= (y >> 18);
-
-	return y;
+	Trace("Some random doubles:");
+	for (int i = 0; i < 10; i++) {
+		Trace(Fmt("\t%f", dsfmt_genrand_close_open(&s_State)));
+	}
 }
