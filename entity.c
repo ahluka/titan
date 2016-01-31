@@ -15,7 +15,7 @@ static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
 ecode_t Ent_Init()
 {
 	if (s_Entities[0] != NULL) {
-		Trace("already called");
+		Trace(CHAN_GENERAL, "already called");
 		return EFAIL;
 	}
 
@@ -24,9 +24,7 @@ ecode_t Ent_Init()
 		s_Entities[i]->inUse = false;
 	}
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("allocated entity pool size %d", MAX_ENTITIES));
-#endif
+	Trace(CHAN_DBG, Fmt("allocated entity pool size %d", MAX_ENTITIES));
 
 	return EOK;
 }
@@ -38,7 +36,7 @@ ecode_t Ent_Init()
 ecode_t Ent_Shutdown()
 {
 	if (s_Entities[0] == NULL) {
-		Trace("already called or Ent_Init not called");
+		Trace(CHAN_GENERAL, "already called or Ent_Init not called");
 		return EFAIL;
 	}
 
@@ -48,9 +46,7 @@ ecode_t Ent_Shutdown()
 		s_Entities[i] = NULL;
 	}
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("freed %d entities", MAX_ENTITIES));
-#endif
+	Trace(CHAN_DBG, Fmt("freed %d entities", MAX_ENTITIES));
 
 	return EOK;
 }
@@ -61,7 +57,7 @@ ecode_t Ent_Shutdown()
  */
 ecode_t EntityDefaultUpdate(struct Entity *self, float dT)
 {
-	Trace("well, this can't be good");
+	Trace(CHAN_GAME, "well, this can't be good");
 
 	if (self->updateType == UPDATE_SCHED)
 		self->nextUpdate = g_Globals.timeNowMs + 500;
@@ -71,7 +67,7 @@ ecode_t EntityDefaultUpdate(struct Entity *self, float dT)
 
 ecode_t EntityDefaultRender(struct Entity *self)
 {
-	Trace("well, this can't be good either");
+	Trace(CHAN_GAME, "well, this can't be good either");
 
 	if (self->updateType == UPDATE_SCHED)
 		self->nextUpdate = g_Globals.timeNowMs + 500;
@@ -105,9 +101,8 @@ struct Entity *Ent_New()
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (!s_Entities[i]->inUse) {
-#ifdef DEBUG_TRACING_ON
-			Trace(Fmt("entity slot %d selected", i));
-#endif
+			Trace(CHAN_DBG, Fmt("entity slot %d selected", i));
+
 			DefaultEntity(s_Entities[i]);
 			s_Entities[i]->inUse = true;
 			return s_Entities[i];
@@ -126,15 +121,16 @@ ecode_t Ent_Free(struct Entity *ent)
 	assert(ent != NULL);
 
 	if (s_Entities[0] == NULL) {
-		Trace("Attempting to free an entity before Ent_Init()");
+		Trace(CHAN_GENERAL,
+			"Attempting to free an entity before Ent_Init()");
 		return EFAIL;
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (s_Entities[i] == ent) {
-#ifdef DEBUG_TRACING_ON
-			Trace(Fmt("marking entity in slot %d as free", i));
-#endif
+			Trace(CHAN_DBG,
+				Fmt("marking entity in slot %d as free", i));
+
 			s_Entities[i]->inUse = false;
 			DefaultEntity(s_Entities[i]);
 			return EOK;
@@ -154,7 +150,8 @@ static ecode_t UpdateEntity(struct Entity *ent, float dT)
 	switch (ent->updateType) {
 	case UPDATE_FRAME:
 		if (ent->Update(ent, dT) != EOK) {
-			Trace(Fmt("entity '%s' failed to update", ent->name));
+			Trace(CHAN_GAME,
+				Fmt("entity '%s' failed to update", ent->name));
 			return EFAIL;
 		}
 
@@ -162,7 +159,8 @@ static ecode_t UpdateEntity(struct Entity *ent, float dT)
 	case UPDATE_SCHED:
 		if (ent->nextUpdate <= g_Globals.timeNowMs) {
 			if (ent->Update(ent, dT) != EOK) {
-				Trace(Fmt("entity '%s' failed to update",
+				Trace(CHAN_GAME,
+					Fmt("entity '%s' failed to update",
 					ent->name));
 				return EFAIL;
 			}
@@ -177,7 +175,7 @@ static ecode_t UpdateEntity(struct Entity *ent, float dT)
 ecode_t Ent_UpdateAll(float dT)
 {
 	if (s_Entities[0] == NULL) {
-		Trace("Entity pool not initialised");
+		Trace(CHAN_GENERAL, "Entity pool not initialised");
 		return EFAIL;
 	}
 

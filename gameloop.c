@@ -26,19 +26,17 @@ static void CheckDbgKeys(SDL_Keycode code)
 	case SDLK_F2:
 		Cmd_ExecuteBuf("cmdlist");
 		break;
-#ifdef DEBUG_MEMORY_BUILD
 	case SDLK_F10:
-		Trace(Fmt("Current memory usage: %lu bytes",
+		Trace(CHAN_MEM, Fmt("Current memory usage: %lu bytes",
 			MemCurrentUsage()));
 		break;
 	case SDLK_F11:
-		Trace(Fmt("Highest memory usage: %lu bytes",
+		Trace(CHAN_MEM, Fmt("Highest memory usage: %lu bytes",
 			MemHighWater()));
 		break;
 	case SDLK_F12:
 		MemStats();
 		break;
-#endif
 	}
 }
 
@@ -70,12 +68,12 @@ ecode_t Mainloop()
 	Timer_Start(&fpsTimer);
 
 	if (Rend_Init() != EOK) {
-		Trace("failed to init renderer");
+		Trace(CHAN_GENERAL, "failed to init renderer");
 		return EFAIL;
 	}
 
 	if (Ent_Init() != EOK) {
-		Trace("failed to init entity manager");
+		Trace(CHAN_GENERAL, "failed to init entity manager");
 		return EFAIL;
 	}
 
@@ -117,12 +115,12 @@ ecode_t Mainloop()
 	}
 
 	if (Ent_Shutdown() != EOK) {
-		Trace("failed to shutdown entity manager");
+		Trace(CHAN_GENERAL, "failed to shutdown entity manager");
 		return EFAIL;
 	}
 
 	if (Rend_Shutdown() != EOK) {
-		Trace("failed to shutdown renderer");
+		Trace(CHAN_GENERAL, "failed to shutdown renderer");
 		return EFAIL;
 	}
 

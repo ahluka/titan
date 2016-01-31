@@ -58,7 +58,6 @@ static void ShutdownModules()
 		Panic("Failed to shutdown command system");
 }
 
-#ifdef DEBUG_MEMORY_BUILD
 /*
  * CheckMemory
  *	Gather memory usage stats and output a warning if everything isn't
@@ -73,14 +72,13 @@ static void CheckMemory()
 	uint32_t diff = allocs - frees;
 
 	if (usage > 0 || diff != 0) {
-		Trace("====== WARNING ======");
-		Trace(Fmt("Memory usage on exit: %lu bytes", usage));
-		Trace(Fmt("%u allocs, %u frees (%u unaccounted for)",
+		Trace(CHAN_MEM, "====== WARNING ======");
+		Trace(CHAN_MEM, Fmt("Memory usage on exit: %lu bytes", usage));
+		Trace(CHAN_MEM, Fmt("%u allocs, %u frees (%u unaccounted for)",
 			allocs, frees, diff));
 		MemStats();
 	}
 }
-#endif
 
 /*
  * main
@@ -89,10 +87,11 @@ static void CheckMemory()
  */
 int main(int argc, char *argv[])
 {
+	SetTraceChannels(CHAN_ALL);
+
 	InitGlobals();
 	InitModules();
-	dSFMT_Init((uint32_t) time(NULL));
-	dSFMT_Test();
+	Random_Init((uint32_t) time(NULL));
 
 	printf("%s version %s\n", g_Config.gameName, g_Config.version);
 
@@ -100,9 +99,7 @@ int main(int argc, char *argv[])
 		Panic("Failed to enter main loop");
 
 	ShutdownModules();
-#ifdef DEBUG_MEMORY_BUILD
-	CheckMemory();
-#endif
 
+	CheckMemory();
 	return EXIT_SUCCESS;
 }

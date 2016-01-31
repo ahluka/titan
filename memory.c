@@ -138,7 +138,7 @@ void MemStats()
 	int same = 0;
 	uint64_t htotal = 0;
 
-	Trace("Memory blocks being tracked:");
+	Trace(CHAN_MEM, "Memory blocks being tracked:");
 	for (MemTag *i = s_Tags, *prev = i; i; prev = i, i = i->next) {
 		if (i != s_Tags && SameAlloc(i, prev)) {
 			same++;
@@ -147,16 +147,16 @@ void MemStats()
 		}
 
 		if (same > 0) {
-			Trace(Fmt("  (%d hidden totalling %lu bytes)",
+			Trace(CHAN_MEM, Fmt("  (%d hidden totalling %lu bytes)",
 				same, htotal));
 			same = 0;
 			htotal = 0;
 		}
 
-		Trace(Fmt(" %u bytes from %s:%ld in %s",
+		Trace(CHAN_MEM, Fmt(" %u bytes from %s:%ld in %s",
 			i->blockSize, i->file, i->line, i->func));
 	}
-	Trace(Fmt("Total: %lu bytes, highest: %lu bytes",
+	Trace(CHAN_MEM, Fmt("Total: %lu bytes, highest: %lu bytes",
 		s_CurrentUsage, s_HighWater));
 }
 #endif

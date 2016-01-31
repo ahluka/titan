@@ -108,9 +108,7 @@ static void DestroyFile(struct File *f)
 void Files_ListOpen(int argc, char **argv);
 ecode_t Files_Init(const char *rootDir)
 {
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("setting root directory to %s", rootDir));
-#endif
+	Trace(CHAN_DBG, Fmt("setting root directory to %s", rootDir));
 	s_FilesRoot = rootDir;
 
 	Cmd_Register("files-listopen", Files_ListOpen);
@@ -124,26 +122,24 @@ ecode_t Files_Init(const char *rootDir)
  */
 ecode_t Files_Shutdown()
 {
-#ifdef DEBUG_TRACING_ON
 	uint32_t closed = 0;
 	uint32_t used = 0;
-#endif
+
 	for (int i = 0; i < MAX_OPENFILES; i++) {
 		if (s_Files[i] == NULL)
 			continue;
 
-#ifdef DEBUG_TRACING_ON
 		closed++;
 		if (s_Files[i]->inUse) used++;
-#endif
+
 		DestroyFile(s_Files[i]);
 		MemFree(s_Files[i]);
 		s_Files[i] = NULL;
 	}
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("freed %u file structures (%u were in use)", closed, used));
-#endif
+	Trace(CHAN_DBG,
+		Fmt("freed %u file structures (%u were in use)", closed, used));
+
 	return EOK;
 }
 
@@ -181,9 +177,7 @@ FileHandle Files_OpenFile(const char *filename)
 	file->handle = s_NextHandle++;
 	OpenAndRead(file);
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("opened %s (handle %u)", fullPath, file->handle));
-#endif
+	Trace(CHAN_DBG, Fmt("opened %s (handle %u)", fullPath, file->handle));
 
 	return file->handle;
 }
@@ -197,9 +191,7 @@ void Files_CloseFile(FileHandle handle)
 	if (!file)
 		Panic(Fmt("no file for handle %u", handle));
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("closed %s (handle %u)", file->path, handle));
-#endif
+	Trace(CHAN_DBG, Fmt("closed %s (handle %u)", file->path, handle));
 	DestroyFile(file);
 }
 
@@ -246,7 +238,7 @@ void Files_ListOpen(int argc, char **argv)
 	int totalOpen = 0;
 	size_t totalBytes = 0;
 
-	printf("List of open files:\n");
+	Trace(CHAN_GENERAL, "List of open files:");
 	for (int i = 0; i < MAX_OPENFILES; i++) {
 		if (s_Files[i] == NULL)
 			continue;
@@ -254,10 +246,12 @@ void Files_ListOpen(int argc, char **argv)
 		if (s_Files[i]->inUse) {
 			struct File *f = s_Files[i];
 
-			printf("\t%s (%lu bytes)\n", f->path, f->size);
+			Trace(CHAN_GENERAL,
+				Fmt("\t%s (%lu bytes)", f->path, f->size));
 			totalOpen++;
 			totalBytes += f->size;
 		}
 	}
-	printf("\n\tTotals: %d open, %lu bytes\n", totalOpen, totalBytes);
+	Trace(CHAN_GENERAL,
+		Fmt("\tTotals: %d open, %lu bytes", totalOpen, totalBytes));
 }

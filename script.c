@@ -75,7 +75,7 @@ ecode_t Script_Init()
 
 	s_State = luaL_newstate();
 	if (!s_State) {
-		Trace("Failed to create Lua state");
+		Trace(CHAN_GENERAL, "Failed to create Lua state");
 		return EFAIL;
 	}
 

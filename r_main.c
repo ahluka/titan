@@ -64,10 +64,8 @@ ecode_t Rend_Init()
 						0, 0, 0));
 	SDL_UpdateWindowSurface(s_Rend.window);
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("initialised renderer %dx%d", g_Config.windowWidth,
+	Trace(CHAN_REND, Fmt("initialised renderer %dx%d", g_Config.windowWidth,
 						g_Config.windowHeight));
-#endif
 
 	return EOK;
 }
@@ -85,14 +83,12 @@ ecode_t Rend_Shutdown()
 		s_Rend.window = NULL;
 		s_Rend.wSurface = NULL;
 
-#ifdef DEBUG_TRACING_ON
-		Trace("shutdown");
-#endif
+		Trace(CHAN_REND, "shutdown");
 
 		return EOK;
 	}
 
-	Trace("called unnecessarily");
+	Trace(CHAN_REND, "called unnecessarily");
 
 	return EFAIL;
 }

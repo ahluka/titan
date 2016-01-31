@@ -19,9 +19,8 @@ struct ConfigData g_Config = {0};
 static int
 INIHandler(void *usr, const char *sec, const char *key, const char *val)
 {
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("handling [%s] %s=%s", sec, key, val));
-#endif
+	Trace(CHAN_DBG, Fmt("handling [%s] %s=%s", sec, key, val));
+
 	if (MATCH("general", "Game")) {
 		g_Config.gameName = StrDup(val);
 	} else if (MATCH("general", "Version")) {
@@ -45,14 +44,13 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 ecode_t Config_Load(const char *filename)
 {
 	assert(filename != NULL);
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("Using config file '%s'", filename));
-#endif
+	Trace(CHAN_GENERAL, Fmt("Using config file '%s'", filename));
+
 	g_Config.filename = filename;
 
 	int ret = ini_parse(filename, INIHandler, NULL);
 	if (ret < 0) {
-		Trace(Fmt("INI parse error %d\n", ret));
+		Trace(CHAN_GENERAL, Fmt("INI parse error %d\n", ret));
 		return EFAIL;
 	}
 

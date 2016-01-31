@@ -37,7 +37,7 @@ static void NewCommand(const char *name, CmdFunction fn)
 static void CmdList(int argc, char **argv)
 {
 	uint32_t total = 0;
-	printf("List of commands y'all:\n");
+	printf("List of commands:\n");
 	for (int i = 0; i < MAX_COMMANDS; i++) {
 		if (s_Commands[i]) {
 			printf("\t%s\n", s_Commands[i]->name);
@@ -88,9 +88,7 @@ ecode_t Cmd_Register(const char *name, CmdFunction func)
 {
 	NewCommand(name, func);
 
-// #ifdef DEBUG_TRACING_ON
-// 	Trace(Fmt("registered command '%s'", name));
-// #endif
+ 	Trace(CHAN_DBG, Fmt("registered command '%s'", name));
 
 	return EOK;
 }
@@ -107,16 +105,14 @@ ecode_t Cmd_Execute(const char *cmd, int argc, char **argv)
 			continue;
 
 		if (strcmp(cmd, s_Commands[i]->name) == 0) {
-#ifdef DEBUG_TRACING_ON
-			Trace(Fmt("executing '%s'", cmd));
-#endif
+			Trace(CHAN_DBG, Fmt("executing '%s'", cmd));
 			s_Commands[i]->function(argc, argv);
 			return EOK;
 		}
 	}
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("command '%s' doesn't exist", cmd));
-#endif
+
+	Trace(CHAN_DBG, Fmt("command '%s' doesn't exist", cmd));
+
 	return EFAIL;
 }
 
@@ -158,9 +154,7 @@ ecode_t Cmd_ExecuteBuf(char *buffer)
 	int argc = CountArgs(buffer);
 
 	if (!argc) {
-#ifdef DEBUG_TRACING_ON
-		Trace(Fmt("found command '%s'", cmd));
-#endif
+		Trace(CHAN_DBG, Fmt("found command '%s'", cmd));
 		Cmd_Execute(cmd, argc, NULL);
 		goto return_eok;
 	}
@@ -174,9 +168,8 @@ ecode_t Cmd_ExecuteBuf(char *buffer)
 		argv[argsCopied++] = strdup(token);
 	}
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("found command '%s' with %d args", cmd, argc));
-#endif
+	Trace(CHAN_DBG, Fmt("found command '%s' with %d args", cmd, argc));
+
 	Cmd_Execute(cmd, argc, argv);
 
 	for (int i = 0; i < argc; i++) {

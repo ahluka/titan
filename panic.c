@@ -3,6 +3,9 @@
 #define LOGFILE_NAME "log.txt"
 static FILE *s_Logfile = NULL;
 
+/* Defaults to 1 so CHAN_GENERAL is already active. */
+static uint64_t s_Channels = 1;
+
 /*
  * OpenLog
  *	Opens the log file. If it fails we don't care, really.
@@ -33,6 +36,11 @@ static void CloseLog()
 	}
 }
 
+void SetTraceChannels(int mask)
+{
+	s_Channels = mask;
+}
+
 /*
  * Trace
  *	Write the given message to stdout and the log file.
@@ -43,9 +51,18 @@ static void CloseLog()
  *		enum TraceChannel CHAN_GENERAL, CHAN_RENDERER, CHAN_GAME, etc.
  *		Could make s_Channels uint64_t if we need more.
  */
-void _Trace(const char *file, long line, const char *func, const char *message)
+void _Trace(
+	const char *file,
+	long line,
+	const char *func,
+	const char *message,
+	int channel)
 {
 	assert(message != NULL);
+
+	if (!(s_Channels & channel)) {
+		return;
+	}
 
 	if (!s_Logfile) {
 		OpenLog();

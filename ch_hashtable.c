@@ -53,7 +53,8 @@ static void AllocTable(HashTable *table, uint32_t size)
 	assert(size > 0);
 
 	if (!IsPrime(size)) {
-		Trace(Fmt("WARNING: non-prime table size of %d", size));
+		Trace(CHAN_GENERAL, Fmt("WARNING: non-prime table size of %d",
+			size));
 	}
 
 	table->size = size;
@@ -163,7 +164,8 @@ ecode_t HT_Add(HashTable *table, char *key, void *data)
 
 	if (FindDatum(table, key, hash, data) == EOK) {
 		if (table->policy == HT_UNIQUE) {
-			Trace(Fmt("WARNING: Duplicate in HT_UNIQUE table "
+			Trace(CHAN_GENERAL,
+				Fmt("WARNING: Duplicate in HT_UNIQUE table "
 				"(key: '%s')", key));
 			MemFree(dat);
 			if (table->freeType == HT_FREE_DATA) {
@@ -176,10 +178,8 @@ ecode_t HT_Add(HashTable *table, char *key, void *data)
 
 	List_Add(table->table[hash], dat);
 
-#ifdef DEBUG_TRACING_ON
-	Trace(Fmt("key '%s' at index '%u', bucket size %d",
+	Trace(CHAN_DBG, Fmt("key '%s' at index '%u', bucket size %d",
 		dat->key, hash, List_GetSize(table->table[hash])));
-#endif
 
 	return EOK;
 }
