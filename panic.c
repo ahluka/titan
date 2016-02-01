@@ -44,12 +44,6 @@ void SetTraceChannels(int mask)
 /*
  * Trace
  *	Write the given message to stdout and the log file.
- *	TODO: Verbosity levels?
- *		s_Verbosity, if (v >= s_Verbosity) output
- *	TODO: Channels?
- *		uint32_t s_Channels with bitmask flags, only active show
- *		enum TraceChannel CHAN_GENERAL, CHAN_RENDERER, CHAN_GAME, etc.
- *		Could make s_Channels uint64_t if we need more.
  */
 void _Trace(
 	const char *file,
