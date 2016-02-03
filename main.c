@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 		Panic("Failed to enter main loop");
 
 	ShutdownModules();
-
 	CheckMemory();
+
 	return EXIT_SUCCESS;
 }
