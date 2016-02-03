@@ -13,15 +13,19 @@ typedef struct MemTag {
 	const char *func;
 } MemTag;
 
-#ifdef DEBUG_MEMORY_BUILD
+struct LAllocState {
+	uint8_t *base;
+	uint8_t *current;
+	size_t blockSize;
+};
+
 static MemTag *s_Tags = NULL;
 static uint64_t s_CurrentUsage = 0;
 static uint64_t s_HighWater = 0;
-#endif
+
 static uint32_t s_AllocCount = 0;
 static uint32_t s_FreeCount = 0;
 
-#ifdef DEBUG_MEMORY_BUILD
 static MemTag *FindTag(void *ptr)
 {
 	if (!s_Tags) return NULL;
@@ -50,21 +54,15 @@ static void RemoveTag(MemTag *tag)
 		}
 	}
 }
-#endif /* DEBUG_MEMORY_BUILD */
 
 /*
  * MemAlloc
  */
-#ifdef DEBUG_MEMORY_BUILD
 void *_MemAlloc(size_t sz, const char *file, long line, const char *fn)
-#else
-void *_MemAlloc(size_t sz)
-#endif
 {
 	assert(sz > 0);
 
 	uint8_t *bytes = calloc(1, sz);
-#ifdef DEBUG_MEMORY_BUILD
 	MemTag *tag = calloc(1, sizeof(*tag));
 	tag->block = bytes;
 	tag->blockSize = sz;
@@ -78,7 +76,6 @@ void *_MemAlloc(size_t sz)
 	if (s_CurrentUsage > s_HighWater) {
 		s_HighWater = s_CurrentUsage;
 	}
-#endif
 
 	s_AllocCount++;
 	return bytes;
@@ -93,7 +90,7 @@ void _MemFree(void *ptr)
 		/* Do nothing, just like free() */
 		return;
 	}
-#ifdef DEBUG_MEMORY_BUILD
+
 	MemTag *tag = FindTag(ptr);
 	if (!tag) {
 		Panic(Fmt("failed to find tag for %p", ptr));
@@ -101,11 +98,11 @@ void _MemFree(void *ptr)
 
 	s_CurrentUsage -= tag->blockSize;
 	RemoveTag(tag);
-#endif
+
 	free(ptr);
 	s_FreeCount++;
 }
-#ifdef DEBUG_MEMORY_BUILD
+
 uint64_t MemCurrentUsage()
 {
 	return s_CurrentUsage;
@@ -159,7 +156,7 @@ void MemStats()
 	Trace(CHAN_MEM, Fmt("Total: %lu bytes, highest: %lu bytes",
 		s_CurrentUsage, s_HighWater));
 }
-#endif
+
 uint32_t MemAllocCount()
 {
 	return s_AllocCount;
@@ -168,4 +165,47 @@ uint32_t MemAllocCount()
 uint32_t MemFreeCount()
 {
 	return s_FreeCount;
+}
+
+/*
+ * LAlloc_Create
+ */
+LAllocState *LAlloc_Create(size_t sz)
+{
+	assert(sz > 0);
+
+	LAllocState *state = MemAlloc(sizeof(*state));
+	state->base = MemAlloc(sz);
+	state->current = state->base;
+	state->blockSize = sz;
+	return state;
+}
+
+/*
+ * LAlloc_Destroy
+ */
+void LAlloc_Destroy(LAllocState *state)
+{
+	assert(state != NULL);
+	MemFree(state->base);
+	MemFree(state);
+}
+
+/*
+ * LAlloc
+ */
+void *LAlloc(LAllocState *state, size_t sz)
+{
+	assert(state != NULL);
+	assert(sz > 0);
+
+	if (state->current + sz > state->base + state->blockSize) {
+		size_t left = state->blockSize - (state->current - state->base);
+		Panic(Fmt("Cannot satisfy allocation of %u bytes (%u left)",
+			sz, left));
+	}
+
+	void *ptr = state->current;
+	state->current += sz;
+	return ptr;
 }

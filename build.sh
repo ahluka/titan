@@ -9,12 +9,12 @@ BINDIR="../bin"
 # _POSIX_C_SOURCE is defined to enable strdup() which isn't part of C99
 # TODO: Remove _POSIX_C_SOURCE? Replaced strdup(), for now...
 CFLAGS="-std=c99 -Wall -pedantic -march=native -g -D_POSIX_C_SOURCE=200809L"
-LIBS="-lSDL2 -lSDL2_image -lSDL2_ttf -ltcl8.6 -L./gus/ -lgus -L./dSFMT/ -ldsfmt"
+LIBS="-lSDL2 -lSDL2_image -lSDL2_ttf -ltcl8.6 -L$BINDIR -lgus -L./dSFMT/ -ldsfmt"
 EXE="titan"
 
 # build gus as a static library
-gcc gus/*.c $CFLAGS -c -o gus/gus.o
-ar rcs gus/libgus.a gus/gus.o
+gcc gus/*.c $CFLAGS -c -o $BINDIR/gus.o
+ar rcs $BINDIR/libgus.a $BINDIR/gus.o
 
 # build titan
 echo "Building $EXE..."

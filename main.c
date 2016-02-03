@@ -12,8 +12,6 @@
 
 #define CONFIG_FILENAME "config.ini"
 
-// TODO: Pool and linear allocators
-
 /*
  * InitModules
  *	Call the initialisation functions of all modules in succession.
