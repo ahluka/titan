@@ -116,7 +116,7 @@ uint64_t MemHighWater()
 /*
  * MemStats
  *	Output a list of all memory blocks currently being tracked.
- *
+ * TODO: Sane output of values; 4096 bytes -> 4 KB, etc.
  */
 static bool SameAlloc(MemTag *tag, MemTag *prev)
 {

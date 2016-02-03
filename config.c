@@ -66,10 +66,5 @@ ecode_t Config_Save(const char *filename)
 	assert(filename != NULL);
 	// TODO: Write it
 
-	/* free strings from StrDup() */
-	MemFree(g_Config.gameName);
-	MemFree(g_Config.version);
-	MemFree(g_Config.filesRoot);
-
 	return EOK;
 }

@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
 {
 	SetTraceChannels(CHAN_ALL);
 
+	InitBase();
 	InitGlobals();
 	InitModules();
 	Random_Init((uint32_t) time(NULL));
@@ -97,6 +98,7 @@ int main(int argc, char *argv[])
 		Panic("Failed to enter main loop");
 
 	ShutdownModules();
+	ShutdownBase();
 	CheckMemory();
 
 	return EXIT_SUCCESS;

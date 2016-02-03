@@ -138,6 +138,9 @@ static int CountArgs(const char *buffer)
  *	Given a buffer containing an arbitrary command string, attempt to
  *	parse and execute it. Commands are of the form:
  *		cmd arg1 arg2 ... argN
+ *
+ * NOTE: This uses strdup() instead of StrDup() to avoid filling the global
+ * string pool with user-typed commands.
  */
 ecode_t Cmd_ExecuteBuf(char *buffer)
 {
