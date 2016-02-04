@@ -1,5 +1,6 @@
 #pragma once
 // TODO: Pool allocator
+// TODO: MemStats for LAlloc, just track active LAllocState blocks
 /*
  * memory.h
  *	All memory allocations should go through MemAlloc(), frees through

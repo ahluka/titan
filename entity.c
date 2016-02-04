@@ -15,7 +15,7 @@ static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
 ecode_t Ent_Init()
 {
 	if (s_Entities[0] != NULL) {
-		Trace(CHAN_GENERAL, "already called");
+		Trace(CHAN_INFO, "already called");
 		return EFAIL;
 	}
 
@@ -36,7 +36,7 @@ ecode_t Ent_Init()
 ecode_t Ent_Shutdown()
 {
 	if (s_Entities[0] == NULL) {
-		Trace(CHAN_GENERAL, "already called or Ent_Init not called");
+		Trace(CHAN_INFO, "already called or Ent_Init not called");
 		return EFAIL;
 	}
 
@@ -121,7 +121,7 @@ ecode_t Ent_Free(struct Entity *ent)
 	assert(ent != NULL);
 
 	if (s_Entities[0] == NULL) {
-		Trace(CHAN_GENERAL,
+		Trace(CHAN_INFO,
 			"Attempting to free an entity before Ent_Init()");
 		return EFAIL;
 	}
@@ -175,7 +175,7 @@ static ecode_t UpdateEntity(struct Entity *ent, float dT)
 ecode_t Ent_UpdateAll(float dT)
 {
 	if (s_Entities[0] == NULL) {
-		Trace(CHAN_GENERAL, "Entity pool not initialised");
+		Trace(CHAN_INFO, "Entity pool not initialised");
 		return EFAIL;
 	}
 

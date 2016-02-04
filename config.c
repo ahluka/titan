@@ -44,13 +44,13 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 ecode_t Config_Load(const char *filename)
 {
 	assert(filename != NULL);
-	Trace(CHAN_GENERAL, Fmt("Using config file '%s'", filename));
+	Trace(CHAN_INFO, Fmt("Using config file '%s'", filename));
 
 	g_Config.filename = filename;
 
 	int ret = ini_parse(filename, INIHandler, NULL);
 	if (ret < 0) {
-		Trace(CHAN_GENERAL, Fmt("INI parse error %d\n", ret));
+		Trace(CHAN_INFO, Fmt("INI parse error %d\n", ret));
 		return EFAIL;
 	}
 

@@ -7,14 +7,15 @@
 /* Trace channels. Trace messages will only be printed if their channel is
  * currently active.
  */
-#define CHAN_GENERAL	0x1
+#define CHAN_INFO	0x1
 #define CHAN_GAME	0x2
 #define CHAN_REND	0x4
 #define CHAN_MEM	0x8
 #define CHAN_DBG	0x10
+#define CHAN_SCRIPT	0x20
 
-#define CHAN_ALL	(CHAN_GENERAL | CHAN_GAME | CHAN_REND | CHAN_MEM | \
-			CHAN_DBG)
+#define CHAN_ALL	(CHAN_INFO | CHAN_GAME | CHAN_REND | CHAN_MEM | \
+			CHAN_DBG | CHAN_SCRIPT)
 
 void SetTraceChannels(int mask);
 

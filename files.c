@@ -238,7 +238,7 @@ void Files_ListOpen(int argc, char **argv)
 	int totalOpen = 0;
 	size_t totalBytes = 0;
 
-	Trace(CHAN_GENERAL, "List of open files:");
+	Trace(CHAN_INFO, "List of open files:");
 	for (int i = 0; i < MAX_OPENFILES; i++) {
 		if (s_Files[i] == NULL)
 			continue;
@@ -246,12 +246,12 @@ void Files_ListOpen(int argc, char **argv)
 		if (s_Files[i]->inUse) {
 			struct File *f = s_Files[i];
 
-			Trace(CHAN_GENERAL,
+			Trace(CHAN_INFO,
 				Fmt("\t%s (%lu bytes)", f->path, f->size));
 			totalOpen++;
 			totalBytes += f->size;
 		}
 	}
-	Trace(CHAN_GENERAL,
+	Trace(CHAN_INFO,
 		Fmt("\tTotals: %d open, %lu bytes", totalOpen, totalBytes));
 }

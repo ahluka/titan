@@ -43,7 +43,7 @@ ecode_t Gus_LoadFile(FileHandle handle, GusFile *_gf)
 
 	memcpy(&header, ptr, sizeof(GusFileHeader));
 	if (!ValidHeader(&header)) {
-		Trace(CHAN_GENERAL, Fmt("Invalid header while reading %s",
+		Trace(CHAN_INFO, Fmt("Invalid header while reading %s",
 			Files_GetPath(handle)));
 		return EFAIL;
 	}

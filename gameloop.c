@@ -68,12 +68,12 @@ ecode_t Mainloop()
 	Timer_Start(&fpsTimer);
 
 	if (Rend_Init() != EOK) {
-		Trace(CHAN_GENERAL, "failed to init renderer");
+		Trace(CHAN_INFO, "failed to init renderer");
 		return EFAIL;
 	}
 
 	if (Ent_Init() != EOK) {
-		Trace(CHAN_GENERAL, "failed to init entity manager");
+		Trace(CHAN_INFO, "failed to init entity manager");
 		return EFAIL;
 	}
 
@@ -115,12 +115,12 @@ ecode_t Mainloop()
 	}
 
 	if (Ent_Shutdown() != EOK) {
-		Trace(CHAN_GENERAL, "failed to shutdown entity manager");
+		Trace(CHAN_INFO, "failed to shutdown entity manager");
 		return EFAIL;
 	}
 
 	if (Rend_Shutdown() != EOK) {
-		Trace(CHAN_GENERAL, "failed to shutdown renderer");
+		Trace(CHAN_INFO, "failed to shutdown renderer");
 		return EFAIL;
 	}
 
