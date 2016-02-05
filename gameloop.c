@@ -88,7 +88,7 @@ ecode_t Mainloop()
 				CheckDbgKeys(event.key.keysym.sym);
 				In_SetKeyDown((int32_t) event.key.keysym.scancode);
 
-				// TODO: this is for debugging only; remove it
+				// FIXME: this is for debugging only; remove it
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					quit = true;
 				}

@@ -12,6 +12,7 @@ static uint64_t s_Channels = 1;
  * OpenLog
  *	Opens the log file. If it fails we don't care, really.
  */
+static void CloseLog();
 static void OpenLog()
 {
 	if (s_Logfile != NULL)
@@ -23,6 +24,8 @@ static void OpenLog()
 				LOGFILE_NAME);
 		return;
 	}
+
+	atexit(CloseLog);
 }
 
 /*
@@ -88,7 +91,6 @@ void _Trace(
 
 	if (!s_Logfile) {
 		OpenLog();
-		atexit(CloseLog);
 	}
 
 	// struct tm {
@@ -127,7 +129,6 @@ void _Panic(const char *file, long line, const char *func, const char *message)
 
 	if (!s_Logfile) {
 		OpenLog();
-		atexit(CloseLog);
 	}
 
 	fprintf(stderr, "\nPANIC:\n\tin %s (%s:%ld)\n\t%s\n\n",

@@ -78,6 +78,27 @@ static void CheckMemory()
 	}
 }
 
+typedef struct TestStruct {
+	int a;
+	char b;
+} TestStruct;
+
+static void DoTests()
+{
+	MemPool *testPool = Pool_Create(5, sizeof(TestStruct), POOL_DYNGROW, "test-pool");
+	void *ptrs[10] = {NULL};
+
+	for (int i = 0; i < 10; i++) {
+		ptrs[i] = PAlloc(testPool);
+	}
+
+	for (int i = 0; i < 10; i++) {
+		PFree(testPool, ptrs[i]);
+	}
+
+	Pool_Destroy(testPool);
+}
+
 /*
  * main
  *	Initialise everything then jump into the main loop. Clean up
@@ -92,7 +113,8 @@ int main(int argc, char *argv[])
 	InitModules();
 	Random_Init((uint32_t) time(NULL));
 
-	printf("%s version %s\n", g_Config.gameName, g_Config.version);
+	Trace(CHAN_INFO, Fmt("%s version %s", g_Config.gameName, g_Config.version));
+	DoTests();
 
 	if (Mainloop() != EOK)
 		Panic("Failed to enter main loop");
