@@ -113,6 +113,24 @@ uint64_t MemHighWater()
 	return s_HighWater;
 }
 
+#define KB_BYTES 1024
+#define MB_BYTES 1048576
+static uint32_t SaneVal(uint64_t v)
+{
+	if (v < KB_BYTES) return v;
+	if (v >= KB_BYTES && v < MB_BYTES) return v / KB_BYTES;
+	return v / MB_BYTES;
+}
+
+static const char *SaneAff(uint32_t v)
+{
+	if (v < KB_BYTES) return "bytes";
+	if (v >= KB_BYTES && v < MB_BYTES) return "KB";
+	return "MB";
+}
+#undef MB_BYTES
+#undef KB_BYTES
+
 /*
  * MemStats
  *	Output a list of all memory blocks currently being tracked.
@@ -144,17 +162,19 @@ void MemStats()
 		}
 
 		if (same > 0) {
-			Trace(CHAN_MEM, Fmt("  (%d hidden totalling %lu bytes)",
-				same, htotal));
+			Trace(CHAN_MEM, Fmt("  (%d hidden totalling %u %s)",
+				same, SaneVal(htotal), SaneAff(htotal)));
 			same = 0;
 			htotal = 0;
 		}
 
-		Trace(CHAN_MEM, Fmt(" %u bytes from %s:%ld in %s",
-			i->blockSize, i->file, i->line, i->func));
+		Trace(CHAN_MEM, Fmt(" %u %s from %s:%ld in %s",
+			SaneVal(i->blockSize), SaneAff(i->blockSize),
+			i->file, i->line, i->func));
 	}
-	Trace(CHAN_MEM, Fmt("Total: %lu bytes, highest: %lu bytes",
-		s_CurrentUsage, s_HighWater));
+	Trace(CHAN_MEM, Fmt("Total: %u %s, highest: %u %s",
+		SaneVal(s_CurrentUsage), SaneAff(s_CurrentUsage),
+		SaneVal(s_HighWater), SaneAff(s_HighWater)));
 }
 
 uint32_t MemAllocCount()
@@ -201,8 +221,8 @@ void *LAlloc(LAllocState *state, size_t sz)
 
 	if (state->current + sz > state->base + state->blockSize) {
 		size_t left = state->blockSize - (state->current - state->base);
-		Panic(Fmt("Cannot satisfy allocation of %u bytes (%u left)",
-			sz, left));
+		Panic(Fmt("Cannot satisfy allocation of %u %s (%u %s left)",
+			SaneVal(sz), SaneAff(sz), SaneVal(left), SaneAff(left)));
 	}
 
 	void *ptr = state->current;

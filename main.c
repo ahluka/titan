@@ -85,18 +85,18 @@ typedef struct TestStruct {
 
 static void DoTests()
 {
-	MemPool *testPool = Pool_Create(5, sizeof(TestStruct), POOL_DYNGROW, "test-pool");
-	void *ptrs[10] = {NULL};
-
-	for (int i = 0; i < 10; i++) {
-		ptrs[i] = PAlloc(testPool);
-	}
-
-	for (int i = 0; i < 10; i++) {
-		PFree(testPool, ptrs[i]);
-	}
-
-	Pool_Destroy(testPool);
+	// MemPool *testPool = Pool_Create(5, sizeof(TestStruct), POOL_DYNGROW, "test-pool");
+	// void *ptrs[10] = {NULL};
+	//
+	// for (int i = 0; i < 10; i++) {
+	// 	ptrs[i] = PAlloc(testPool);
+	// }
+	//
+	// for (int i = 0; i < 10; i++) {
+	// 	PFree(testPool, ptrs[i]);
+	// }
+	//
+	// Pool_Destroy(testPool);
 }
 
 /*
