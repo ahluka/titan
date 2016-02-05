@@ -85,6 +85,7 @@ typedef struct TestStruct {
 
 static void DoTests()
 {
+	Trace(CHAN_DBG, "in DoTests()");
 	// MemPool *testPool = Pool_Create(5, sizeof(TestStruct), POOL_DYNGROW, "test-pool");
 	// void *ptrs[10] = {NULL};
 	//

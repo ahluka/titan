@@ -1,10 +1,15 @@
 #include "base.h"
 #include "panic.h"
 #include "script.h"
-#include <tcl8.6/tcl.h>
 
 static Tcl_Interp *s_Interp = NULL;
 #define BASEDEFS_FILENAME "./res/tcl/basedefs.tcl"
+
+DECLARE_SCRIPT_PROC(ScriptTests) {
+	Trace(CHAN_SCRIPT, "In ScriptTests()");
+
+	return TCL_OK;
+}
 
 /*
  * Get the result string from the given interpreter and print it out.
@@ -31,6 +36,8 @@ ecode_t Script_Init()
 		Trace(CHAN_SCRIPT, "Failed to create Tcl interpreter");
 		return EFAIL;
 	}
+
+	Script_RegisterCommand(ScriptTests, "scrtests");
 
 	/* Load and run bootstrap script */
 	if (Tcl_EvalFile(s_Interp, BASEDEFS_FILENAME) != TCL_OK) {
@@ -86,6 +93,26 @@ ecode_t Script_ExecFile(FileHandle handle)
 		Trace(CHAN_INFO, Fmt("Failed to eval file '%s'", path));
 		PrintError(s_Interp);
 		return EFAIL;
+	}
+
+	return EOK;
+}
+
+/*
+ * Script_RegisterCommand
+ */
+ecode_t Script_RegisterCommand(ScriptCmdFunc fn, const char *name)
+{
+	assert(fn != NULL);
+	assert(name != NULL);
+
+	if (!s_Interp) {
+		Panic("Script module not initialised");
+	}
+
+	if (Tcl_CreateObjCommand(s_Interp, name, fn, NULL, NULL) == NULL) {
+		Script_Shutdown();
+		Panic(Fmt("Failed to register '%s'", name));
 	}
 
 	return EOK;
