@@ -13,10 +13,10 @@ enum EntUpdateType {
 	UPDATE_SCHED	/* when game time >= Entity.nextUpdate */
 };
 
-struct Entity {
+typedef struct Entity {
 	bool inUse;
 
-	const char *name;
+	const char *class;
 
 	/* Updating */
 	enum EntUpdateType updateType;
@@ -26,12 +26,12 @@ struct Entity {
 	/* Rendering */
 	ecode_t (*Render)(struct Entity *self);
 
-};
+} Entity;
 
 ecode_t Ent_Init();
 ecode_t Ent_Shutdown();
 
-struct Entity *Ent_New();
-ecode_t Ent_Free(struct Entity *ent);
+Entity *Ent_New();
+ecode_t Ent_Free(Entity *ent);
 
 ecode_t Ent_UpdateAll(float dT);

@@ -8,6 +8,7 @@
 #include "cmds.h"
 #include "script.h"
 #include "memory.h"
+#include "event.h"
 #include <time.h>
 
 #define CONFIG_FILENAME "config.ini"
@@ -33,6 +34,9 @@ static void InitModules()
 
 	if (Script_Init() != EOK)
 		Panic("Failed to init script system");
+
+	if (Evt_Init() != EOK)
+		Panic("Failed to init event system");
 }
 
 /*
@@ -43,6 +47,9 @@ static void InitModules()
  */
 static void ShutdownModules()
 {
+	if (Evt_Shutdown() != EOK)
+		Panic("Failed to shutdown event system");
+
 	if (Script_Shutdown() != EOK)
 		Panic("Failed to shutdown script system");
 
@@ -85,7 +92,9 @@ typedef struct TestStruct {
 
 static void DoTests()
 {
-	Trace(CHAN_DBG, "in DoTests()");
+	Event *evt = Evt_Create("test-event", EVENT_BROADCAST | EVENT_QUEUED);
+	Evt_Enqueue(evt);
+
 	// MemPool *testPool = Pool_Create(5, sizeof(TestStruct), POOL_DYNGROW, "test-pool");
 	// void *ptrs[10] = {NULL};
 	//

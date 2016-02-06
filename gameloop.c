@@ -11,6 +11,7 @@
 #include "entity.h"
 #include "cmds.h"
 #include "input.h"
+#include "event.h"
 #include <SDL2/SDL.h>
 
 /*
@@ -46,8 +47,13 @@ static void CheckDbgKeys(SDL_Keycode code)
  */
 static void UpdateGameworld(float dT)
 {
-	if (Ent_UpdateAll(dT) != EOK)
+	if (Ent_UpdateAll(dT) != EOK) {
 		Panic("Failed to update Entities");
+	}
+
+	if (Evt_Process() != EOK) {
+		Panic("Failed to process events");
+	}
 }
 
 /*

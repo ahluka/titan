@@ -4,6 +4,11 @@
 #include "panic.h"
 #include "globals.h"
 
+/* Not using a MemPool here because we need to iterate over the entities
+ * all the time. I *could* use a MemPool, but I'd have to either A) change
+ * the MemPool API to include iteration, or B) keep an array of pointers
+ * like this anyway / be redundant.
+ */
 #define MAX_ENTITIES	32
 static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
 
@@ -15,7 +20,7 @@ static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
 ecode_t Ent_Init()
 {
 	if (s_Entities[0] != NULL) {
-		Trace(CHAN_INFO, "already called");
+		Trace(CHAN_INFO, "Entity manager already initialised");
 		return EFAIL;
 	}
 
@@ -24,7 +29,7 @@ ecode_t Ent_Init()
 		s_Entities[i]->inUse = false;
 	}
 
-	Trace(CHAN_DBG, Fmt("allocated entity pool size %d", MAX_ENTITIES));
+	Trace(CHAN_DBG, Fmt("Allocated entity pool size %d", MAX_ENTITIES));
 
 	return EOK;
 }
@@ -36,7 +41,7 @@ ecode_t Ent_Init()
 ecode_t Ent_Shutdown()
 {
 	if (s_Entities[0] == NULL) {
-		Trace(CHAN_INFO, "already called or Ent_Init not called");
+		Trace(CHAN_INFO, "Already called or Ent_Init not called");
 		return EFAIL;
 	}
 
@@ -46,7 +51,7 @@ ecode_t Ent_Shutdown()
 		s_Entities[i] = NULL;
 	}
 
-	Trace(CHAN_DBG, Fmt("freed %d entities", MAX_ENTITIES));
+	Trace(CHAN_DBG, Fmt("Freed %d entities", MAX_ENTITIES));
 
 	return EOK;
 }
@@ -79,7 +84,7 @@ static void DefaultEntity(struct Entity *ent)
 {
 	assert(ent != NULL);
 
-	ent->name = "(unnamed)";
+	ent->class = "(invalid)";
 
 	ent->updateType = UPDATE_FRAME;
 	ent->nextUpdate = 0;
@@ -93,7 +98,7 @@ static void DefaultEntity(struct Entity *ent)
  *	Return a pointer to the first unused Entity in the pool.
  *	If we don't find one, Panic().
  */
-struct Entity *Ent_New()
+Entity *Ent_New()
 {
 	if (s_Entities[0] == NULL) {
 		Panic("Entity pool not initialised");
@@ -101,7 +106,7 @@ struct Entity *Ent_New()
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (!s_Entities[i]->inUse) {
-			Trace(CHAN_DBG, Fmt("entity slot %d selected", i));
+			Trace(CHAN_DBG, Fmt("Entity slot %d selected", i));
 
 			DefaultEntity(s_Entities[i]);
 			s_Entities[i]->inUse = true;
@@ -116,7 +121,7 @@ struct Entity *Ent_New()
 /*
  * Ent_Free
  */
-ecode_t Ent_Free(struct Entity *ent)
+ecode_t Ent_Free(Entity *ent)
 {
 	assert(ent != NULL);
 
@@ -145,13 +150,13 @@ ecode_t Ent_Free(struct Entity *ent)
  * Ent_UpdateAll
  *	Update all in-use Entities in the pool.
  */
-static ecode_t UpdateEntity(struct Entity *ent, float dT)
+static ecode_t UpdateEntity(Entity *ent, float dT)
 {
 	switch (ent->updateType) {
 	case UPDATE_FRAME:
 		if (ent->Update(ent, dT) != EOK) {
 			Trace(CHAN_GAME,
-				Fmt("entity '%s' failed to update", ent->name));
+				Fmt("entity '%s' failed to update", ent->class));
 			return EFAIL;
 		}
 
@@ -161,7 +166,7 @@ static ecode_t UpdateEntity(struct Entity *ent, float dT)
 			if (ent->Update(ent, dT) != EOK) {
 				Trace(CHAN_GAME,
 					Fmt("entity '%s' failed to update",
-					ent->name));
+					ent->class));
 				return EFAIL;
 			}
 		}
@@ -180,7 +185,7 @@ ecode_t Ent_UpdateAll(float dT)
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
-		struct Entity *ent = s_Entities[i];
+		Entity *ent = s_Entities[i];
 
 		if (!ent->inUse)
 			continue;

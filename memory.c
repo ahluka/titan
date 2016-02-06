@@ -134,13 +134,12 @@ static const char *SaneAff(uint32_t v)
 /*
  * MemStats
  *	Output a list of all memory blocks currently being tracked.
- * TODO: Sane output of values; 4096 bytes -> 4 KB, etc.
  */
 static bool SameAlloc(MemTag *tag, MemTag *prev)
 {
 	if (strcmp(tag->file, prev->file) == 0 &&
 		strcmp(tag->func, prev->func) == 0 &&
-		tag->line == prev->line &&
+		/*tag->line == prev->line &&*/
 		tag->blockSize == prev->blockSize) {
 		return true;
 	}
