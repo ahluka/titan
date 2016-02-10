@@ -8,8 +8,8 @@
  * ("queued events"), and one for events that are timestamped ("future events").
  */
 #define MAX_QUEUED_EVENTS 64
-static Event *s_QueuedEvents[MAX_QUEUED_EVENTS] = {NULL};
-static Event *s_FutureEvents[MAX_QUEUED_EVENTS] = {NULL};
+UNUSED static Event *s_QueuedEvents[MAX_QUEUED_EVENTS] = {NULL};
+UNUSED static Event *s_FutureEvents[MAX_QUEUED_EVENTS] = {NULL};
 static MemPool *s_EventPool = NULL;
 
 /*
@@ -18,7 +18,7 @@ static MemPool *s_EventPool = NULL;
  */
 static bool ValidFlags(uint32_t flags)
 {
-	if ((flags * EVENT_QUEUED) && (flags & EVENT_FUTURE)) {
+	if ((flags & EVENT_QUEUED) && (flags & EVENT_FUTURE)) {
 		return false;
 	}
 

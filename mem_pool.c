@@ -81,7 +81,7 @@ static void DebugPool(MemPool *pool)
 	for (struct PoolNode *i = pool->freeBlocks; i; i = i->next, f++)
 		;
 
-	Trace(CHAN_DBG, Fmt("%s - USED: %u, FREE: %u", pool->debugName, u, f));
+	Trace(CHAN_DBG, Fmt("'%s' - USED: %u, FREE: %u", pool->debugName, u, f));
 }
 
 /*

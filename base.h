@@ -17,6 +17,8 @@
 /* Place a breakpoint / trap instruction for debugging. */
 #define BREAKPOINT do { __asm__("int $0x3"); } while (0)
 
+#define UNUSED __attribute__((unused))
+
 /* Error codes
  *
  * Functions that might fail and are NOT predicates should return an ecode_t
