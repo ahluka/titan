@@ -47,6 +47,9 @@ static void CloseLog()
 void SetTraceChannels(int mask)
 {
 	s_Channels = mask;
+#ifdef NDEBUG
+        s_Channels &= ~CHAN_DBG;
+#endif
 }
 
 /*
@@ -106,7 +109,16 @@ void _Trace(
 	// };
 	time_t t = time(NULL);
 	struct tm *curTime = localtime(&t);
-	// TODO: Don't output file and line in release, maybe func too
+
+#ifdef NDEBUG
+        const char *fmt = "[%d:%d:%d %s] %s\n";
+
+        printf(fmt, curTime->tm_hour, curTime->tm_min, curTime->tm_sec,
+                ChannelToStr(channel), message);
+
+        fprintf(s_Logfile, fmt, curTime->tm_hour, curTime->tm_min,
+		curTime->tm_sec, ChannelToStr(channel), message);
+#else
 	const char *fmt = "[%d:%d:%d %s] (%s:%ld) %s: %s\n";
 
 	printf(fmt, curTime->tm_hour, curTime->tm_min, curTime->tm_sec,
@@ -115,6 +127,7 @@ void _Trace(
 	fprintf(s_Logfile, fmt, curTime->tm_hour, curTime->tm_min,
 		curTime->tm_sec, ChannelToStr(channel), file, line,
 		func, message);
+#endif /* NDEBUG */
 	//fflush(s_Logfile);
 }
 

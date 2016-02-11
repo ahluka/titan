@@ -10,8 +10,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 // TODO: Uncomment this for release
-//#define NDEBUG
+// #define NDEBUG
 #include <assert.h>
 
 /* Place a breakpoint / trap instruction for debugging. */

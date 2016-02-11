@@ -60,6 +60,16 @@ ecode_t Ent_Shutdown()
 	return EOK;
 }
 
+// TODO: move make_lowercase?
+static void make_lowercase(char *str)
+{
+        while (*str) {
+                *str = tolower(*str);
+                str++;
+        }
+}
+
+// TODO: use sections?
 static int
 handle_prop(void *usr, const char *sec, const char *key, const char *val)
 {
@@ -68,7 +78,9 @@ handle_prop(void *usr, const char *sec, const char *key, const char *val)
         struct property_tbl *prop_tbl = usr;
         struct property *prop = MemAlloc(sizeof(*prop));
         prop->key = sstrdup(key);
+        make_lowercase(prop->key);
         prop->val = sstrdup(val);
+        make_lowercase(prop->val);
         list_add(&prop->list, &prop_tbl->props);
         prop_tbl->size++;
 
@@ -85,11 +97,8 @@ static void load_properties(Entity *ent, const char *entfile)
         if (ini_parse(entfile, handle_prop, &ent->properties) < 0) {
                 Panic(Fmt("Failed to parse entity defintion '%s'", entfile));
         }
-}
 
-static void default_properties(struct Entity *ent)
-{
-        load_properties(ent, DEFAULT_ENTDEF_FILE);
+        Trace(CHAN_DBG, Fmt("loaded %u properties", ent->properties.size));
 }
 
 static void free_property_table(struct property_tbl *ptbl)
@@ -138,29 +147,6 @@ static void set_basic_fields(Entity *ent)
         ent->Render = EntityDefaultRender;
 
         INIT_LIST_HEAD(&ent->properties.props);
-}
-
-static void DefaultEntity(struct Entity *ent)
-{
-	assert(ent != NULL);
-
-        set_basic_fields(ent);
-        default_properties(ent);
-
-        /* class and name should now be in the property table. We don't care
-         * about name, but we Panic() if class isnt' defined.
-         */
-        ent->name = Ent_GetProperty(ent, "name");
-        if (!ent->name)
-                ent->name = "unnamed";
-
-        ent->class = Ent_GetProperty(ent, "class");
-        if (!ent->class)
-                Panic(Fmt("No class defined for entity '%s'", ent->name));
-
-
-        Trace(CHAN_DBG, Fmt("Loaded %u properties for '%s'",
-                        ent->properties.size, ent->name));
 }
 
 /*
@@ -225,19 +211,19 @@ Entity *Ent_Spawn(const char *class)
 
         Entity *ent = Ent_New();
 
-        if (strcmp(class, "default") == 0) {
-                DefaultEntity(ent);
-                return ent;
-        }
-
         set_basic_fields(ent);
 
         char *root = sstrcat(Files_GetRoot(), "ent/");
         char *full = sstrfname(root, class, ".ent");
         load_properties(ent, full);
+
+        ent->class = Ent_GetProperty(ent, "class");
+        if (!ent->class) {
+                Panic(Fmt("no class defined in %s", full));
+        }
+
         sstrfree(full);
         sstrfree(root);
-
         return ent;
 }
 

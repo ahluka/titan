@@ -94,6 +94,9 @@ static void DestroyFile(struct File *f)
 void Files_ListOpen(int argc, char **argv);
 ecode_t Files_Init(const char *rootDir)
 {
+        if (rootDir[strlen(rootDir)-1] != '/')
+                Panic("root directory must end with /");
+
 	Trace(CHAN_DBG, Fmt("setting root directory to %s", rootDir));
 	s_FilesRoot = rootDir;
 

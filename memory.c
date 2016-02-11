@@ -134,6 +134,7 @@ static const char *SaneAff(uint32_t v)
 /*
  * MemStats
  *	Output a list of all memory blocks currently being tracked.
+ *      Repeated lines of output are hidden, some get filtered entirely.
  */
 static bool SameAlloc(MemTag *tag, MemTag *prev)
 {
@@ -148,11 +149,12 @@ static bool SameAlloc(MemTag *tag, MemTag *prev)
 }
 
 /* Just a hack to make the debug output a bit more pleasant. */
+static const char *filt[] = {"mem_pool.c"};
+static int nfilt = sizeof(filt) / sizeof(filt[0]);
+
 static bool is_filtered(const char *module)
 {
-        const char *filt[] = {"mem_pool.c"};
-        int count = sizeof(filt) / sizeof(filt[0]);
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < nfilt; i++) {
                 if (strcmp(module, filt[i]) == 0)
                         return true;
         }
@@ -193,7 +195,10 @@ void MemStats()
 	Trace(CHAN_MEM, Fmt("Total: %u %s, highest: %u %s",
 		SaneVal(s_CurrentUsage), SaneAff(s_CurrentUsage),
 		SaneVal(s_HighWater), SaneAff(s_HighWater)));
-        Trace(CHAN_MEM, Fmt("(%lu filtered)", filtered));
+        Trace(CHAN_MEM, Fmt("(%lu filtered) from:", filtered));
+        for (int i = 0; i < nfilt; i++) {
+                Trace(CHAN_MEM, Fmt("\t%s", filt[i]));
+        }
 }
 
 uint32_t MemAllocCount()

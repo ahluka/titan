@@ -83,13 +83,13 @@ ecode_t Mainloop()
 		return EFAIL;
 	}
 
-        Entity *test = Ent_Spawn("default");
-
+        // Entity *test = Ent_Spawn("default");
+        //
         // struct property *prop = NULL;
         // list_for_each_entry(prop, &test->properties.props, list) {
         //         Trace(CHAN_DBG, Fmt("%s=%s", prop->key, prop->val));
         // }
-        Ent_Free(test);
+        // Ent_Free(test);
 
 	while (!quit) {
 		/* input */
