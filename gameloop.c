@@ -83,13 +83,15 @@ ecode_t Mainloop()
 		return EFAIL;
 	}
 
-        // Entity *test = Ent_Spawn("default");
-        //
+        Entity *test = Ent_Spawn("default");
+
+        Trace(CHAN_DBG, Fmt("pos: %.3f, %.3f", test->pos[X], test->pos[Y]));
+        Trace(CHAN_DBG, Fmt("vel: %.3f, %.3f", test->vel[X], test->vel[Y]));
         // struct property *prop = NULL;
         // list_for_each_entry(prop, &test->properties.props, list) {
         //         Trace(CHAN_DBG, Fmt("%s=%s", prop->key, prop->val));
         // }
-        // Ent_Free(test);
+        Ent_Free(test);
 
 	while (!quit) {
 		/* input */

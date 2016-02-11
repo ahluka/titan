@@ -6,8 +6,6 @@
 #pragma once
 #include "mem_pool.h"
 
-// TODO: MemStats for LAlloc, just track active LAllocState blocks
-
 #define MemAlloc(sz) _MemAlloc(sz, __FILE__, __LINE__, __func__)
 #define MemFree(ptr) _MemFree(ptr)
 

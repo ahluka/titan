@@ -87,6 +87,10 @@ handle_prop(void *usr, const char *sec, const char *key, const char *val)
         return 1;
 }
 
+/*
+ * load_properties
+ *      Load and parse the specified entity definition file.
+ */
 static void load_properties(Entity *ent, const char *entfile)
 {
         assert(ent != NULL);
@@ -101,6 +105,9 @@ static void load_properties(Entity *ent, const char *entfile)
         Trace(CHAN_DBG, Fmt("loaded %u properties", ent->properties.size));
 }
 
+/*
+ * free_property_table
+ */
 static void free_property_table(struct property_tbl *ptbl)
 {
         assert(ptbl != NULL);
@@ -203,6 +210,33 @@ ecode_t Ent_Free(Entity *ent)
 }
 
 /*
+ * parse_loaded_properties
+ */
+static void parse_loaded_properties(Entity *ent, const char *entfile)
+{
+        /* Must have a class specified, set name to 'unnamed' if it wasn't */
+        ent->class = Ent_GetProperty(ent, "class");
+        if (!ent->class) {
+                Panic(Fmt("no class defined in %s", entfile));
+        }
+
+        ent->name = Ent_GetProperty(ent, "name");
+        if (!ent->name)
+        ent->name = "unnamed";
+
+        /* If an initial position and velocity were specified, parse them */
+        const char *pos = Ent_GetProperty(ent, "pos");
+        const char *vel = Ent_GetProperty(ent, "vel");
+        if (pos) {
+                VParseStr(pos, ent->pos);
+        }
+
+        if (vel) {
+                VParseStr(vel, ent->vel);
+        }
+}
+
+/*
  * Ent_Spawn
  */
 Entity *Ent_Spawn(const char *class)
@@ -210,17 +244,12 @@ Entity *Ent_Spawn(const char *class)
         assert(class != NULL);
 
         Entity *ent = Ent_New();
-
         set_basic_fields(ent);
 
         char *root = sstrcat(Files_GetRoot(), "ent/");
         char *full = sstrfname(root, class, ".ent");
         load_properties(ent, full);
-
-        ent->class = Ent_GetProperty(ent, "class");
-        if (!ent->class) {
-                Panic(Fmt("no class defined in %s", full));
-        }
+        parse_loaded_properties(ent, full);
 
         sstrfree(full);
         sstrfree(root);

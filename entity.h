@@ -1,5 +1,6 @@
 #pragma once
 #include "list.h"
+#include "vec.h"
 
 struct property {
         char *key, *val;
@@ -31,6 +32,13 @@ typedef struct Entity {
 	const char *class;
         const char *name;
         struct property_tbl properties;
+
+        /* Position and velocity
+         * These will be in the property table too, but those are only used
+         * as initial values.
+         */
+        vec2_t pos;
+        vec2_t vel;
 
 	/* Updating */
 	enum EntUpdateType updateType;
