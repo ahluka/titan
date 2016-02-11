@@ -3,6 +3,8 @@
 #include "memory.h"
 #include "panic.h"
 #include "globals.h"
+#include "ini.h"
+#include "files.h"
 
 /* Not using a MemPool here because we need to iterate over the entities
  * all the time. I *could* use a MemPool, but I'd have to either A) change
@@ -11,6 +13,8 @@
  */
 #define MAX_ENTITIES	32
 static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
+
+#define DEFAULT_ENTDEF_FILE "./res/ent/default.ent"
 
 /*
  * Ent_Init
@@ -56,6 +60,51 @@ ecode_t Ent_Shutdown()
 	return EOK;
 }
 
+static int
+handle_prop(void *usr, const char *sec, const char *key, const char *val)
+{
+        //Trace(CHAN_DBG, Fmt("[%s] %s=%s", sec, key, val));
+
+        struct property_tbl *prop_tbl = usr;
+        struct property *prop = MemAlloc(sizeof(*prop));
+        prop->key = sstrdup(key);
+        prop->val = sstrdup(val);
+        list_add(&prop->list, &prop_tbl->props);
+        prop_tbl->size++;
+
+        return 1;
+}
+
+static void load_properties(Entity *ent, const char *entfile)
+{
+        assert(ent != NULL);
+        assert(entfile != NULL);
+
+        Trace(CHAN_DBG, Fmt("loading %s", entfile));
+
+        if (ini_parse(entfile, handle_prop, &ent->properties) < 0) {
+                Panic(Fmt("Failed to parse entity defintion '%s'", entfile));
+        }
+}
+
+static void default_properties(struct Entity *ent)
+{
+        load_properties(ent, DEFAULT_ENTDEF_FILE);
+}
+
+static void free_property_table(struct property_tbl *ptbl)
+{
+        assert(ptbl != NULL);
+
+        struct property *i, *tmp;
+        list_for_each_entry_safe(i, tmp, &ptbl->props, list) {
+                sstrfree(i->key);
+                sstrfree(i->val);
+                list_del(&i->list);
+                MemFree(i);
+        }
+}
+
 /*
  * DefaultEntity
  *	Set all fields in the given Entity to their default values.
@@ -80,17 +129,38 @@ ecode_t EntityDefaultRender(struct Entity *self)
 	return EOK;
 }
 
+static void set_basic_fields(Entity *ent)
+{
+        ent->updateType = UPDATE_FRAME;
+        ent->nextUpdate = 0;
+        ent->Update = EntityDefaultUpdate;
+
+        ent->Render = EntityDefaultRender;
+
+        INIT_LIST_HEAD(&ent->properties.props);
+}
+
 static void DefaultEntity(struct Entity *ent)
 {
 	assert(ent != NULL);
 
-	ent->class = "(invalid)";
+        set_basic_fields(ent);
+        default_properties(ent);
 
-	ent->updateType = UPDATE_FRAME;
-	ent->nextUpdate = 0;
-	ent->Update = EntityDefaultUpdate;
+        /* class and name should now be in the property table. We don't care
+         * about name, but we Panic() if class isnt' defined.
+         */
+        ent->name = Ent_GetProperty(ent, "name");
+        if (!ent->name)
+                ent->name = "unnamed";
 
-	ent->Render = EntityDefaultRender;
+        ent->class = Ent_GetProperty(ent, "class");
+        if (!ent->class)
+                Panic(Fmt("No class defined for entity '%s'", ent->name));
+
+
+        Trace(CHAN_DBG, Fmt("Loaded %u properties for '%s'",
+                        ent->properties.size, ent->name));
 }
 
 /*
@@ -108,7 +178,6 @@ Entity *Ent_New()
 		if (!s_Entities[i]->inUse) {
 			Trace(CHAN_DBG, Fmt("Entity slot %d selected", i));
 
-			DefaultEntity(s_Entities[i]);
 			s_Entities[i]->inUse = true;
 			return s_Entities[i];
 		}
@@ -137,13 +206,60 @@ ecode_t Ent_Free(Entity *ent)
 				Fmt("marking entity in slot %d as free", i));
 
 			s_Entities[i]->inUse = false;
-			DefaultEntity(s_Entities[i]);
+                        free_property_table(&s_Entities[i]->properties);
+
 			return EOK;
 		}
 	}
 
 	Panic("Invalid Entity pointer");
 	return EFAIL; /* not reached */
+}
+
+/*
+ * Ent_Spawn
+ */
+Entity *Ent_Spawn(const char *class)
+{
+        assert(class != NULL);
+
+        Entity *ent = Ent_New();
+
+        if (strcmp(class, "default") == 0) {
+                DefaultEntity(ent);
+                return ent;
+        }
+
+        set_basic_fields(ent);
+
+        char *root = sstrcat(Files_GetRoot(), "ent/");
+        char *full = sstrfname(root, class, ".ent");
+        load_properties(ent, full);
+        sstrfree(full);
+        sstrfree(root);
+
+        return ent;
+}
+
+
+/*
+ * Ent_GetProperty
+ */
+const char *Ent_GetProperty(Entity *ent, const char *key)
+{
+        assert(ent != NULL);
+        assert(key != NULL);
+
+        struct property *i = NULL;
+        list_for_each_entry(i, &ent->properties.props, list) {
+                if (strcmp(i->key, key) == 0) {
+                        return i->val;
+                }
+        }
+
+        Trace(CHAN_GAME, Fmt("Warning: entity has no property '%s'", key));
+
+        return NULL;
 }
 
 /*

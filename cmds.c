@@ -139,7 +139,7 @@ static int CountArgs(const char *buffer)
  *	parse and execute it. Commands are of the form:
  *		cmd arg1 arg2 ... argN
  *
- * NOTE: This uses strdup() instead of StrDup() to avoid filling the global
+ * NOTE: This uses strdup() instead of sstrdup() to avoid filling the global
  * string pool with user-typed commands.
  */
 ecode_t Cmd_ExecuteBuf(char *buffer)

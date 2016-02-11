@@ -147,13 +147,32 @@ static bool SameAlloc(MemTag *tag, MemTag *prev)
 	return false;
 }
 
+/* Just a hack to make the debug output a bit more pleasant. */
+static bool is_filtered(const char *module)
+{
+        const char *filt[] = {"mem_pool.c"};
+        int count = sizeof(filt) / sizeof(filt[0]);
+        for (int i = 0; i < count; i++) {
+                if (strcmp(module, filt[i]) == 0)
+                        return true;
+        }
+
+        return false;
+}
+
 void MemStats()
 {
 	int same = 0;
 	uint64_t htotal = 0;
+        uint64_t filtered = 0;
 
 	Trace(CHAN_MEM, "Memory blocks being tracked:");
 	for (MemTag *i = s_Tags, *prev = i; i; prev = i, i = i->next) {
+                if (is_filtered(i->file)) {
+                        filtered++;
+                        continue;
+                }
+
 		if (i != s_Tags && SameAlloc(i, prev)) {
 			same++;
 			htotal += i->blockSize;
@@ -174,6 +193,7 @@ void MemStats()
 	Trace(CHAN_MEM, Fmt("Total: %u %s, highest: %u %s",
 		SaneVal(s_CurrentUsage), SaneAff(s_CurrentUsage),
 		SaneVal(s_HighWater), SaneAff(s_HighWater)));
+        Trace(CHAN_MEM, Fmt("(%lu filtered)", filtered));
 }
 
 uint32_t MemAllocCount()

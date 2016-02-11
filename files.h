@@ -27,3 +27,5 @@ size_t Files_GetSize(FileHandle handle);
 
 /* Get a pointer to the file's full path */
 const char *Files_GetPath(FileHandle handle);
+
+const char *Files_GetRoot();

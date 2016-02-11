@@ -29,23 +29,9 @@ static FileHandle s_NextHandle = 1;
 /* All file access are relative to here */
 static const char *s_FilesRoot = NULL;
 
-/*
- * GetFullPath
- *	Given a relative path, return s_FilesRoot + relPath.
- *	The returned pointer must be freed by the caller.
- */
-static char *GetFullPath(const char *relPath)
+const char *Files_GetRoot()
 {
-	assert(relPath != NULL);
-
-	size_t szRoot = strlen(s_FilesRoot);
-	size_t szRel = strlen(relPath);
-	char *fullPath = MemAlloc(szRoot + szRel + 1);
-
-	strncpy(fullPath, s_FilesRoot, szRoot);
-	strncpy(fullPath + szRoot, relPath, szRel);
-
-	return fullPath;
+        return s_FilesRoot;
 }
 
 /*
@@ -96,7 +82,7 @@ static void DestroyFile(struct File *f)
 	MemFree(f->data);
 	f->data = NULL;
 	f->size = 0;
-	MemFree(f->path);
+	sstrfree(f->path);
 	f->path = NULL;
 
 	f->inUse = false;
@@ -170,7 +156,7 @@ FileHandle Files_OpenFile(const char *filename)
 {
 	assert(filename != NULL);
 
-	char *fullPath = GetFullPath(filename);
+	char *fullPath = sstrcat(s_FilesRoot, filename);
 	struct File *file = NextFreeFile();
 
 	file->path = fullPath;

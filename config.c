@@ -22,15 +22,15 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 	Trace(CHAN_DBG, Fmt("handling [%s] %s=%s", sec, key, val));
 
 	if (MATCH("general", "Game")) {
-		g_Config.gameName = StrDup(val);
+		g_Config.gameName = sstrdup(val);
 	} else if (MATCH("general", "Version")) {
-		g_Config.version = StrDup(val);
+		g_Config.version = sstrdup(val);
 	} else if (MATCH("renderer", "WindowWidth")) {
 		g_Config.windowWidth = atoi(val);
 	} else if (MATCH("renderer", "WindowHeight")) {
 		g_Config.windowHeight = atoi(val);
 	} else if (MATCH("filesystem", "FilesRoot")) {
-		g_Config.filesRoot = StrDup(val);
+		g_Config.filesRoot = sstrdup(val);
 	}
 
 	return 1;
@@ -65,6 +65,10 @@ ecode_t Config_Save(const char *filename)
 {
 	assert(filename != NULL);
 	// TODO: Write it
+
+        sstrfree(g_Config.gameName);
+        sstrfree(g_Config.version);
+        sstrfree(g_Config.filesRoot);
 
 	return EOK;
 }

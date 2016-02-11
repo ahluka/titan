@@ -255,7 +255,7 @@
 // 	size_t ofs = 0;
 //
 // 	while (sscanf(txt + ofs, "%s\n", word) != EOF) {
-// 		HT_Add(table, StrDup(word), NULL);
+// 		HT_Add(table, sstrdup(word), NULL);
 // 		ofs += strlen(word) + 1; /* +1 for the newline */
 // 	}
 //

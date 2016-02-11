@@ -2,9 +2,6 @@
 #include "memory.h"
 #include <stdarg.h>
 
-/* StrDup() allocates its memory from this linear allocator. */
-#define STRINGS_BUDGET 1024 * 512
-static LAllocState *s_Strings = NULL;
 
 /*
  * Fmt
@@ -27,23 +24,12 @@ const char *Fmt(const char *format, ...)
 }
 
 /*
- * StrDup
- */
-char *StrDup(const char *str)
-{
-	char *ret = LAlloc(s_Strings, strlen(str) + 1);
-	strncpy(ret, str, strlen(str));
-	return ret;
-}
-
-/*
  * InitBase
  */
 ecode_t InitBase()
 {
-	if (!s_Strings) {
-		s_Strings = LAlloc_Create(STRINGS_BUDGET);
-	}
+        if (sstr_init() != EOK)
+                return EFAIL;
 
 	return EOK;
 }
@@ -53,10 +39,8 @@ ecode_t InitBase()
  */
 ecode_t ShutdownBase()
 {
-	if (s_Strings != NULL) {
-		LAlloc_Destroy(s_Strings);
-		s_Strings = NULL;
-	}
+        if (sstr_shutdown() != EOK)
+                return EFAIL;
 
 	return EOK;
 }

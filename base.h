@@ -34,16 +34,10 @@ typedef int ecode_t;
  */
 const char *Fmt(const char *format, ...);
 
-/* Own implementation of strdup() that allocates from the global string
- * pool.
- * NOTE: Unlike with strdup() from the standard library, you DO NOT free
- * the pointers returned by this function. They're freed all at once when
- * the base layer shuts down.
- */
-char *StrDup(const char *str);
 
 ecode_t InitBase();
 ecode_t ShutdownBase();
 
+#include "sstr.h"
 
 #endif /* __BASE_H__ */

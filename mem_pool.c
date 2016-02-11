@@ -1,15 +1,16 @@
 #include "base.h"
 #include "memory.h"
 #include "panic.h"
+#include "list.h"
 
 struct PoolNode {
-	struct PoolNode *next;
+	struct list_head list;
 	void *block;
 };
 
 struct MemPool {
-	struct PoolNode *freeBlocks;
-	struct PoolNode *usedBlocks;
+	struct list_head freeBlocks;
+	struct list_head usedBlocks;
 	size_t blockSize;
 	size_t blockCount;
 	PoolPolicy policy;
@@ -36,8 +37,7 @@ static void AddFreeNodes(MemPool *pool, size_t count, size_t sz)
 
 	for (size_t i = 0; i < count; i++) {
 		struct PoolNode *node = NewPoolNode(sz);
-		node->next = pool->freeBlocks;
-		pool->freeBlocks = node;
+                list_add(&node->list, &pool->freeBlocks);
 	}
 
 	pool->blockCount += count;
@@ -52,7 +52,7 @@ static void AddFreeNodes(MemPool *pool, size_t count, size_t sz)
  */
 static void *NextFreeBlock(MemPool *pool)
 {
-	if (pool->freeBlocks == NULL) {
+	if (list_empty(&pool->freeBlocks)) {
 		if (pool->policy == POOL_FIXEDSIZE) {
 			Panic(Fmt("'%s' is empty", pool->debugName));
 		} else {
@@ -61,25 +61,30 @@ static void *NextFreeBlock(MemPool *pool)
 		}
 	}
 
-	struct PoolNode *ret = pool->freeBlocks;
-	pool->freeBlocks = pool->freeBlocks->next;
+        struct list_head *i, *safe;
+        struct PoolNode *ret = NULL;
+        list_for_each_safe(i, safe, &pool->freeBlocks) {
+                ret = list_entry(i, struct PoolNode, list);
+                list_move(i, &pool->usedBlocks);
+                break;
+        }
 
-	ret->next = pool->usedBlocks;
-	pool->usedBlocks = ret;
-
-	return ret->block;
+        return ret->block;
 }
 
 // FIXME: This can be removed eventually
-static void DebugPool(MemPool *pool)
+UNUSED static void DebugPool(MemPool *pool)
 {
 	size_t u = 0, f = 0;
 
-	for (struct PoolNode *i = pool->usedBlocks; i; i = i->next, u++)
-		;
+        struct list_head *i = NULL;
+        list_for_each(i, &pool->freeBlocks) {
+                f++;
+        }
 
-	for (struct PoolNode *i = pool->freeBlocks; i; i = i->next, f++)
-		;
+        list_for_each(i, &pool->usedBlocks) {
+                u++;
+        }
 
 	Trace(CHAN_DBG, Fmt("'%s' - USED: %u, FREE: %u", pool->debugName, u, f));
 }
@@ -100,7 +105,11 @@ MemPool *Pool_Create(size_t blockCount,
 	pool->policy = policy;
 	pool->debugName = debugName;
 
+        INIT_LIST_HEAD(&pool->freeBlocks);
+        INIT_LIST_HEAD(&pool->usedBlocks);
+
 	AddFreeNodes(pool, blockCount, blockSize);
+        // DebugPool(pool);
 
 	Trace(CHAN_DBG, Fmt("Pool '%s' %u x %u bytes", debugName,
 		blockCount, blockSize));
@@ -115,23 +124,18 @@ void Pool_Destroy(MemPool *pool)
 {
 	assert(pool != NULL);
 
-	struct PoolNode *i = pool->usedBlocks;
-	struct PoolNode *dead = NULL;
+        Trace(CHAN_DBG, Fmt("pool '%s'", pool->debugName));
 
-	while (i) {
-		dead = i;
-		i = i->next;
-		MemFree(dead->block);
-		MemFree(dead);
-	}
+        struct PoolNode *i, *safe;
+        list_for_each_entry_safe(i, safe, &pool->usedBlocks, list) {
+                MemFree(i->block);
+                MemFree(i);
+        }
 
-	i = pool->freeBlocks;
-	while (i) {
-		dead = i;
-		i = i->next;
-		MemFree(dead->block);
-		MemFree(dead);
-	}
+        list_for_each_entry_safe(i, safe, &pool->freeBlocks, list) {
+                MemFree(i->block);
+                MemFree(i);
+        }
 
 	MemFree(pool);
 }
@@ -144,7 +148,7 @@ void *PAlloc(MemPool *pool)
 	assert(pool != NULL);
 
 	void *ret = NextFreeBlock(pool);
-	DebugPool(pool);
+	// DebugPool(pool);
 	return ret;
 }
 
@@ -156,23 +160,16 @@ void PFree(MemPool *pool, void *block)
 	assert(pool != NULL);
 	assert(block != NULL);
 
-	/* Is this block ours to free? */
-	for (struct PoolNode *i = pool->usedBlocks, *prev = i;
-		i; prev = i, i = i->next) {
-		if (i->block == block) {
-			/* Yes; move it onto the pool's free list. */
-			if (i == pool->usedBlocks) {
-				pool->usedBlocks = NULL;
-			} else {
-				prev->next = i->next;
-			}
+        struct list_head *i, *safe;
+        list_for_each_safe(i, safe, &pool->usedBlocks) {
+                struct PoolNode *n = list_entry(i, struct PoolNode, list);
 
-			i->next = pool->freeBlocks;
-			pool->freeBlocks = i;
-			return;
-		}
-	}
+                if (n->block == block) {
+                        list_move(i, &pool->freeBlocks);
+                        // DebugPool(pool);
+                        return;
+                }
+        }
 
-	/* No; shit ourselves. */
 	Panic("Invalid block");
 }
