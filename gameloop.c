@@ -83,14 +83,11 @@ ecode_t Mainloop()
 		return EFAIL;
 	}
 
-        Entity *test = Ent_Spawn("default");
+        // Entity *test = Ent_Spawn("default");
         // test->Update = TestUpdate;
-        // test->updateType = UPDATE_SCHED;
+        // test->updateType = ENT_UPDATE_SCHED;
         // test->nextUpdate = g_Globals.timeNowMs + 1000;
-        Trace(CHAN_DBG, Fmt("Name: %s", Ent_GetProperty(test, "name")));
-        Ent_SetProperty(test, "name", "fuckface");
-        Trace(CHAN_DBG, Fmt("Name: %s", Ent_GetProperty(test, "name")));
-        Ent_Free(test);
+        // Ent_Free(test);
 
 	while (!quit) {
 		/* input */

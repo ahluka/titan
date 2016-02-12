@@ -146,7 +146,7 @@ ecode_t EntityDefaultRender(struct Entity *self)
 
 static void set_basic_fields(Entity *ent)
 {
-        ent->updateType = UPDATE_FRAME;
+        ent->updateType = ENT_UPDATE_FRAME;
         ent->nextUpdate = 0;
         ent->Update = EntityDefaultUpdate;
 
@@ -299,7 +299,7 @@ void Ent_SetProperty(Entity *ent, const char *key, const char *val)
 static ecode_t UpdateEntity(Entity *ent, float dT)
 {
 	switch (ent->updateType) {
-	case UPDATE_FRAME:
+	case ENT_UPDATE_FRAME:
 		if (ent->Update(ent, dT) != EOK) {
 			Trace(CHAN_GAME,
 				Fmt("entity '%s' failed to update", ent->class));
@@ -307,7 +307,7 @@ static ecode_t UpdateEntity(Entity *ent, float dT)
 		}
 
 		break;
-	case UPDATE_SCHED:
+	case ENT_UPDATE_SCHED:
 		if (ent->nextUpdate <= g_Globals.timeNowMs) {
 			if (ent->Update(ent, dT) != EOK) {
 				Trace(CHAN_GAME,
