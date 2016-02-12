@@ -50,8 +50,11 @@ ecode_t Ent_Shutdown()
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
-		if (s_Entities[i] != NULL)
+		if (s_Entities[i] != NULL) {
+                        Ent_Free(s_Entities[i]);
 			MemFree(s_Entities[i]);
+                }
+
 		s_Entities[i] = NULL;
 	}
 
@@ -122,26 +125,22 @@ static void free_property_table(struct property_tbl *ptbl)
 }
 
 /*
- * DefaultEntity
- *	Set all fields in the given Entity to their default values.
+ * Update and render stub functions. They just Panic(), because I obviously
+ * forgot to replace them.
  */
 ecode_t EntityDefaultUpdate(struct Entity *self, float dT)
 {
-	Trace(CHAN_GAME, "well, this can't be good");
+        const char *name = SelfProperty("name");
 
-	if (self->updateType == UPDATE_SCHED)
-		self->nextUpdate = g_Globals.timeNowMs + 500;
-
+        Panic(Fmt("no update function specified for '%s'", name));
 	return EOK;
 }
 
 ecode_t EntityDefaultRender(struct Entity *self)
 {
-	Trace(CHAN_GAME, "well, this can't be good either");
+        const char *name = SelfProperty("name");
 
-	if (self->updateType == UPDATE_SCHED)
-		self->nextUpdate = g_Globals.timeNowMs + 500;
-
+        Panic(Fmt("no render function specified for '%s'", name));
 	return EOK;
 }
 
@@ -187,19 +186,15 @@ ecode_t Ent_Free(Entity *ent)
 {
 	assert(ent != NULL);
 
-	if (s_Entities[0] == NULL) {
-		Trace(CHAN_INFO,
-			"Attempting to free an entity before Ent_Init()");
-		return EFAIL;
-	}
-
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (s_Entities[i] == ent) {
-			Trace(CHAN_DBG,
-				Fmt("marking entity in slot %d as free", i));
+			// Trace(CHAN_DBG,
+			// 	Fmt("marking entity in slot %d as free", i));
 
-			s_Entities[i]->inUse = false;
-                        free_property_table(&s_Entities[i]->properties);
+                        if (s_Entities[i]->inUse) {
+        			s_Entities[i]->inUse = false;
+                                free_property_table(&s_Entities[i]->properties);
+                        }
 
 			return EOK;
 		}
@@ -275,6 +270,26 @@ const char *Ent_GetProperty(Entity *ent, const char *key)
         Trace(CHAN_GAME, Fmt("Warning: entity has no property '%s'", key));
 
         return NULL;
+}
+
+/*
+ * Ent_SetProperty
+ */
+void Ent_SetProperty(Entity *ent, const char *key, const char *val)
+{
+        assert(ent != NULL);
+        assert(key != NULL);
+
+        struct property *i = NULL;
+        list_for_each_entry(i, &ent->properties.props, list) {
+                if (strcmp(i->key, key) == 0) {
+                        sstrfree(i->val);
+                        i->val = sstrdup(val);
+                        return;
+                }
+        }
+
+        handle_prop(&ent->properties, "api-set", key, val);
 }
 
 /*

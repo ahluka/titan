@@ -2,6 +2,11 @@
 #include "list.h"
 #include "vec.h"
 
+/* Every entity update / render function is given a pointer to itself named
+ * self; this macro is defined for convenience. */
+#define SelfProperty(key) Ent_GetProperty(self, (key))
+#define TIMENOW_PLUS(ms) g_Globals.timeNowMs + (ms)
+
 struct property {
         char *key, *val;
         struct list_head list;
@@ -50,6 +55,7 @@ typedef struct Entity {
 
 } Entity;
 
+
 ecode_t Ent_Init();
 ecode_t Ent_Shutdown();
 
@@ -62,5 +68,9 @@ ecode_t Ent_Free(Entity *ent);
  * DO NOT free the string returned, it's allocated from the global string
  * pool and will be freed for you. */
 const char *Ent_GetProperty(Entity *ent, const char *key);
+
+/* Add the given key / value property to the given entity's property
+ * table, or update its value if it already exists. */
+void Ent_SetProperty(Entity *ent, const char *key, const char *val);
 
 ecode_t Ent_UpdateAll(float dT);

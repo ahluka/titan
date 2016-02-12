@@ -165,6 +165,7 @@ void PFree(MemPool *pool, void *block)
                 struct PoolNode *n = list_entry(i, struct PoolNode, list);
 
                 if (n->block == block) {
+                        memset(n->block, 0, pool->blockSize);
                         list_move(i, &pool->freeBlocks);
                         // DebugPool(pool);
                         return;

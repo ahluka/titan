@@ -27,14 +27,6 @@ static void CheckDbgKeys(SDL_Keycode code)
 	case SDLK_F2:
 		Cmd_ExecuteBuf("cmdlist");
 		break;
-	case SDLK_F10:
-		Trace(CHAN_MEM, Fmt("Current memory usage: %lu bytes",
-			MemCurrentUsage()));
-		break;
-	case SDLK_F11:
-		Trace(CHAN_MEM, Fmt("Highest memory usage: %lu bytes",
-			MemHighWater()));
-		break;
 	case SDLK_F12:
 		MemStats();
 		break;
@@ -54,6 +46,14 @@ static void UpdateGameworld(float dT)
 	if (Evt_Process() != EOK) {
 		Panic("Failed to process events");
 	}
+}
+
+UNUSED static ecode_t TestUpdate(Entity *self, float dT)
+{
+        Trace(CHAN_GAME, "SHIT SON!");
+        self->nextUpdate = TIMENOW_PLUS(1000);
+
+        return EOK;
 }
 
 /*
@@ -84,13 +84,12 @@ ecode_t Mainloop()
 	}
 
         Entity *test = Ent_Spawn("default");
-
-        Trace(CHAN_DBG, Fmt("pos: %.3f, %.3f", test->pos[X], test->pos[Y]));
-        Trace(CHAN_DBG, Fmt("vel: %.3f, %.3f", test->vel[X], test->vel[Y]));
-        // struct property *prop = NULL;
-        // list_for_each_entry(prop, &test->properties.props, list) {
-        //         Trace(CHAN_DBG, Fmt("%s=%s", prop->key, prop->val));
-        // }
+        // test->Update = TestUpdate;
+        // test->updateType = UPDATE_SCHED;
+        // test->nextUpdate = g_Globals.timeNowMs + 1000;
+        Trace(CHAN_DBG, Fmt("Name: %s", Ent_GetProperty(test, "name")));
+        Ent_SetProperty(test, "name", "fuckface");
+        Trace(CHAN_DBG, Fmt("Name: %s", Ent_GetProperty(test, "name")));
         Ent_Free(test);
 
 	while (!quit) {
