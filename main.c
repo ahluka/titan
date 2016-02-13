@@ -5,7 +5,6 @@
 #include "gameloop.h"
 #include "config.h"
 #include "files.h"
-#include "cmds.h"
 #include "script.h"
 #include "memory.h"
 #include "event.h"
@@ -20,12 +19,6 @@
  */
 static void InitModules()
 {
-	/* NOTE: Cmd_Init() should be the first init function called; other
-	 * modules might call into it during initialisation.
-	 */
-	if (Cmd_Init() != EOK)
-		Panic("Failed to init command system");
-
 	if (Config_Load(CONFIG_FILENAME) != EOK)
 		Panic("Failed to load configuration");
 
@@ -58,9 +51,6 @@ static void ShutdownModules()
 
 	if (Config_Save(CONFIG_FILENAME) != EOK)
 		Panic("Failed to write configuration");
-
-	if (Cmd_Shutdown() != EOK)
-		Panic("Failed to shutdown command system");
 }
 
 /*

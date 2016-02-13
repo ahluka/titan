@@ -195,9 +195,12 @@ void MemStats()
 	Trace(CHAN_MEM, Fmt("Total: %u %s, highest: %u %s",
 		SaneVal(s_CurrentUsage), SaneAff(s_CurrentUsage),
 		SaneVal(s_HighWater), SaneAff(s_HighWater)));
-        Trace(CHAN_MEM, Fmt("(%lu filtered) from:", filtered));
-        for (int i = 0; i < nfilt; i++) {
-                Trace(CHAN_MEM, Fmt("\t%s", filt[i]));
+
+        if (filtered > 0) {
+                Trace(CHAN_MEM, Fmt("(%lu filtered) from:", filtered));
+                for (int i = 0; i < nfilt; i++) {
+                        Trace(CHAN_MEM, Fmt("\t%s", filt[i]));
+                }
         }
 }
 

@@ -2,7 +2,6 @@
 #include "panic.h"
 #include "files.h"
 #include "memory.h"
-#include "cmds.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -99,8 +98,6 @@ ecode_t Files_Init(const char *rootDir)
 
 	Trace(CHAN_DBG, Fmt("setting root directory to %s", rootDir));
 	s_FilesRoot = rootDir;
-
-	Cmd_Register("files-listopen", Files_ListOpen);
 
 	return EOK;
 }
