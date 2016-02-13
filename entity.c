@@ -63,15 +63,6 @@ ecode_t Ent_Shutdown()
 	return EOK;
 }
 
-// TODO: move make_lowercase?
-static void make_lowercase(char *str)
-{
-        while (*str) {
-                *str = tolower(*str);
-                str++;
-        }
-}
-
 // TODO: use sections?
 static int
 handle_prop(void *usr, const char *sec, const char *key, const char *val)
@@ -80,10 +71,8 @@ handle_prop(void *usr, const char *sec, const char *key, const char *val)
 
         struct property_tbl *prop_tbl = usr;
         struct property *prop = MemAlloc(sizeof(*prop));
-        prop->key = sstrdup(key);
-        make_lowercase(prop->key);
-        prop->val = sstrdup(val);
-        make_lowercase(prop->val);
+        prop->key = sstrdup_lower(key);
+        prop->val = sstrdup_lower(val);
         list_add(&prop->list, &prop_tbl->props);
         prop_tbl->size++;
 
@@ -302,7 +291,7 @@ static ecode_t UpdateEntity(Entity *ent, float dT)
 	case ENT_UPDATE_FRAME:
 		if (ent->Update(ent, dT) != EOK) {
 			Trace(CHAN_GAME,
-				Fmt("entity '%s' failed to update", ent->class));
+				Fmt("entity '%s' failed to update", ent->name));
 			return EFAIL;
 		}
 
@@ -312,7 +301,7 @@ static ecode_t UpdateEntity(Entity *ent, float dT)
 			if (ent->Update(ent, dT) != EOK) {
 				Trace(CHAN_GAME,
 					Fmt("entity '%s' failed to update",
-					ent->class));
+					ent->name));
 				return EFAIL;
 			}
 		}

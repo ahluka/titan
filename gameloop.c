@@ -50,7 +50,7 @@ static void UpdateGameworld(float dT)
 
 UNUSED static ecode_t TestUpdate(Entity *self, float dT)
 {
-        Trace(CHAN_GAME, "SHIT SON!");
+        Trace(CHAN_GAME, Fmt("Updating '%s'", SelfProperty("name")));
         self->nextUpdate = TIMENOW_PLUS(1000);
 
         return EOK;
@@ -84,6 +84,10 @@ ecode_t Mainloop()
 	}
 
         // Entity *test = Ent_Spawn("default");
+        // struct property *prop = NULL;
+        // list_for_each_entry(prop, &test->properties.props, list) {
+        //         Trace(CHAN_DBG, Fmt("%s = %s", prop->key, prop->val));
+        // }
         // test->Update = TestUpdate;
         // test->updateType = ENT_UPDATE_SCHED;
         // test->nextUpdate = g_Globals.timeNowMs + 1000;

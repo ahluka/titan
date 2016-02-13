@@ -27,7 +27,7 @@ static struct PoolNode *NewPoolNode(size_t blocksz)
 /*
  * AddFreeNodes
  *	Adds the specified number of new nodes to the pool's free list,
- *	and increments the pool's blockCount.
+ *	and increments the pool's blockCount accordingly.
  */
 static void AddFreeNodes(MemPool *pool, size_t count, size_t sz)
 {
@@ -61,6 +61,8 @@ static void *NextFreeBlock(MemPool *pool)
 		}
 	}
 
+        // FIXME: This is a stupid way to get the first element
+        // Just grabbing the head with list_entry() didn't work, though?
         struct list_head *i, *safe;
         struct PoolNode *ret = NULL;
         list_for_each_safe(i, safe, &pool->freeBlocks) {
@@ -86,7 +88,7 @@ UNUSED static void DebugPool(MemPool *pool)
                 u++;
         }
 
-	Trace(CHAN_DBG, Fmt("'%s' - USED: %u, FREE: %u", pool->debugName, u, f));
+	Trace(CHAN_DBG, Fmt("[%s] USED: %u, FREE: %u", pool->debugName, u, f));
 }
 
 /*
@@ -109,7 +111,6 @@ MemPool *Pool_Create(size_t blockCount,
         INIT_LIST_HEAD(&pool->usedBlocks);
 
 	AddFreeNodes(pool, blockCount, blockSize);
-        // DebugPool(pool);
 
 	Trace(CHAN_DBG, Fmt("Pool '%s' %u x %u bytes", debugName,
 		blockCount, blockSize));

@@ -21,6 +21,9 @@ void sstrfree(char *str);
 /* Duplicate the given string. */
 char *sstrdup(const char *str);
 
+/* Duplicate the given string, converting it to lowercase too. */
+char *sstrdup_lower(const char *str);
+
 /* Concatenate the given strings. */
 char *sstrcat(const char *first, const char *second);
 
@@ -29,3 +32,6 @@ char *sstrcat(const char *first, const char *second);
  * dir and ext can be NULL.
  */
 char *sstrfname(const char *dir, const char *name, const char *ext);
+
+/* Make the given string lowercase. Modifies it in-place. */
+void sstrlower(char *str);

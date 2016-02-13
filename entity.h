@@ -41,7 +41,7 @@ typedef struct Entity {
 
         /* Position and velocity
          * These will be in the property table too, but those are only used
-         * as initial values.
+         * as initial values when the Entity is spawned in.
          */
         vec2_t pos;
         vec2_t vel;
@@ -65,7 +65,8 @@ ecode_t Ent_UpdateAll(float dT);
  * entity definition script named from the given parameter "class", so
  * Ent_Spawn("default"); loads default.ent. It returns a relatively bare-
  * bones Entity that only has a property table and Update() and Render()
- * stubs (which you should replace immediately).
+ * stubs (both of which you should replace immediately).
+ * After this call, the Entity returned will be processed on the next frame.
  */
 Entity *Ent_Spawn(const char *class);
 

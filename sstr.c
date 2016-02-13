@@ -67,6 +67,18 @@ char *sstrdup(const char *str)
 }
 
 /*
+ * sstrdup_lower
+ */
+char *sstrdup_lower(const char *str)
+{
+        assert(str != NULL);
+
+        char *copy = sstrdup(str);
+        sstrlower(copy);
+        return copy;
+}
+
+/*
  * sstrcat
  */
 char *sstrcat(const char *first, const char *second)
@@ -114,4 +126,15 @@ char *sstrfname(const char *dir, const char *name, const char *ext)
         strncat(ret, name, namesz);
         if (ext) strncat(ret, ext, strlen(ext));
         return ret;
+}
+
+/*
+ * sstrlower
+ */
+void sstrlower(char *str)
+{
+        while (*str) {
+                *str = tolower(*str);
+                str++;
+        }
 }
