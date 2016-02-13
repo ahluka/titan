@@ -1,0 +1,30 @@
+NOTES
+=====
+
+Design and implementation notes just to help keep everything straight in my
+head while I'm working.
+
+
+General
+-------
+* Each subsystem is responsible for loading and managing its resources, so
+  other systems don't, for e.g., load sprites or sound effects directly
+  themselves, they just tell the appropriate system that they want a particular
+  file to be available in the future. So the renderer will allocate and manage
+  sprites and maps etc., the audio system will load and manage SFX and music,
+  and Entities will just keep handles to sprites and SFX and submit them at
+  the appropriate time each frame.
+
+  Entity has a spritesheet -> tells renderer to precache file -> renderer loads
+  and manages the file data -> Entity gets a handle to it -> Entity submits
+  render command with the given sprite handle.
+
+
+
+Renderer
+--------
+* Keeps a cache of loaded spritesheets (etc.) and hands out handles to other
+  systems that want to use them.
+* NO subsystem directly renders anything; renderer accepts draw commands and
+  should end up with a list of these at the end of each frame. It then
+  processes the command list to draw everything, sorting commands as necessary.
