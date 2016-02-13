@@ -9,7 +9,6 @@
 #include "globals.h"
 #include "panic.h"
 #include "entity.h"
-#include "cmds.h"
 #include "input.h"
 #include "event.h"
 #include <SDL2/SDL.h>

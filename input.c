@@ -8,7 +8,6 @@
 */
 #include "base.h"
 #include "panic.h"
-#include "cmds.h"
 #include "input.h"
 
 // SDL_GetScancodeFromKey(event.key.keysym.sym)

@@ -2,12 +2,10 @@
 
 /*
  * r_main.h
- *	TODO: Write description comment
+ *	Main renderer module. Pulls in everything else.
  */
 
-#include <SDL2/SDL.h>
 
 ecode_t Rend_Init();
 ecode_t Rend_Shutdown();
 ecode_t Rend_Frame();
-SDL_Window *Rend_GetWindow();
