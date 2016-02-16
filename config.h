@@ -16,6 +16,7 @@ struct ConfigData {
 	/* renderer */
 	int windowWidth;
 	int windowHeight;
+        bool vsync;
 
 	/* filesystem */
 	char *filesRoot;

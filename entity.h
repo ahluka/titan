@@ -56,11 +56,6 @@ typedef struct Entity {
 
 } Entity;
 
-/* These are called by base modules. */
-ecode_t Ent_Init();
-ecode_t Ent_Shutdown();
-ecode_t Ent_UpdateAll(float dT);
-
 /* Spawn an entity of the given class into the game world. This loads the
  * entity definition script named from the given parameter "class", so
  * Ent_Spawn("default"); loads default.ent. It returns a relatively bare-
@@ -82,3 +77,9 @@ const char *Ent_GetProperty(Entity *ent, const char *key);
 /* Add the given key / value property to the given entity's property
  * table, or update its value if it already exists. */
 void Ent_SetProperty(Entity *ent, const char *key, const char *val);
+
+
+/* These are called by base modules. */
+ecode_t Ent_Init();
+ecode_t Ent_Shutdown();
+ecode_t Ent_UpdateAll(float dT);

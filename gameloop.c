@@ -60,11 +60,9 @@ ecode_t Mainloop()
 {
 	SDL_Event event;
 	bool quit = false;
-	struct Timer fpsTimer;
+	struct Timer gameTimer;
 	struct Timer stepTimer;
-	uint32_t frameCount = 0;
-
-	Timer_Start(&fpsTimer);
+	uint32_t frameCount = 0, nextFPS = 0, fps = 0;
 
 	if (Rend_Init() != EOK) {
 		Trace(CHAN_INFO, "failed to init renderer");
@@ -86,6 +84,8 @@ ecode_t Mainloop()
         // test->nextUpdate = g_Globals.timeNowMs + 1000;
         // Ent_Free(test);
 
+        Timer_Start(&gameTimer);
+
 	while (!quit) {
 		/* input */
 		while (SDL_PollEvent(&event) != 0) {
@@ -104,19 +104,22 @@ ecode_t Mainloop()
 			}
 		}
 
-		// float avgFPS = frameCount / (Timer_GetTicks(&fpsTimer) / 1000.f);
-		// static uint32_t nextOut = 0;
-		//
-		// if (nextOut <= g_Globals.timeNowMs) {
-		// 	printf("%f\n", avgFPS);
-		// 	nextOut = Timer_GetTicks(&fpsTimer) + 500;
-		// }
-
 		/* Update gameworld */
 		float dT = Timer_GetTicks(&stepTimer) / 1000.f;
-		g_Globals.timeNowMs = Timer_GetTicks(&fpsTimer);
+		g_Globals.timeNowMs = Timer_GetTicks(&gameTimer);
 		UpdateGameworld(dT);
 		Timer_Start(&stepTimer); /* restart */
+
+                /* FPS */
+                if (nextFPS <= g_Globals.timeNowMs) {
+                        nextFPS = g_Globals.timeNowMs + 1000;
+                        fps = frameCount;
+                        frameCount = 0;
+                }
+
+                R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, 10,
+                        Fmt("FPS: %u - dT: %f - T: %u", fps, dT,
+                        g_Globals.timeNowMs));
 
 		/* Render */
 		Rend_Frame();

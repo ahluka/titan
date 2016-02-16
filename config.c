@@ -21,15 +21,22 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 {
 	Trace(CHAN_DBG, Fmt("handling [%s] %s=%s", sec, key, val));
 
-	if (MATCH("general", "Game")) {
+	if (MATCH("General", "Game")) {
 		g_Config.gameName = sstrdup(val);
-	} else if (MATCH("general", "Version")) {
+	} else if (MATCH("General", "Version")) {
 		g_Config.version = sstrdup(val);
-	} else if (MATCH("renderer", "WindowWidth")) {
+	} else if (MATCH("Renderer", "WindowWidth")) {
 		g_Config.windowWidth = atoi(val);
-	} else if (MATCH("renderer", "WindowHeight")) {
+	} else if (MATCH("Renderer", "WindowHeight")) {
 		g_Config.windowHeight = atoi(val);
-	} else if (MATCH("filesystem", "FilesRoot")) {
+        } else if (MATCH("Renderer", "VSync")) {
+                char *dup = sstrdup_lower(val);
+                if (strcmp(dup, "true") == 0 || strcmp(dup, "on") == 0)
+                        g_Config.vsync = true;
+                else
+                        g_Config.vsync = false;
+                sstrfree(dup);
+	} else if (MATCH("FileSystem", "FilesRoot")) {
 		g_Config.filesRoot = sstrdup(val);
 	}
 
