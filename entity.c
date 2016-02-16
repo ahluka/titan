@@ -206,7 +206,7 @@ static void parse_loaded_properties(Entity *ent, const char *entfile)
 
         ent->name = Ent_GetProperty(ent, "name");
         if (!ent->name)
-        ent->name = "unnamed";
+        	ent->name = "unnamed";
 
         /* If an initial position and velocity were specified, parse them */
         const char *pos = Ent_GetProperty(ent, "pos");
@@ -273,7 +273,7 @@ void Ent_SetProperty(Entity *ent, const char *key, const char *val)
         list_for_each_entry(i, &ent->properties.props, list) {
                 if (strcmp(i->key, key) == 0) {
                         sstrfree(i->val);
-                        i->val = sstrdup(val);
+                        i->val = sstrdup_lower(val);
                         return;
                 }
         }
