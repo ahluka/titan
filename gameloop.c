@@ -11,7 +11,29 @@
 #include "entity.h"
 #include "input.h"
 #include "event.h"
+#include "config.h"
 #include <SDL2/SDL.h>
+
+
+UNUSED static ecode_t TestUpdate(Entity *self, float dT)
+{
+        VMA(self->pos, self->vel, dT);
+
+        if (self->pos[X] >= g_Config.windowWidth ||
+                self->pos[Y] >= g_Config.windowHeight ||
+                self->pos[X] <= 0 || self->pos[Y] <= 0) {
+                        VNeg(self->vel, self->vel);
+        }
+
+        return EOK;
+}
+
+UNUSED static ecode_t TestRender(Entity *self)
+{
+        R_AddRect(COLOUR_RED, self->pos[X], self->pos[Y], 35, 35);
+
+        return EOK;
+}
 
 /*
  * CheckDbgKeys
@@ -41,13 +63,6 @@ static void UpdateGameworld(float dT)
 	}
 }
 
-UNUSED static ecode_t TestUpdate(Entity *self, float dT)
-{
-        Trace(CHAN_GAME, Fmt("Updating '%s'", SelfProperty("name")));
-        self->nextUpdate = TIMENOW_PLUS(1000);
-
-        return EOK;
-}
 
 /*
  * Mainloop
@@ -79,8 +94,9 @@ ecode_t Mainloop()
         // list_for_each_entry(prop, &test->properties.props, list) {
         //         Trace(CHAN_DBG, Fmt("%s = %s", prop->key, prop->val));
         // }
+        // test->Render = TestRender;
         // test->Update = TestUpdate;
-        // test->updateType = ENT_UPDATE_SCHED;
+        // test->updateType = ENT_UPDATE_FRAME;
         // test->nextUpdate = g_Globals.timeNowMs + 1000;
         // Ent_Free(test);
 
@@ -121,7 +137,14 @@ ecode_t Mainloop()
                         Fmt("FPS: %u - dT: %f - T: %u", fps, dT,
                         g_Globals.timeNowMs));
 
+                R_AddString(FONT_NORMAL, COLOUR_WHITE, g_Config.windowWidth - 100,
+                        10, Fmt("Mem: %lu", MemCurrentUsage()));
+
 		/* Render */
+                if (Ent_RenderAll() != EOK) {
+                        Panic("Failed to render entities");
+                }
+
 		Rend_Frame();
 		frameCount++;
 	}

@@ -14,6 +14,8 @@ void _MemFree(void *ptr);
 
 
 /* Debugging */
+uint32_t SaneVal(uint64_t v);
+const char *SaneAff(uint32_t v);
 uint64_t MemCurrentUsage();
 uint64_t MemHighWater();
 void MemStats();

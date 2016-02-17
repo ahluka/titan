@@ -21,7 +21,10 @@ typedef enum FontSize {
 
 
 void R_AddString(FontSize sz, Colour c, int x, int y, const char *str);
-
+void R_AddCircle(Colour c, int x, int y, float r);
+void R_AddLine(Colour c, int sx, int sy, int ex, int ey);
+void R_AddRect(Colour c, int x, int y, int w, int h);
+void R_AddPoint(Colour c, int x, int y);
 
 /* These are called by the base modules. */
 ecode_t Rend_Init();

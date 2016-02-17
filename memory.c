@@ -115,14 +115,14 @@ uint64_t MemHighWater()
 
 #define KB_BYTES 1024
 #define MB_BYTES 1048576
-static uint32_t SaneVal(uint64_t v)
+uint32_t SaneVal(uint64_t v)
 {
 	if (v < KB_BYTES) return v;
 	if (v >= KB_BYTES && v < MB_BYTES) return v / KB_BYTES;
 	return v / MB_BYTES;
 }
 
-static const char *SaneAff(uint32_t v)
+const char *SaneAff(uint32_t v)
 {
 	if (v < KB_BYTES) return "bytes";
 	if (v >= KB_BYTES && v < MB_BYTES) return "KB";

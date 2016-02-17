@@ -21,6 +21,7 @@ typedef vec_t vec4_t[4];
 #define VAdd(vout, v1, v2)      (vout[X]=v1[X]+v2[X],vout[Y]=v1[Y]+v2[Y])
 #define VSub(vout, v1, v2)      (vout[X]=v1[X]-v2[X],vout[Y]=v1[Y]-v2[Y])
 #define VScale(vout, v, s)      (vout[X]=v[X]*s,vout[Y]=v[Y]*s)
+#define VMA(vout, v, s)         (vout[X]+=v[X]*s,vout[Y]+=v[Y]*s)
 #define VCopy(vout, v)          (vout[X]=v[X],vout[Y]=v[Y])
 #define VNeg(vout, v)           (vout[X]=-v[X],vout[Y]=-v[Y])
 #define VSet(v, x, y)           (v[X]=(x),v[Y]=(y))

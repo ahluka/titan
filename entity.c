@@ -11,7 +11,7 @@
  * the MemPool API to include iteration, or B) keep an array of pointers
  * like this anyway / be redundant.
  */
-#define MAX_ENTITIES	32
+#define MAX_ENTITIES	64
 static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
 
 #define DEFAULT_ENTDEF_FILE "./res/ent/default.ent"
@@ -139,6 +139,7 @@ static void set_basic_fields(Entity *ent)
         ent->nextUpdate = 0;
         ent->Update = EntityDefaultUpdate;
 
+        ent->isVisible = true;
         ent->Render = EntityDefaultRender;
 
         INIT_LIST_HEAD(&ent->properties.props);
@@ -325,10 +326,34 @@ ecode_t Ent_UpdateAll(float dT)
 		if (!ent->inUse)
 			continue;
 
-		if (UpdateEntity(ent, dT) != EOK) {
+		if (UpdateEntity(ent, dT) != EOK)
 			return EFAIL;
-		}
 	}
 
 	return EOK;
+}
+
+/*
+ * Ent_RenderAll
+ *      Call each Entity's Render() function, giving them all a chance to
+ *      submit render commands.
+ */
+ecode_t Ent_RenderAll()
+{
+        if (s_Entities[0] == NULL) {
+                Trace(CHAN_INFO, "Entity pool not initialised");
+                return EFAIL;
+        }
+
+        for (int i = 0; i < MAX_ENTITIES; i++) {
+                Entity *ent = s_Entities[i];
+
+                if (!ent->inUse || !ent->isVisible)
+                        continue;
+
+                if (ent->Render(ent) != EOK)
+                        return EFAIL;
+        }
+
+        return EOK;
 }

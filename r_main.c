@@ -43,6 +43,13 @@ enum command_type {
         RC_PSYSTEM
 };
 
+enum shape_type {
+        SHAPE_CIRCLE,   // TODO: implement this
+        SHAPE_LINE,
+        SHAPE_RECT,
+        SHAPE_POINT
+};
+
 struct text_cmd {
         FontSize size;
         Colour colour;
@@ -51,7 +58,10 @@ struct text_cmd {
 };
 
 struct shape_cmd {
-        int x, y;
+        enum shape_type type;
+        Colour colour;
+        int x, y, x2, y2, w, h;
+        float r;
 };
 
 struct sprite_cmd {
@@ -140,7 +150,7 @@ static void load_fonts()
 
 /*
  * create_rstring
- *      Render the given string into a surface, convert it into the texture,
+ *      Render the given string into a surface, convert it into a texture,
  *      then return it along with the surface's width and height (an rstring).
  */
 static struct rstring
@@ -168,7 +178,7 @@ create_rstring(Colour colour, FontSize sz, const char *str)
 
 /*
  * render_rstring
- *      Render the given struct rstring at the specified coords.
+ *      Render the given rstring at the specified coords.
  */
 static void render_rstring(struct rstring *rstr, int x, int y)
 {
@@ -178,6 +188,9 @@ static void render_rstring(struct rstring *rstr, int x, int y)
         SDL_RenderCopy(s_state.renderer, rstr->texture, NULL, &dst);
 }
 
+/*
+ * create_command
+ */
 static struct render_command *create_command()
 {
         return (struct render_command *) PAlloc(rcmd_pool);
@@ -201,15 +214,16 @@ static void destroy_command(struct render_command *cmd)
         switch (cmd->type) {
         case RC_TEXT:
                 sstrfree(cmd->text.str);
-                PFree(rcmd_pool, cmd);
-                return;
+                break;
         case RC_SHAPE:
-                return;
+                break;
         case RC_SPRITE:
-                return;
+                break;
         case RC_PSYSTEM:
-                return;
+                break;
         }
+
+        PFree(rcmd_pool, cmd);
 }
 
 /*
@@ -225,6 +239,75 @@ void R_AddString(FontSize sz, Colour c, int x, int y, const char *str)
         cmd->text.str = sstrdup(str);
         cmd->text.x = x;
         cmd->text.y = y;
+
+        queue_command(cmd);
+}
+
+/*
+ * R_AddCircle
+ */
+void R_AddCircle(Colour c, int x, int y, float r)
+{
+        struct render_command *cmd = create_command();
+
+        cmd->type = RC_SHAPE;
+        cmd->shape.type = SHAPE_CIRCLE;
+        cmd->shape.colour = c;
+        cmd->shape.x = x;
+        cmd->shape.y = y;
+        cmd->shape.r = r;
+
+        queue_command(cmd);
+}
+
+/*
+ * R_AddLine
+ */
+void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
+{
+        struct render_command *cmd = create_command();
+
+        cmd->type = RC_SHAPE;
+        cmd->shape.type = SHAPE_LINE;
+        cmd->shape.colour = c;
+        cmd->shape.x = sx;
+        cmd->shape.y = sy;
+        cmd->shape.x2 = ex;
+        cmd->shape.y2 = ey;
+
+        queue_command(cmd);
+}
+
+/*
+ * R_AddRect
+ */
+void R_AddRect(Colour c, int x, int y, int w, int h)
+{
+        struct render_command *cmd = create_command();
+
+        cmd->type = RC_SHAPE;
+        cmd->shape.type = SHAPE_RECT;
+        cmd->shape.colour = c;
+        cmd->shape.x = x;
+        cmd->shape.y = y;
+        cmd->shape.w = w;
+        cmd->shape.h = h;
+
+        queue_command(cmd);
+}
+
+/*
+ * R_AddPoint
+ */
+void R_AddPoint(Colour c, int x, int y)
+{
+        struct render_command *cmd = create_command();
+
+        cmd->type = RC_SHAPE;
+        cmd->shape.type = SHAPE_POINT;
+        cmd->shape.colour = c;
+        cmd->shape.x = x;
+        cmd->shape.y = y;
 
         queue_command(cmd);
 }
@@ -321,7 +404,25 @@ static void process_text_cmd(struct text_cmd *cmd)
 
 static void process_shape_cmd(struct shape_cmd *cmd)
 {
-
+        switch (cmd->type) {
+        case SHAPE_CIRCLE:
+                Panic("Circle not impemented yet");
+                break;
+        case SHAPE_LINE:
+                set_colour(cmd->colour);
+                SDL_RenderDrawLine(s_state.renderer, cmd->x, cmd->y,
+                        cmd->x2, cmd->y2);
+                break;
+        case SHAPE_RECT: {
+                SDL_Rect r = {cmd->x, cmd->y, cmd->w, cmd->h};
+                set_colour(cmd->colour);
+                SDL_RenderDrawRect(s_state.renderer, &r);
+        } break;
+        case SHAPE_POINT:
+                set_colour(cmd->colour);
+                SDL_RenderDrawPoint(s_state.renderer, cmd->x, cmd->y);
+                break;
+        }
 }
 
 static void process_sprite_cmd(struct sprite_cmd *cmd)

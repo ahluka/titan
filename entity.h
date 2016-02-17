@@ -52,6 +52,7 @@ typedef struct Entity {
 	ecode_t (*Update)(struct Entity *self, float dT);
 
 	/* Rendering */
+        bool isVisible;
 	ecode_t (*Render)(struct Entity *self);
 
 } Entity;
@@ -83,3 +84,4 @@ void Ent_SetProperty(Entity *ent, const char *key, const char *val);
 ecode_t Ent_Init();
 ecode_t Ent_Shutdown();
 ecode_t Ent_UpdateAll(float dT);
+ecode_t Ent_RenderAll();
