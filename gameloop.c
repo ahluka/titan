@@ -89,14 +89,14 @@ ecode_t Mainloop()
 		return EFAIL;
 	}
 
-        // Entity *test = Ent_Spawn("default");
+        Entity *test = Ent_Spawn("default");
         // struct property *prop = NULL;
         // list_for_each_entry(prop, &test->properties.props, list) {
         //         Trace(CHAN_DBG, Fmt("%s = %s", prop->key, prop->val));
         // }
-        // test->Render = TestRender;
-        // test->Update = TestUpdate;
-        // test->updateType = ENT_UPDATE_FRAME;
+        test->Render = TestRender;
+        test->Update = TestUpdate;
+        test->updateType = ENT_UPDATE_FRAME;
         // test->nextUpdate = g_Globals.timeNowMs + 1000;
         // Ent_Free(test);
 
@@ -137,11 +137,8 @@ ecode_t Mainloop()
 		/* Render */
                 R_BeginCommands();
                 R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, 10,
-                        Fmt("FPS: %u - dT: %f - T: %u", fps, dT,
-                        g_Globals.timeNowMs));
-
-                        R_AddString(FONT_NORMAL, COLOUR_WHITE, g_Config.windowWidth - 100,
-                                10, Fmt("Mem: %lu", MemCurrentUsage()));
+                        Fmt("FPS: %u - dT: %3.4f - T: %u - M: %lu", fps, dT,
+                        g_Globals.timeNowMs, MemCurrentUsage()));
 
                 if (Ent_RenderAll() != EOK) {
                         Panic("Failed to render entities");

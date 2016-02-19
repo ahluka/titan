@@ -89,7 +89,10 @@ struct render_command {
 
 /* The queue of render_command's. */
 // TODO: Multiple queues for each type of command
-static LIST_HEAD(command_list);
+static LIST_HEAD(text_rcmds_list);
+static LIST_HEAD(shape_rcmds_list);
+static LIST_HEAD(sprite_rcmds_list);
+static LIST_HEAD(psys_rcmds_list);
 
 static LAllocState *rcmd_pool = NULL;
 
@@ -114,29 +117,6 @@ static void set_colour(enum Colour colour)
         SDL_SetRenderDrawColor(s_state.renderer, c.r, c.g, c.b, c.a);
 }
 
-// SDL_DestroyTexture
-// static SDL_Texture *load_texture(const char *filename)
-// {
-//         assert(filename != NULL);
-//
-//         SDL_Texture *ret = NULL;
-//         SDL_Surface *surf = NULL;
-//
-//         surf = IMG_Load(filename);
-//         if (!surf) {
-//                 Panic(Fmt("Failed to load %s", filename));
-//         }
-//
-//         ret = SDL_CreateTextureFromSurface(s_state.renderer, surf);
-//         if (!ret) {
-//                 Panic(Fmt("Failed to create texture from %s (%s)", filename,
-//                         SDL_GetError()));
-//         }
-//
-//         SDL_FreeSurface(surf);
-//         return ret;
-// }
-
 /*
  * load_fonts
  */
@@ -144,12 +124,12 @@ static void load_fonts()
 {
         s_state.small_font = TTF_OpenFont(FONT_FILENAME, FONT_SMALLSIZE);
         if (!s_state.small_font) {
-                Panic(Fmt("Failed: %s", TTF_GetError()));
+                Panic(Fmt("Failed to load fonts: %s", TTF_GetError()));
         }
 
         s_state.normal_font = TTF_OpenFont(FONT_FILENAME, FONT_NORMSIZE);
         if (!s_state.normal_font) {
-                Panic(Fmt("Failed: %s", TTF_GetError()));
+                Panic(Fmt("Failed to load fonts: %s", TTF_GetError()));
         }
 }
 
@@ -169,11 +149,21 @@ create_rstring(Colour colour, FontSize sz, const char *str)
         SDL_Surface *surf = NULL;
         if (sz == FONT_SMALL) {
                 surf = TTF_RenderText_Solid(s_state.small_font, str, col);
+                if (!surf) {
+                        Panic(Fmt("Failed to render string (%s)", TTF_GetError()));
+                }
         } else if (sz == FONT_NORMAL) {
                 surf = TTF_RenderText_Solid(s_state.normal_font, str, col);
+                if (!surf) {
+                        Panic(Fmt("Failed to render string (%s)", TTF_GetError()));
+                }
         }
 
         ret.texture = SDL_CreateTextureFromSurface(s_state.renderer, surf);
+        if (!ret.texture) {
+                Panic(Fmt("Failed to create texture (%s)", SDL_GetError()));
+        }
+
         ret.w = surf->w;
         ret.h = surf->h;
         SDL_FreeSurface(surf);
@@ -190,7 +180,9 @@ static void render_rstring(struct rstring *rstr, int x, int y)
         assert(rstr != NULL);
 
         SDL_Rect dst = {x, y, rstr->w, rstr->h};
-        SDL_RenderCopy(s_state.renderer, rstr->texture, NULL, &dst);
+        if (SDL_RenderCopy(s_state.renderer, rstr->texture, NULL, &dst) < 0) {
+                Panic(Fmt("SDL_RenderCopy failed (%s)", SDL_GetError()));
+        }
 }
 
 /*
@@ -206,14 +198,15 @@ static struct render_command *create_command()
  * queue_command
  *      Add a render_command to the queue.
  */
-static void queue_command(struct render_command *cmd)
+static void queue_command(struct render_command *cmd, struct list_head *q)
 {
-        list_add(&cmd->list, &command_list);
+        list_add(&cmd->list, q);
 }
 
 /*
  * destroy_command
- *      Free all the memory the given command used.
+ *      Free all the memory the given command used, but not the command
+ *      itself.
  */
 static void destroy_command(struct render_command *cmd)
 {
@@ -238,7 +231,7 @@ static void destroy_command(struct render_command *cmd)
 static void check_accepting()
 {
         if (!accepting_cmds) {
-                Panic("Render command added outside of entity render function");
+                Panic("Command submitted outside of entity render function");
         }
 }
 
@@ -257,7 +250,7 @@ void R_AddString(FontSize sz, Colour c, int x, int y, const char *str)
         cmd->text.x = x;
         cmd->text.y = y;
 
-        queue_command(cmd);
+        queue_command(cmd, &text_rcmds_list);
 }
 
 /*
@@ -275,7 +268,7 @@ void R_AddCircle(Colour c, int x, int y, float r)
         cmd->shape.y = y;
         cmd->shape.r = r;
 
-        queue_command(cmd);
+        queue_command(cmd, &shape_rcmds_list);
 }
 
 /*
@@ -294,7 +287,7 @@ void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
         cmd->shape.x2 = ex;
         cmd->shape.y2 = ey;
 
-        queue_command(cmd);
+        queue_command(cmd, &shape_rcmds_list);
 }
 
 /*
@@ -313,7 +306,7 @@ void R_AddRect(Colour c, int x, int y, int w, int h)
         cmd->shape.w = w;
         cmd->shape.h = h;
 
-        queue_command(cmd);
+        queue_command(cmd, &shape_rcmds_list);
 }
 
 /*
@@ -330,7 +323,7 @@ void R_AddPoint(Colour c, int x, int y)
         cmd->shape.x = x;
         cmd->shape.y = y;
 
-        queue_command(cmd);
+        queue_command(cmd, &shape_rcmds_list);
 }
 
 /*
@@ -339,23 +332,27 @@ void R_AddPoint(Colour c, int x, int y)
 ecode_t R_Init()
 {
 	if (s_state.window != NULL) {
-		Panic("Window already created");
+		Panic("Renderer already initialised");
 	}
 
         rcmd_pool = LAlloc_Create(RCMD_POOL_SZ * sizeof(struct render_command),
                 "rcmds");
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		Panic("SDL_Init() failed");
+		Panic(Fmt("SDL_Init() failed (%s)", SDL_GetError()));
 	}
 
 	if (IMG_Init(IMG_INIT_PNG) < 0) {
-		Panic("IMG_Init() failed");
+		Panic(Fmt("IMG_Init() failed (%s)", IMG_GetError()));
 	}
 
         if (TTF_Init() < 0) {
-                Panic("TTF_Init() failed");
+                Panic(Fmt("TTF_Init() failed (%s)", TTF_GetError()));
         }
+
+        atexit(TTF_Quit);
+        atexit(IMG_Quit);
+        atexit(SDL_Quit);
 
 	s_state.window = SDL_CreateWindow(g_Config.gameName,
 				SDL_WINDOWPOS_UNDEFINED,
@@ -364,7 +361,7 @@ ecode_t R_Init()
 				g_Config.windowHeight,
 				SDL_WINDOW_SHOWN);
 	if (!s_state.window)
-		Panic("Failed to create window");
+		Panic(Fmt("Failed to create window (%s)", SDL_GetError()));
 
         uint32_t flags = SDL_RENDERER_ACCELERATED;
 
@@ -372,9 +369,8 @@ ecode_t R_Init()
                 flags |= SDL_RENDERER_PRESENTVSYNC;
 
         s_state.renderer = SDL_CreateRenderer(s_state.window, -1, flags);
-        if (!s_state.renderer) {
-                Panic("Failed to create renderer");
-        }
+        if (!s_state.renderer)
+                Panic(Fmt("Failed to create renderer", SDL_GetError()));
 
         set_colour(COLOUR_BLACK);
         load_fonts();
@@ -404,7 +400,7 @@ ecode_t R_Shutdown()
 
                 memset(&s_state, 0, sizeof(s_state));
 
-		Trace(CHAN_REND, "shutdown");
+		Trace(CHAN_REND, "shutdown complete");
 
 		return EOK;
 	}
@@ -473,14 +469,10 @@ static void process_psys_cmd(struct psystem_cmd *cmd)
 
 }
 
-/*
- * process_commands
- *      Process all commands in the command queue.
- */
-static void process_commands()
+static void process_queue(struct list_head *q)
 {
         struct list_head *iter, *safe;
-        list_for_each_safe(iter, safe, &command_list) {
+        list_for_each_safe(iter, safe, q) {
                 struct render_command *cmd = list_entry(iter,
                         struct render_command, list);
 
@@ -505,21 +497,53 @@ static void process_commands()
         }
 }
 
-// TODO: Count different types of command?
+/*
+ * process_commands
+ *      Process all commands in the command queues. They are processed in a
+ *      certain order--a good ol' painters' algorithm.
+ */
+static void process_commands()
+{
+        /* The order, from back to front (for now):
+         *      map
+         *      sprites
+         *      debug shapes
+         *      debug text
+         */
+
+        process_queue(&shape_rcmds_list);
+        process_queue(&text_rcmds_list);
+}
+
 static void debug_commands()
 {
-        struct render_command *cmd = NULL;
+        struct render_command *iter = NULL;
         uint32_t counts[4] = {0};
         uint32_t total = 0;
 
-        list_for_each_entry(cmd, &command_list, list) {
-                counts[cmd->type]++;
+        list_for_each_entry(iter, &text_rcmds_list, list) {
+                counts[RC_TEXT]++;
                 total++;
         }
 
-        const char *s = Fmt("rcmds: %u (T: %u S: %u SP: %u P: %u)",
+        list_for_each_entry(iter, &shape_rcmds_list, list) {
+                counts[RC_SHAPE]++;
+                total++;
+        }
+
+        list_for_each_entry(iter, &sprite_rcmds_list, list) {
+                counts[RC_SPRITE]++;
+                total++;
+        }
+
+        list_for_each_entry(iter, &psys_rcmds_list, list) {
+                counts[RC_PSYSTEM]++;
+                total++;
+        }
+
+        const char *s = Fmt("rcmds: %u (t: %u, sh: %u, sp: %u, p: %u) / %d",
                 total, counts[RC_TEXT], counts[RC_SHAPE],
-                counts[RC_SPRITE], counts[RC_PSYSTEM]);
+                counts[RC_SPRITE], counts[RC_PSYSTEM], RCMD_POOL_SZ);
 
         accepting_cmds = true;
         R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, g_Config.windowHeight - 50,

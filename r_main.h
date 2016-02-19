@@ -4,6 +4,7 @@
  * r_main.h
  *	Main renderer module. Pulls in everything else.
  */
+#include "r_cache.h"
 
 typedef enum Colour {
         COLOUR_BLACK,
