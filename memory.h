@@ -41,6 +41,7 @@ typedef struct LAllocState LAllocState;
 
 LAllocState *LAlloc_Create(size_t sz);
 void LAlloc_Destroy(LAllocState *state);
+void LAlloc_Reset(LAllocState *state);
 
 /* Returns a pointer to a memory block of the given size from the memory
  * managed by the given allocator state, or Panic()s and doesn't return if

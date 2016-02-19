@@ -11,7 +11,10 @@
 #define FONT_FILENAME "./res/pragmatapro.ttf"
 #define FONT_SMALLSIZE 14
 #define FONT_NORMSIZE 16
-#define RCMD_POOL_SZ 32 // TODO: DYNGROW?
+
+/* We use a linear allocator to hold the render commands for each frame,
+ * so a maximum of RCMD_POOL_SZ can exist at once. */
+#define RCMD_POOL_SZ 32
 
 /* The global renderer state. */
 // TODO: This might need sharing between modules, unfortunately
@@ -88,10 +91,11 @@ struct render_command {
 // TODO: Multiple queues for each type of command
 static LIST_HEAD(command_list);
 
-static MemPool *rcmd_pool = NULL;
+static LAllocState *rcmd_pool = NULL;
 
 /* Static renderer state. */
 static struct rstate s_state;
+static bool accepting_cmds = false;
 
 /* These map enum Colour values to SDL_Color structures. */
 static SDL_Color colour_table[] = {
@@ -193,7 +197,8 @@ static void render_rstring(struct rstring *rstr, int x, int y)
  */
 static struct render_command *create_command()
 {
-        return (struct render_command *) PAlloc(rcmd_pool);
+        return (struct render_command *) LAlloc(rcmd_pool,
+                sizeof(struct render_command));
 }
 
 /*
@@ -222,8 +227,18 @@ static void destroy_command(struct render_command *cmd)
         case RC_PSYSTEM:
                 break;
         }
+}
 
-        PFree(rcmd_pool, cmd);
+/*
+ * check_accepting
+ *      Check if we're currrently accepting render commands. If we aren't,
+ *      Panic().
+ */
+static void check_accepting()
+{
+        if (!accepting_cmds) {
+                Panic("Render command added outside of entity render function");
+        }
 }
 
 /*
@@ -231,6 +246,7 @@ static void destroy_command(struct render_command *cmd)
  */
 void R_AddString(FontSize sz, Colour c, int x, int y, const char *str)
 {
+        check_accepting();
         struct render_command *cmd = create_command();
 
         cmd->type = RC_TEXT;
@@ -248,6 +264,7 @@ void R_AddString(FontSize sz, Colour c, int x, int y, const char *str)
  */
 void R_AddCircle(Colour c, int x, int y, float r)
 {
+        check_accepting();
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -265,6 +282,7 @@ void R_AddCircle(Colour c, int x, int y, float r)
  */
 void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
 {
+        check_accepting();
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -283,6 +301,7 @@ void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
  */
 void R_AddRect(Colour c, int x, int y, int w, int h)
 {
+        check_accepting();
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -301,6 +320,7 @@ void R_AddRect(Colour c, int x, int y, int w, int h)
  */
 void R_AddPoint(Colour c, int x, int y)
 {
+        check_accepting();
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -321,8 +341,7 @@ ecode_t Rend_Init()
 		Panic("Window already created");
 	}
 
-        rcmd_pool = Pool_Create(RCMD_POOL_SZ, sizeof(struct render_command),
-                                POOL_FIXEDSIZE, "rcmds");
+        rcmd_pool = LAlloc_Create(RCMD_POOL_SZ * sizeof(struct render_command));
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		Panic("SDL_Init() failed");
@@ -355,7 +374,7 @@ ecode_t Rend_Init()
                 Panic("Failed to create renderer");
         }
 
-        set_colour(COLOUR_GREY);
+        set_colour(COLOUR_BLACK);
         load_fonts();
 
 	Trace(CHAN_REND, Fmt("initialised renderer %dx%d", g_Config.windowWidth,
@@ -370,7 +389,7 @@ ecode_t Rend_Init()
 ecode_t Rend_Shutdown()
 {
 	if (s_state.window != NULL) {
-                Pool_Destroy(rcmd_pool);
+                LAlloc_Destroy(rcmd_pool);
 
                 SDL_DestroyRenderer(s_state.renderer);
 		SDL_DestroyWindow(s_state.window);
@@ -391,6 +410,22 @@ ecode_t Rend_Shutdown()
 	Trace(CHAN_REND, "called unnecessarily");
 
 	return EFAIL;
+}
+
+/*
+ * R_BeginCommands
+ */
+void R_BeginCommands()
+{
+        accepting_cmds = true;
+}
+
+/*
+ * R_EndCommands
+ */
+void R_EndCommands()
+{
+        accepting_cmds = false;
 }
 
 /* These are the individual command processing functions. Each one processes
@@ -463,6 +498,7 @@ static void process_commands()
 
                 list_del(iter);
                 destroy_command(cmd);
+                LAlloc_Reset(rcmd_pool);
         }
 }
 

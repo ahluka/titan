@@ -239,6 +239,15 @@ void LAlloc_Destroy(LAllocState *state)
 }
 
 /*
+ * LAlloc_Reset
+ */
+void LAlloc_Reset(LAllocState *state)
+{
+        assert(state != NULL);
+        state->current = state->base;
+}
+
+/*
  * LAlloc
  */
 void *LAlloc(LAllocState *state, size_t sz)
