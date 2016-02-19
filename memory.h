@@ -39,7 +39,7 @@ uint32_t MemFreeCount();
  */
 typedef struct LAllocState LAllocState;
 
-LAllocState *LAlloc_Create(size_t sz);
+LAllocState *LAlloc_Create(size_t sz, const char *dbgName);
 void LAlloc_Destroy(LAllocState *state);
 void LAlloc_Reset(LAllocState *state);
 

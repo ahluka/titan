@@ -14,6 +14,7 @@ typedef struct MemTag {
 } MemTag;
 
 struct LAllocState {
+        const char *name;
 	uint8_t *base;
 	uint8_t *current;
 	size_t blockSize;
@@ -217,11 +218,16 @@ uint32_t MemFreeCount()
 /*
  * LAlloc_Create
  */
-LAllocState *LAlloc_Create(size_t sz)
+LAllocState *LAlloc_Create(size_t sz, const char *dbgName)
 {
 	assert(sz > 0);
 
 	LAllocState *state = MemAlloc(sizeof(*state));
+        if (!dbgName)
+                state->name = "unnamed";
+        else
+                state->name = dbgName;
+
 	state->base = MemAlloc(sz);
 	state->current = state->base;
 	state->blockSize = sz;
@@ -257,8 +263,8 @@ void *LAlloc(LAllocState *state, size_t sz)
 
 	if (state->current + sz > state->base + state->blockSize) {
 		size_t left = state->blockSize - (state->current - state->base);
-		Panic(Fmt("Cannot satisfy allocation of %u %s (%u %s left)",
-			SaneVal(sz), SaneAff(sz), SaneVal(left), SaneAff(left)));
+		Panic(Fmt("Cannot satisfy allocation of %u %s from %s (%u %s left)",
+			SaneVal(sz), SaneAff(sz), state->name, SaneVal(left), SaneAff(left)));
 	}
 
 	void *ptr = state->current;

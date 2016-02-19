@@ -11,7 +11,8 @@ typedef enum Colour {
         COLOUR_RED,
         COLOUR_GREEN,
         COLOUR_BLUE,
-        COLOUR_GREY
+        COLOUR_GREY,
+        COLOUR_MAGENTA
 } Colour;
 
 typedef enum FontSize {

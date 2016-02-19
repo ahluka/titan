@@ -104,7 +104,8 @@ static SDL_Color colour_table[] = {
         {255, 0, 0, 255},
         {0, 255, 0, 255},
         {0, 0, 255, 255},
-        {48, 48, 48, 255}
+        {48, 48, 48, 255},
+        {255, 0, 255, 255}
 };
 
 static void set_colour(enum Colour colour)
@@ -341,7 +342,8 @@ ecode_t Rend_Init()
 		Panic("Window already created");
 	}
 
-        rcmd_pool = LAlloc_Create(RCMD_POOL_SZ * sizeof(struct render_command));
+        rcmd_pool = LAlloc_Create(RCMD_POOL_SZ * sizeof(struct render_command),
+                "rcmds");
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		Panic("SDL_Init() failed");
@@ -502,6 +504,18 @@ static void process_commands()
         }
 }
 
+static uint32_t rcmd_count()
+{
+        struct render_command *cmd = NULL;
+        uint32_t n = 0;
+
+        list_for_each_entry(cmd, &command_list, list) {
+                n++;
+        }
+
+        return n;
+}
+
 /*
  * Rend_Frame
  *	Render the current frame.
@@ -516,6 +530,12 @@ ecode_t Rend_Frame()
 
         SDL_RenderClear(s_state.renderer);
         SDL_GetRenderDrawColor(s_state.renderer, &r, &g, &b, &a);
+
+        /* Output the number of commands, this can be removed. */
+        accepting_cmds = true;
+        R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, g_Config.windowHeight - 50,
+                Fmt("rcmds: %u", rcmd_count()));
+        accepting_cmds = false;
 
         process_commands();
 
