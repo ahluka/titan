@@ -19,7 +19,7 @@ struct ConfigData g_Config = {0};
 static int
 INIHandler(void *usr, const char *sec, const char *key, const char *val)
 {
-	Trace(CHAN_DBG, Fmt("handling [%s] %s=%s", sec, key, val));
+	// Trace(CHAN_DBG, Fmt("handling [%s] %s=%s", sec, key, val));
 
 	if (MATCH("General", "Game")) {
 		g_Config.gameName = sstrdup(val);

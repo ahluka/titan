@@ -79,7 +79,7 @@ ecode_t Mainloop()
 	struct Timer stepTimer;
 	uint32_t frameCount = 0, nextFPS = 0, fps = 0;
 
-	if (Rend_Init() != EOK) {
+	if (R_Init() != EOK) {
 		Trace(CHAN_INFO, "failed to init renderer");
 		return EFAIL;
 	}
@@ -89,14 +89,14 @@ ecode_t Mainloop()
 		return EFAIL;
 	}
 
-        Entity *test = Ent_Spawn("default");
+        // Entity *test = Ent_Spawn("default");
         // struct property *prop = NULL;
         // list_for_each_entry(prop, &test->properties.props, list) {
         //         Trace(CHAN_DBG, Fmt("%s = %s", prop->key, prop->val));
         // }
-        test->Render = TestRender;
-        test->Update = TestUpdate;
-        test->updateType = ENT_UPDATE_FRAME;
+        // test->Render = TestRender;
+        // test->Update = TestUpdate;
+        // test->updateType = ENT_UPDATE_FRAME;
         // test->nextUpdate = g_Globals.timeNowMs + 1000;
         // Ent_Free(test);
 
@@ -148,7 +148,7 @@ ecode_t Mainloop()
                 }
                 R_EndCommands();
 
-		Rend_Frame();
+		R_RenderFrame();
 		frameCount++;
 	}
 
@@ -157,7 +157,7 @@ ecode_t Mainloop()
 		return EFAIL;
 	}
 
-	if (Rend_Shutdown() != EOK) {
+	if (R_Shutdown() != EOK) {
 		Trace(CHAN_INFO, "failed to shutdown renderer");
 		return EFAIL;
 	}

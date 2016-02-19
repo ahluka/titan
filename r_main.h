@@ -29,8 +29,8 @@ void R_AddRect(Colour c, int x, int y, int w, int h);
 void R_AddPoint(Colour c, int x, int y);
 
 /* These are called by the base modules. */
-ecode_t Rend_Init();
-ecode_t Rend_Shutdown();
-ecode_t Rend_Frame();
+ecode_t R_Init();
+ecode_t R_Shutdown();
+ecode_t R_RenderFrame();
 void R_BeginCommands();
 void R_EndCommands();

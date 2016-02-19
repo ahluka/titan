@@ -334,9 +334,9 @@ void R_AddPoint(Colour c, int x, int y)
 }
 
 /*
- * Rend_Init
+ * R_Init
  */
-ecode_t Rend_Init()
+ecode_t R_Init()
 {
 	if (s_state.window != NULL) {
 		Panic("Window already created");
@@ -386,9 +386,9 @@ ecode_t Rend_Init()
 }
 
 /*
- * Rend_Shutdown
+ * R_Shutdown
  */
-ecode_t Rend_Shutdown()
+ecode_t R_Shutdown()
 {
 	if (s_state.window != NULL) {
                 LAlloc_Destroy(rcmd_pool);
@@ -437,6 +437,7 @@ static void process_text_cmd(struct text_cmd *cmd)
 {
         struct rstring rstr = create_rstring(cmd->colour, cmd->size, cmd->str);
         render_rstring(&rstr, cmd->x, cmd->y);
+        SDL_DestroyTexture(rstr.texture);
 }
 
 static void process_shape_cmd(struct shape_cmd *cmd)
@@ -504,23 +505,33 @@ static void process_commands()
         }
 }
 
-static uint32_t rcmd_count()
+// TODO: Count different types of command?
+static void debug_commands()
 {
         struct render_command *cmd = NULL;
-        uint32_t n = 0;
+        uint32_t counts[4] = {0};
+        uint32_t total = 0;
 
         list_for_each_entry(cmd, &command_list, list) {
-                n++;
+                counts[cmd->type]++;
+                total++;
         }
 
-        return n;
+        const char *s = Fmt("rcmds: %u (T: %u S: %u SP: %u P: %u)",
+                total, counts[RC_TEXT], counts[RC_SHAPE],
+                counts[RC_SPRITE], counts[RC_PSYSTEM]);
+
+        accepting_cmds = true;
+        R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, g_Config.windowHeight - 50,
+                s);
+        accepting_cmds = false;
 }
 
 /*
- * Rend_Frame
+ * R_RenderFrame
  *	Render the current frame.
  */
-ecode_t Rend_Frame()
+ecode_t R_RenderFrame()
 {
 	if (!s_state.window) {
 		Panic("Renderer not initialised");
@@ -532,11 +543,7 @@ ecode_t Rend_Frame()
         SDL_GetRenderDrawColor(s_state.renderer, &r, &g, &b, &a);
 
         /* Output the number of commands, this can be removed. */
-        accepting_cmds = true;
-        R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, g_Config.windowHeight - 50,
-                Fmt("rcmds: %u", rcmd_count()));
-        accepting_cmds = false;
-
+        debug_commands();
         process_commands();
 
         SDL_SetRenderDrawColor(s_state.renderer, r, g, b, a);
