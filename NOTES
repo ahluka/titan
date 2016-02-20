@@ -31,8 +31,9 @@ Renderer
 
 Map
 ---
-* Map module is responsible only for loading map files and providing a struct
+* Map module is responsible for loading map files and providing a struct
   the renderer can use. This includes the map's tilemap image.
+* World query functions are also defined here.
 
 Viewport
 --------

@@ -38,9 +38,6 @@ struct rstring {
  * up ready for processing at the end of every frame. A separate queue is
  * maintained for each type of render command so they can be processed in the
  * ideal order--this is simpler than sorting a single list every frame.
- *
- * Each queue *could* be a list of different structs, but it isn't so that a
- * single memory pool can be used.
  */
 enum command_type {
         RC_TEXT,
