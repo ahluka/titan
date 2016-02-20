@@ -2,6 +2,9 @@
 #include "panic.h"
 #include "vec.h"
 
+/*
+* VParseStr
+*/
 static bool valid_vector(const char *str)
 {
         size_t n = strlen(str);
@@ -38,9 +41,6 @@ static char *remove_spaces(const char *str)
         return copy;
 }
 
-/*
- * VParseStr
- */
 ecode_t VParseStr(const char *str, vec2_t out)
 {
         assert(str != NULL);
@@ -64,7 +64,31 @@ ecode_t VParseStr(const char *str, vec2_t out)
         return EOK;
 }
 
+/*
+ * lerp
+ */
+float lerp(float from, float to, float t)
+{
+        return from + ((to - from) * t);
+}
+
+/*
+ * VLerp
+ */
+void VLerp(vec2_t out, vec2_t from, vec2_t to, vec_t t)
+{
+        out[X] = lerp(from[X], to[X], t);
+        out[Y] = lerp(from[Y], to[Y], t);
+}
+
 void VecTests()
 {
-
+        // vec2_t from = {1.0f, 2.0f};
+        // vec2_t to = {5.0f, 6.0f};
+        // vec2_t r;
+        //
+        // VLerp(r, from, to, 0.75f);
+        //
+        // Trace(CHAN_DBG, Fmt("%2.2f, %2.2f", r[X], r[Y]));
+        // Trace(CHAN_DBG, Fmt("%2.2f", lerp(3, 5, 0.5f)));
 }

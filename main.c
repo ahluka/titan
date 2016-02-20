@@ -9,6 +9,7 @@
 #include "memory.h"
 #include "event.h"
 #include <time.h>
+#include "vec.h"
 
 #define CONFIG_FILENAME "config.ini"
 
@@ -79,7 +80,6 @@ static void DoTests()
 {
 	// Event *evt = Evt_Create("test-event", EVENT_BROADCAST | EVENT_QUEUED);
 	// Evt_Enqueue(evt);
-
 
 }
 

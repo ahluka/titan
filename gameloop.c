@@ -19,12 +19,6 @@ UNUSED static ecode_t TestUpdate(Entity *self, float dT)
 {
         VMA(self->pos, self->vel, dT);
 
-        if (self->pos[X] >= g_Config.windowWidth ||
-                self->pos[Y] >= g_Config.windowHeight ||
-                self->pos[X] <= 0 || self->pos[Y] <= 0) {
-                        VNeg(self->vel, self->vel);
-        }
-
         return EOK;
 }
 
@@ -89,14 +83,10 @@ ecode_t Mainloop()
 		return EFAIL;
 	}
 
-        Entity *test = Ent_Spawn("default");
-        // struct property *prop = NULL;
-        // list_for_each_entry(prop, &test->properties.props, list) {
-        //         Trace(CHAN_DBG, Fmt("%s = %s", prop->key, prop->val));
-        // }
-        test->Render = TestRender;
-        test->Update = TestUpdate;
-        test->updateType = ENT_UPDATE_FRAME;
+        // Entity *test = Ent_Spawn("default");
+        // test->Render = TestRender;
+        // test->Update = TestUpdate;
+        // test->updateType = ENT_UPDATE_FRAME;
         // test->nextUpdate = g_Globals.timeNowMs + 1000;
         // Ent_Free(test);
 
@@ -133,11 +123,10 @@ ecode_t Mainloop()
                         frameCount = 0;
                 }
 
-
 		/* Render */
                 R_BeginCommands();
                 R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, 10,
-                        Fmt("FPS: %u - dT: %3.4f - T: %u - M: %lu", fps, dT,
+                        Fmt("FPS: %u - dT: %3.4f - T: %u - M: %lu bytes", fps, dT,
                         g_Globals.timeNowMs, MemCurrentUsage()));
 
                 if (Ent_RenderAll() != EOK) {

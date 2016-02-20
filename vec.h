@@ -43,4 +43,7 @@ static inline void VNorm(vec2_t v)
  */
 ecode_t VParseStr(const char *str, vec2_t out);
 
+float lerp(float from, float to, float t);
+void VLerp(vec2_t out, vec2_t from, vec2_t to, vec_t t);
+
 void VecTests();

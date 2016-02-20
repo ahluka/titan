@@ -2,7 +2,7 @@
 
 /*
  * r_main.h
- *	Main renderer module. Pulls in everything else.
+ *	Main renderer module.
  */
 #include "r_cache.h"
 

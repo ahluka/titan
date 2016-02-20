@@ -4,6 +4,8 @@
 #include "panic.h"
 #include "list.h"
 #include "memory.h"
+#include "vec.h"
+#include "r_viewport.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -21,6 +23,7 @@
 struct rstate {
 	SDL_Window *window;
         SDL_Renderer *renderer;
+        struct viewport viewport;
         TTF_Font *small_font, *normal_font;
 };
 
@@ -88,7 +91,7 @@ struct render_command {
 };
 
 /* The queue of render_command's. */
-// TODO: Multiple queues for each type of command
+static uint32_t discarded_cmds = 0;
 static LIST_HEAD(text_rcmds_list);
 static LIST_HEAD(shape_rcmds_list);
 static LIST_HEAD(sprite_rcmds_list);
@@ -115,6 +118,18 @@ static void set_colour(enum Colour colour)
 {
         SDL_Color c = colour_table[colour];
         SDL_SetRenderDrawColor(s_state.renderer, c.r, c.g, c.b, c.a);
+}
+
+/*
+ * lerp_colour
+ */
+UNUSED static void
+lerp_colour(SDL_Color *out, SDL_Color *from, SDL_Color *to, float t)
+{
+        out->r = lerp(from->r, to->r, t);
+        out->g = lerp(from->g, to->g, t);
+        out->b = lerp(from->b, to->b, t);
+        out->a = 255; /* Is this what we want? */
 }
 
 /*
@@ -259,6 +274,12 @@ void R_AddString(FontSize sz, Colour c, int x, int y, const char *str)
 void R_AddCircle(Colour c, int x, int y, float r)
 {
         check_accepting();
+
+        if (!viewport_contains_xy(&s_state.viewport, x, y)) {
+                discarded_cmds++;
+                return;
+        }
+
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -277,6 +298,13 @@ void R_AddCircle(Colour c, int x, int y, float r)
 void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
 {
         check_accepting();
+
+        if (!viewport_contains_xy(&s_state.viewport, sx, sy) &&
+                !viewport_contains_xy(&s_state.viewport, ex, ey)) {
+                discarded_cmds++;
+                return;
+        }
+
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -296,6 +324,12 @@ void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
 void R_AddRect(Colour c, int x, int y, int w, int h)
 {
         check_accepting();
+
+        if (!viewport_contains_xy(&s_state.viewport, x, y)) {
+                discarded_cmds++;
+                return;
+        }
+
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -315,6 +349,12 @@ void R_AddRect(Colour c, int x, int y, int w, int h)
 void R_AddPoint(Colour c, int x, int y)
 {
         check_accepting();
+
+        if (!viewport_contains_xy(&s_state.viewport, x, y)) {
+                discarded_cmds++;
+                return;
+        }
+
         struct render_command *cmd = create_command();
 
         cmd->type = RC_SHAPE;
@@ -374,6 +414,9 @@ ecode_t R_Init()
 
         set_colour(COLOUR_BLACK);
         load_fonts();
+
+        s_state.viewport = create_viewport(0, 0, g_Config.windowWidth,
+                g_Config.windowHeight);
 
 	Trace(CHAN_REND, Fmt("initialised renderer %dx%d", g_Config.windowWidth,
 						g_Config.windowHeight));
@@ -493,7 +536,6 @@ static void process_queue(struct list_head *q)
 
                 list_del(iter);
                 destroy_command(cmd);
-                LAlloc_Reset(rcmd_pool);
         }
 }
 
@@ -507,12 +549,18 @@ static void process_commands()
         /* The order, from back to front (for now):
          *      map
          *      sprites
+         *      psystems
          *      debug shapes
          *      debug text
          */
 
+        // map
+        // process_queue(&sprite_rcmds_list);
+        // process_queue(&psys_rcmds_list);
         process_queue(&shape_rcmds_list);
         process_queue(&text_rcmds_list);
+
+        LAlloc_Reset(rcmd_pool);
 }
 
 static void debug_commands()
@@ -541,14 +589,17 @@ static void debug_commands()
                 total++;
         }
 
-        const char *s = Fmt("rcmds: %u (t: %u, sh: %u, sp: %u, p: %u) / %d",
+        const char *s = Fmt("rcmds: %u (t: %u, sh: %u, sp: %u, p: %u) / %d" \
+                                " - discarded: %u",
                 total, counts[RC_TEXT], counts[RC_SHAPE],
-                counts[RC_SPRITE], counts[RC_PSYSTEM], RCMD_POOL_SZ);
+                counts[RC_SPRITE], counts[RC_PSYSTEM], RCMD_POOL_SZ,
+                discarded_cmds);
 
         accepting_cmds = true;
         R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, g_Config.windowHeight - 50,
                 s);
         accepting_cmds = false;
+        discarded_cmds = 0;
 }
 
 /*
@@ -566,7 +617,6 @@ ecode_t R_RenderFrame()
         SDL_RenderClear(s_state.renderer);
         SDL_GetRenderDrawColor(s_state.renderer, &r, &g, &b, &a);
 
-        /* Output the number of commands, this can be removed. */
         debug_commands();
         process_commands();
 

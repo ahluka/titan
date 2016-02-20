@@ -28,3 +28,15 @@ Renderer
 * NO subsystem directly renders anything; renderer accepts draw commands and
   should end up with a list of these at the end of each frame. It then
   processes the command list to draw everything, sorting commands as necessary.
+
+Map
+---
+* Map module is responsible only for loading map files and providing a struct
+  the renderer can use. This includes the map's tilemap image.
+
+Viewport
+--------
+* Basically manages a rectangle which represents the current viewport as it is
+  panned around the map. The renderer uses it to decide what needs to be
+  rendered each frame; render commands which fall outside of the viewport are
+  discarded.
