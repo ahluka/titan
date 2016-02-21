@@ -90,10 +90,10 @@ uint32_t FNVHash(void *data, int32_t len)
 }
 
 /*
- * Hash
+ * hash
  *
  */
-uint32_t Hash(const void *data, int32_t len)
+uint32_t hash(const void *data, int32_t len)
 {
 	return ElfHash(data, len);
 }

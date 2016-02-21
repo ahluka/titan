@@ -24,11 +24,11 @@
 //
 // /*
 //  * HashMod
-//  *	Hash the given string and modulo it down between 0 and prime - 1.
+//  *	hash the given string and modulo it down between 0 and prime - 1.
 //  */
 // static uint32_t HashMod(const char *str, int prime)
 // {
-// 	uint32_t h = Hash(str, strlen(str));
+// 	uint32_t h = hash(str, strlen(str));
 // 	return h % prime;
 // }
 //
@@ -56,7 +56,7 @@
 // 	assert(size > 0);
 //
 // 	if (!IsPrime(size)) {
-// 		Trace(CHAN_INFO, Fmt("WARNING: non-prime table size of %d",
+// 		trace(CHAN_INFO, fmt("WARNING: non-prime table size of %d",
 // 			size));
 // 	}
 //
@@ -167,8 +167,8 @@
 //
 // 	if (FindDatum(table, key, hash, data) == EOK) {
 // 		if (table->policy == HT_UNIQUE) {
-// 			Trace(CHAN_INFO,
-// 				Fmt("WARNING: Duplicate in HT_UNIQUE table "
+// 			trace(CHAN_INFO,
+// 				fmt("WARNING: Duplicate in HT_UNIQUE table "
 // 				"(key: '%s')", key));
 // 			MemFree(dat);
 // 			if (table->freeType == HT_FREE_DATA) {
@@ -181,7 +181,7 @@
 //
 // 	List_Add(table->table[hash], dat);
 //
-// 	Trace(CHAN_DBG, Fmt("key '%s' at index '%u', bucket size %d",
+// 	trace(CHAN_DBG, fmt("key '%s' at index '%u', bucket size %d",
 // 		dat->key, hash, List_GetSize(table->table[hash])));
 //
 // 	return EOK;
@@ -249,8 +249,8 @@
 // // static bool s_Table[SZ_PRIME] = {false};
 // static void TestDataset(HashTable *table)
 // {
-// 	FileHandle hnd = Files_OpenFile("hashtest.txt");
-// 	const char *txt = (const char *) Files_GetData(hnd);
+// 	filehandle_t hnd = open_file("hashtest.txt");
+// 	const char *txt = (const char *) file_get_data(hnd);
 // 	char word[128] = {0};
 // 	size_t ofs = 0;
 //
@@ -259,5 +259,5 @@
 // 		ofs += strlen(word) + 1; /* +1 for the newline */
 // 	}
 //
-// 	Files_CloseFile(hnd);
+// 	close_file(hnd);
 // }

@@ -1,14 +1,14 @@
 #include "base.h"
 #include "globals.h"
 
-Globals g_Globals;
+struct globals g_globals;
 
-void InitGlobals()
+void init_globals()
 {
-	if (g_Globals.initialised)
+	if (g_globals.initialised)
 		return;
 
-	g_Globals.initialised = true;
-	g_Globals.debugTracingOn = true;
-	g_Globals.timeNowMs = 0;
+	g_globals.initialised = true;
+	g_globals.debugTracingOn = true;
+	g_globals.timeNowMs = 0;
 }

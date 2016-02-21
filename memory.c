@@ -94,7 +94,7 @@ void _MemFree(void *ptr)
 
 	MemTag *tag = FindTag(ptr);
 	if (!tag) {
-		Panic(Fmt("failed to find tag for %p", ptr));
+		panic(fmt("failed to find tag for %p", ptr));
 	}
 
 	s_CurrentUsage -= tag->blockSize;
@@ -169,7 +169,7 @@ void MemStats()
 	uint64_t htotal = 0;
         uint64_t filtered = 0;
 
-	Trace(CHAN_MEM, "Memory blocks being tracked:");
+	trace(CHAN_MEM, "Memory blocks being tracked:");
 	for (MemTag *i = s_Tags, *prev = i; i; prev = i, i = i->next) {
                 if (is_filtered(i->file)) {
                         filtered++;
@@ -183,24 +183,24 @@ void MemStats()
 		}
 
 		if (same > 0) {
-			Trace(CHAN_MEM, Fmt("  (%d hidden totalling %u %s)",
+			trace(CHAN_MEM, fmt("  (%d hidden totalling %u %s)",
 				same, SaneVal(htotal), SaneAff(htotal)));
 			same = 0;
 			htotal = 0;
 		}
 
-		Trace(CHAN_MEM, Fmt(" %u %s from %s:%ld in %s",
+		trace(CHAN_MEM, fmt(" %u %s from %s:%ld in %s",
 			SaneVal(i->blockSize), SaneAff(i->blockSize),
 			i->file, i->line, i->func));
 	}
-	Trace(CHAN_MEM, Fmt("Total: %u %s, highest: %u %s",
+	trace(CHAN_MEM, fmt("Total: %u %s, highest: %u %s",
 		SaneVal(s_CurrentUsage), SaneAff(s_CurrentUsage),
 		SaneVal(s_HighWater), SaneAff(s_HighWater)));
 
         if (filtered > 0) {
-                Trace(CHAN_MEM, Fmt("(%lu filtered) from:", filtered));
+                trace(CHAN_MEM, fmt("(%lu filtered) from:", filtered));
                 for (int i = 0; i < nfilt; i++) {
-                        Trace(CHAN_MEM, Fmt("\t%s", filt[i]));
+                        trace(CHAN_MEM, fmt("\t%s", filt[i]));
                 }
         }
 }
@@ -263,7 +263,7 @@ void *LAlloc(LAllocState *state, size_t sz)
 
 	if (state->current + sz > state->base + state->blockSize) {
 		size_t left = state->blockSize - (state->current - state->base);
-		Panic(Fmt("Cannot satisfy allocation of %u %s from %s (%u %s left)",
+		panic(fmt("Cannot satisfy allocation of %u %s from %s (%u %s left)",
 			SaneVal(sz), SaneAff(sz), state->name, SaneVal(left), SaneAff(left)));
 	}
 

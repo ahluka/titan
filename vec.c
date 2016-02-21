@@ -10,14 +10,14 @@ static bool valid_vector(const char *str)
         size_t n = strlen(str);
 
         if (str[0] != '(') {
-                Trace(CHAN_INFO, "vector must start with '('");
-                Trace(CHAN_INFO, Fmt("  got: %s", str));
+                trace(CHAN_INFO, "vector must start with '('");
+                trace(CHAN_INFO, fmt("  got: %s", str));
                 return false;
         }
 
         if (str[n-1] != ')') {
-                Trace(CHAN_INFO, "vector must end with '('");
-                Trace(CHAN_INFO, Fmt("  got: %s", str));
+                trace(CHAN_INFO, "vector must end with '('");
+                trace(CHAN_INFO, fmt("  got: %s", str));
                 return false;
         }
 
@@ -46,7 +46,7 @@ ecode_t VParseStr(const char *str, vec2_t out)
         assert(str != NULL);
         assert(out != NULL);
 
-        // Trace(CHAN_DBG, Fmt("parsing: %s", str));
+        // trace(CHAN_DBG, fmt("parsing: %s", str));
 
         if (!valid_vector(str))
                 return EFAIL;
@@ -54,7 +54,7 @@ ecode_t VParseStr(const char *str, vec2_t out)
         vec_t x = 0, y = 0;
         char *v = remove_spaces(str);
         if (sscanf(v, "(%f %f)", &x, &y) != 2) {
-                Trace(CHAN_INFO, Fmt("failed to parse %s", str));
+                trace(CHAN_INFO, fmt("failed to parse %s", str));
                 return EFAIL;
         }
 
@@ -89,6 +89,6 @@ void VecTests()
         //
         // VLerp(r, from, to, 0.75f);
         //
-        // Trace(CHAN_DBG, Fmt("%2.2f, %2.2f", r[X], r[Y]));
-        // Trace(CHAN_DBG, Fmt("%2.2f", lerp(3, 5, 0.5f)));
+        // trace(CHAN_DBG, fmt("%2.2f, %2.2f", r[X], r[Y]));
+        // trace(CHAN_DBG, fmt("%2.2f", lerp(3, 5, 0.5f)));
 }

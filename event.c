@@ -8,9 +8,9 @@
  * ("queued events"), and one for events that are timestamped ("future events").
  */
 #define MAX_QUEUED_EVENTS 64
-UNUSED static Event *s_QueuedEvents[MAX_QUEUED_EVENTS] = {NULL};
-UNUSED static Event *s_FutureEvents[MAX_QUEUED_EVENTS] = {NULL};
-static MemPool *s_EventPool = NULL;
+UNUSED static event_t *s_QueuedEvents[MAX_QUEUED_EVENTS] = {NULL};
+UNUSED static event_t *s_FutureEvents[MAX_QUEUED_EVENTS] = {NULL};
+static mem_pool_t *s_EventPool = NULL;
 
 /*
  * ValidFlags
@@ -26,53 +26,53 @@ static bool ValidFlags(uint32_t flags)
 }
 
 /*
- * Evt_Init
+ * init_events
  */
-ecode_t Evt_Init()
+ecode_t init_events()
 {
 	if (s_EventPool != NULL) {
-		Trace(CHAN_INFO, "Event system already initialised");
+		trace(CHAN_INFO, "event system already initialised");
 		return EFAIL;
 	}
 
-	s_EventPool = Pool_Create(MAX_QUEUED_EVENTS, sizeof(Event),
+	s_EventPool = create_pool(MAX_QUEUED_EVENTS, sizeof(event_t),
 		POOL_DYNGROW, "EventPool");
 
 	return EOK;
 }
 
 /*
- * Evt_Shutdown
+ * shutdown_events
  */
-ecode_t Evt_Shutdown()
+ecode_t shutdown_events()
 {
 	if (!s_EventPool) {
-		Trace(CHAN_INFO, "Event system doesn't need shutting down");
+		trace(CHAN_INFO, "event system doesn't need shutting down");
 		return EFAIL;
 	}
 
-	Pool_Destroy(s_EventPool);
+	destroy_pool(s_EventPool);
 	s_EventPool = NULL;
 
 	return EOK;
 }
 
 /*
- * Evt_Create
+ * create_event
  */
-Event *Evt_Create(const char *name, uint32_t flags)
+event_t *create_event(const char *name, uint32_t flags)
 {
         assert(name != NULL);
 
         if (!s_EventPool) {
-                Panic("Event system not initialised");
+                panic("event_t system not initialised");
         }
 
         if (!ValidFlags(flags)) {
-                Panic("Invalid flags");
+                panic("Invalid flags");
         }
 
-        Event *evt = PAlloc(s_EventPool);
+        event_t *evt = PAlloc(s_EventPool);
         evt->name = name;
         evt->flags = flags;
 
@@ -80,9 +80,9 @@ Event *Evt_Create(const char *name, uint32_t flags)
 }
 
 /*
- * Evt_Enqueue
+ * queue_event
  */
-ecode_t Evt_Enqueue(Event *event)
+ecode_t queue_event(event_t *event)
 {
 	assert(event != NULL);
 
@@ -90,9 +90,9 @@ ecode_t Evt_Enqueue(Event *event)
 }
 
 /*
- * Evt_Process
+ * process_events
  */
-ecode_t Evt_Process()
+ecode_t process_events()
 {
 	// TODO: PFree() events after they've been processed.
 	return EOK;

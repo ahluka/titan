@@ -9,32 +9,32 @@ static dsfmt_t s_State = {0};
 /*
  * dSFMT_Init
  */
-void Random_Init(uint32_t seed)
+void init_random(uint32_t seed)
 {
 	dsfmt_init_gen_rand(&s_State, seed);
 }
 
-uint32_t Random_u32()
+uint32_t rand_u32()
 {
 	return dsfmt_genrand_uint32(&s_State);
 }
 
-uint32_t Random_u32R(uint32_t max)
+uint32_t rand_u32_max(uint32_t max)
 {
-	return Random_u32() % max;
+	return rand_u32() % max;
 }
 
-uint32_t Random_u32B(uint32_t min, uint32_t max)
+uint32_t rand_u32_range(uint32_t min, uint32_t max)
 {
-	return min + (Random_u32() % (max - min));
+	return min + (rand_u32() % (max - min));
 }
 
-double Random_d()
+double rand_dbl()
 {
 	return dsfmt_genrand_open_open(&s_State);
 }
 
-float Random_f()
+float rand_flt()
 {
 	return (float) dsfmt_genrand_open_open(&s_State);
 }
@@ -48,13 +48,13 @@ float Random_f()
  */
 // void dSFMT_Test()
 // {
-// 	Trace("Some random uint32's:");
+// 	trace("Some random uint32's:");
 // 	for (int i = 0; i < 10; i++) {
-// 		Trace(Fmt("\t%u", dSFMT_RandR2(50, 150)));
+// 		trace(fmt("\t%u", dSFMT_RandR2(50, 150)));
 // 	}
 //
-// 	Trace("Some random doubles:");
+// 	trace("Some random doubles:");
 // 	for (int i = 0; i < 10; i++) {
-// 		Trace(Fmt("\t%f", dSFMT_RandD()));
+// 		trace(fmt("\t%f", dSFMT_RandD()));
 // 	}
 // }

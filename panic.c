@@ -42,9 +42,9 @@ static void CloseLog()
 }
 
 /*
- * SetTraceChannels
+ * set_trace_channels
  */
-void SetTraceChannels(int mask)
+void set_trace_channels(int mask)
 {
 	s_Channels = mask;
 #ifdef NDEBUG
@@ -76,10 +76,10 @@ static const char *ChannelToStr(int chan)
 }
 
 /*
- * Trace
+ * trace
  *	Write the given message to stdout and the log file.
  */
-void _Trace(
+void _trace(
 	const char *file,
 	long line,
 	const char *func,
@@ -132,11 +132,11 @@ void _Trace(
 }
 
 /*
- * Panic
+ * panic
  * 	Prints the given message to stderr and the log file, then exit()'s.
  *	We like simple error handling. Crash and burn.
  */
-void _Panic(const char *file, long line, const char *func, const char *message)
+void _panic(const char *file, long line, const char *func, const char *message)
 {
 	assert(message != NULL);
 

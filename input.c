@@ -1,11 +1,9 @@
 /*
-	TODO: All this crap...
-
-	either fire off input events, or just expose an input table for other
-	modules to examine as and when?
-		In_Update to check s_Keys once per frame and fire events for
-		keys that are down?
-*/
+ * TODO: Input module...
+ *      Either fire off input events or just expose the key table for other
+ *      modules to examine as and when?
+ *              In_Update() to check key table once per frame and fire events?
+ */
 #include "base.h"
 #include "panic.h"
 #include "input.h"
@@ -18,8 +16,8 @@ static bool s_Keys[SDL_NUM_SCANCODES] = {false};
 
 void In_SetKeyDown(SDL_Scancode scode)
 {
-// 	Trace(CHAN_DBG,
-//		Fmt("scancode %d keycode %d", scode,
+// 	trace(CHAN_DBG,
+//		fmt("scancode %d keycode %d", scode,
 //		SDL_GetKeyFromScancode(scode)));
 
 	s_Keys[scode] = true;
@@ -27,8 +25,8 @@ void In_SetKeyDown(SDL_Scancode scode)
 
 void In_SetKeyUp(SDL_Scancode scode)
 {
-// 	Trace(CHAN_DBG,
-		// Fmt("scancode %d keycode %d", scode,
+// 	trace(CHAN_DBG,
+		// fmt("scancode %d keycode %d", scode,
 		// SDL_GetKeyFromScancode(scode)));
 
 	s_Keys[scode] = false;

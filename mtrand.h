@@ -8,13 +8,13 @@
 /* Initialise the PRNG state with the given seed.
  * Typically (uint32_t) time(NULL);
  */
-void Random_Init(uint32_t seed);
+void init_random(uint32_t seed);
 
-uint32_t Random_u32();
-uint32_t Random_u32R(uint32_t max);
-uint32_t Random_u32B(uint32_t min, uint32_t max);
-double Random_d();
-float Random_f();
+uint32_t rand_u32();
+uint32_t rand_u32_max(uint32_t max);
+uint32_t rand_u32_range(uint32_t min, uint32_t max);
+double rand_dbl();
+float rand_flt();
 
 
 // void dSFMT_Test();

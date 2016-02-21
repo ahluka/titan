@@ -24,7 +24,7 @@
  */
 #pragma once
 
-/* Event flags, separated by mutual exclusion. */
+/* event_t flags, separated by mutual exclusion. */
 #define EVENT_BROADCAST	(1 << 0)
 #define EVENT_TARGETED	(1 << 1)
 #define EVENT_AREA	(1 << 2)
@@ -32,20 +32,20 @@
 #define EVENT_QUEUED	(1 << 3)
 #define EVENT_FUTURE	(1 << 4)
 
-typedef struct Event {
+typedef struct event {
 	const char *name;
 	uint32_t flags;
-} Event;
+} event_t;
 
 /* Called during startup and shutdown. */
-ecode_t Evt_Init();
-ecode_t Evt_Shutdown();
+ecode_t init_events();
+ecode_t shutdown_events();
 
 /* Allocate a new event ready to be sent off. */
-Event *Evt_Create(const char *name, uint32_t flags);
+event_t *create_event(const char *name, uint32_t flags);
 
 /* Queue the given event up ready for processing. */
-ecode_t Evt_Enqueue(Event *event);
+ecode_t queue_event(event_t *event);
 
 /* Process all events currently queued. */
-ecode_t Evt_Process();
+ecode_t process_events();

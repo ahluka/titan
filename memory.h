@@ -44,7 +44,7 @@ void LAlloc_Destroy(LAllocState *state);
 void LAlloc_Reset(LAllocState *state);
 
 /* Returns a pointer to a memory block of the given size from the memory
- * managed by the given allocator state, or Panic()s and doesn't return if
+ * managed by the given allocator state, or panic()s and doesn't return if
  * there isn't enough memory to satisfy.
  */
 void *LAlloc(LAllocState *state, size_t sz);

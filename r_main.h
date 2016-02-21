@@ -23,15 +23,15 @@ typedef enum FontSize {
 
 /* Rendering commands. Can only be called during an entity's Render()
  * function as that's when we want all commands to be added. */
-void R_AddString(FontSize sz, Colour c, int x, int y, const char *str);
-void R_AddCircle(Colour c, int x, int y, float r);
-void R_AddLine(Colour c, int sx, int sy, int ex, int ey);
-void R_AddRect(Colour c, int x, int y, int w, int h);
-void R_AddPoint(Colour c, int x, int y);
+void r_add_string(FontSize sz, Colour c, int x, int y, const char *str);
+void r_add_circle(Colour c, int x, int y, float r);
+void r_add_line(Colour c, int sx, int sy, int ex, int ey);
+void r_add_rect(Colour c, int x, int y, int w, int h);
+void r_add_point(Colour c, int x, int y);
 
 /* These are called by the base modules. */
-ecode_t R_Init();
-ecode_t R_Shutdown();
-ecode_t R_RenderFrame();
-void R_BeginCommands();
-void R_EndCommands();
+ecode_t init_renderer();
+ecode_t shutdown_renderer();
+ecode_t r_render_frame();
+void r_begin_commands();
+void r_end_commands();

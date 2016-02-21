@@ -11,8 +11,8 @@
 #include <SDL2/SDL_ttf.h>
 
 #define FONT_FILENAME "./res/pragmatapro.ttf"
-#define FONT_SMALLSIZE 14
-#define FONT_NORMSIZE 16
+#define FONT_SMALLSIZE 13
+#define FONT_NORMSIZE 15
 
 /* We use a linear allocator to hold the render commands for each frame,
  * so a maximum of RCMD_POOL_SZ can exist at once. */
@@ -136,12 +136,12 @@ static void load_fonts()
 {
         s_state.small_font = TTF_OpenFont(FONT_FILENAME, FONT_SMALLSIZE);
         if (!s_state.small_font) {
-                Panic(Fmt("Failed to load fonts: %s", TTF_GetError()));
+                panic(fmt("Failed to load fonts: %s", TTF_GetError()));
         }
 
         s_state.normal_font = TTF_OpenFont(FONT_FILENAME, FONT_NORMSIZE);
         if (!s_state.normal_font) {
-                Panic(Fmt("Failed to load fonts: %s", TTF_GetError()));
+                panic(fmt("Failed to load fonts: %s", TTF_GetError()));
         }
 }
 
@@ -162,18 +162,18 @@ create_rstring(Colour colour, FontSize sz, const char *str)
         if (sz == FONT_SMALL) {
                 surf = TTF_RenderText_Solid(s_state.small_font, str, col);
                 if (!surf) {
-                        Panic(Fmt("Failed to render string (%s)", TTF_GetError()));
+                        panic(fmt("Failed to render string (%s)", TTF_GetError()));
                 }
         } else if (sz == FONT_NORMAL) {
                 surf = TTF_RenderText_Solid(s_state.normal_font, str, col);
                 if (!surf) {
-                        Panic(Fmt("Failed to render string (%s)", TTF_GetError()));
+                        panic(fmt("Failed to render string (%s)", TTF_GetError()));
                 }
         }
 
         ret.texture = SDL_CreateTextureFromSurface(s_state.renderer, surf);
         if (!ret.texture) {
-                Panic(Fmt("Failed to create texture (%s)", SDL_GetError()));
+                panic(fmt("Failed to create texture (%s)", SDL_GetError()));
         }
 
         ret.w = surf->w;
@@ -193,7 +193,7 @@ static void render_rstring(struct rstring *rstr, int x, int y)
 
         SDL_Rect dst = {x, y, rstr->w, rstr->h};
         if (SDL_RenderCopy(s_state.renderer, rstr->texture, NULL, &dst) < 0) {
-                Panic(Fmt("SDL_RenderCopy failed (%s)", SDL_GetError()));
+                panic(fmt("SDL_RenderCopy failed (%s)", SDL_GetError()));
         }
 }
 
@@ -238,19 +238,19 @@ static void destroy_command(struct render_command *cmd)
 /*
  * check_accepting
  *      Check if we're currrently accepting render commands. If we aren't,
- *      Panic().
+ *      panic().
  */
 static void check_accepting()
 {
         if (!accepting_cmds) {
-                Panic("Command submitted outside of entity render function");
+                panic("Command submitted outside of entity render function");
         }
 }
 
 /*
- * R_AddString
+ * r_add_string
  */
-void R_AddString(FontSize sz, Colour c, int x, int y, const char *str)
+void r_add_string(FontSize sz, Colour c, int x, int y, const char *str)
 {
         check_accepting();
         struct render_command *cmd = create_command();
@@ -266,9 +266,9 @@ void R_AddString(FontSize sz, Colour c, int x, int y, const char *str)
 }
 
 /*
- * R_AddCircle
+ * r_add_circle
  */
-void R_AddCircle(Colour c, int x, int y, float r)
+void r_add_circle(Colour c, int x, int y, float r)
 {
         check_accepting();
 
@@ -290,9 +290,9 @@ void R_AddCircle(Colour c, int x, int y, float r)
 }
 
 /*
- * R_AddLine
+ * r_add_line
  */
-void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
+void r_add_line(Colour c, int sx, int sy, int ex, int ey)
 {
         check_accepting();
 
@@ -316,9 +316,9 @@ void R_AddLine(Colour c, int sx, int sy, int ex, int ey)
 }
 
 /*
- * R_AddRect
+ * r_add_rect
  */
-void R_AddRect(Colour c, int x, int y, int w, int h)
+void r_add_rect(Colour c, int x, int y, int w, int h)
 {
         check_accepting();
 
@@ -341,9 +341,9 @@ void R_AddRect(Colour c, int x, int y, int w, int h)
 }
 
 /*
- * R_AddPoint
+ * r_add_point
  */
-void R_AddPoint(Colour c, int x, int y)
+void r_add_point(Colour c, int x, int y)
 {
         check_accepting();
 
@@ -364,27 +364,27 @@ void R_AddPoint(Colour c, int x, int y)
 }
 
 /*
- * R_Init
+ * init_renderer
  */
-ecode_t R_Init()
+ecode_t init_renderer()
 {
 	if (s_state.window != NULL) {
-		Panic("Renderer already initialised");
+		panic("Renderer already initialised");
 	}
 
         rcmd_pool = LAlloc_Create(RCMD_POOL_SZ * sizeof(struct render_command),
                 "rcmds");
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		Panic(Fmt("SDL_Init() failed (%s)", SDL_GetError()));
+		panic(fmt("SDL_Init() failed (%s)", SDL_GetError()));
 	}
 
 	if (IMG_Init(IMG_INIT_PNG) < 0) {
-		Panic(Fmt("IMG_Init() failed (%s)", IMG_GetError()));
+		panic(fmt("IMG_Init() failed (%s)", IMG_GetError()));
 	}
 
         if (TTF_Init() < 0) {
-                Panic(Fmt("TTF_Init() failed (%s)", TTF_GetError()));
+                panic(fmt("TTF_Init() failed (%s)", TTF_GetError()));
         }
 
         atexit(TTF_Quit);
@@ -398,7 +398,7 @@ ecode_t R_Init()
 				g_Config.windowHeight,
 				SDL_WINDOW_SHOWN);
 	if (!s_state.window)
-		Panic(Fmt("Failed to create window (%s)", SDL_GetError()));
+		panic(fmt("Failed to create window (%s)", SDL_GetError()));
 
         uint32_t flags = SDL_RENDERER_ACCELERATED;
 
@@ -407,7 +407,7 @@ ecode_t R_Init()
 
         s_state.renderer = SDL_CreateRenderer(s_state.window, -1, flags);
         if (!s_state.renderer)
-                Panic(Fmt("Failed to create renderer", SDL_GetError()));
+                panic(fmt("Failed to create renderer", SDL_GetError()));
 
         set_colour(COLOUR_BLACK);
         load_fonts();
@@ -415,16 +415,16 @@ ecode_t R_Init()
         s_state.viewport = create_viewport(0, 0, g_Config.windowWidth,
                 g_Config.windowHeight);
 
-	Trace(CHAN_REND, Fmt("initialised renderer %dx%d", g_Config.windowWidth,
+	trace(CHAN_REND, fmt("initialised renderer %dx%d", g_Config.windowWidth,
 						g_Config.windowHeight));
 
 	return EOK;
 }
 
 /*
- * R_Shutdown
+ * shutdown_renderer
  */
-ecode_t R_Shutdown()
+ecode_t shutdown_renderer()
 {
 	if (s_state.window != NULL) {
                 LAlloc_Destroy(rcmd_pool);
@@ -440,28 +440,28 @@ ecode_t R_Shutdown()
 
                 memset(&s_state, 0, sizeof(s_state));
 
-		Trace(CHAN_REND, "shutdown complete");
+		trace(CHAN_REND, "shutdown complete");
 
 		return EOK;
 	}
 
-	Trace(CHAN_REND, "called unnecessarily");
+	trace(CHAN_REND, "called unnecessarily");
 
 	return EFAIL;
 }
 
 /*
- * R_BeginCommands
+ * r_begin_commands
  */
-void R_BeginCommands()
+void r_begin_commands()
 {
         accepting_cmds = true;
 }
 
 /*
- * R_EndCommands
+ * r_end_commands
  */
-void R_EndCommands()
+void r_end_commands()
 {
         accepting_cmds = false;
 }
@@ -480,7 +480,7 @@ static void process_shape_cmd(struct shape_cmd *cmd)
 {
         switch (cmd->type) {
         case SHAPE_CIRCLE:
-                Panic("Circle not impemented yet");
+                panic("Circle not impemented yet");
                 break;
         case SHAPE_LINE:
                 set_colour(cmd->colour);
@@ -586,27 +586,27 @@ static void debug_commands()
                 total++;
         }
 
-        const char *s = Fmt("rcmds: %u (t: %u, sh: %u, sp: %u, p: %u) / %d" \
+        const char *s = fmt("rcmds: %u (t: %u, sh: %u, sp: %u, p: %u) / %d" \
                                 " - discarded: %u",
                 total, counts[RC_TEXT], counts[RC_SHAPE],
                 counts[RC_SPRITE], counts[RC_PSYSTEM], RCMD_POOL_SZ,
                 discarded_cmds);
 
         accepting_cmds = true;
-        R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, g_Config.windowHeight - 50,
+        r_add_string(FONT_NORMAL, COLOUR_WHITE, 10, g_Config.windowHeight - 50,
                 s);
         accepting_cmds = false;
         discarded_cmds = 0;
 }
 
 /*
- * R_RenderFrame
+ * r_render_frame
  *	Render the current frame.
  */
-ecode_t R_RenderFrame()
+ecode_t r_render_frame()
 {
 	if (!s_state.window) {
-		Panic("Renderer not initialised");
+		panic("Renderer not initialised");
 	}
 
         uint8_t r, g, b, a;

@@ -4,7 +4,7 @@
 /* Any variables that will be needed by multiple modules should go here.
  * This includes flags passed to the executable.
  */
-typedef struct Globals_s {
+struct globals {
 	bool initialised;
 
 	bool debugTracingOn;
@@ -13,11 +13,13 @@ typedef struct Globals_s {
 	uint32_t timeNowMs;
 
 	// TODO: program flags
-} Globals;
+};
 
-extern Globals g_Globals;
+extern struct globals g_globals;
 
-void InitGlobals();
+#define TIMENOW_PLUS(ms) g_globals.timeNowMs + (ms)
+
+void init_globals();
 
 
 #endif /* __GLOBALS_H__ */

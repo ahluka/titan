@@ -15,25 +15,25 @@
 #include <SDL2/SDL.h>
 
 
-UNUSED static ecode_t TestUpdate(Entity *self, float dT)
+UNUSED static ecode_t test_update(entity_t *self, float dT)
 {
         VMA(self->pos, self->vel, dT);
 
         return EOK;
 }
 
-UNUSED static ecode_t TestRender(Entity *self)
+UNUSED static ecode_t test_render(entity_t *self)
 {
-        R_AddRect(COLOUR_RED, self->pos[X], self->pos[Y], 35, 35);
+        r_add_rect(COLOUR_RED, self->pos[X], self->pos[Y], 35, 35);
 
         return EOK;
 }
 
 /*
- * CheckDbgKeys
+ * check_dbg_keys
  *	Checks if a debug key was pressed and runs commands as necessary.
  */
-static void CheckDbgKeys(SDL_Keycode code)
+static void check_dbg_keys(SDL_Keycode code)
 {
 	switch (code) {
 	case SDLK_F12:
@@ -46,40 +46,40 @@ static void CheckDbgKeys(SDL_Keycode code)
  * UpdateGameworld
  *	Update the gameworld state.
  */
-static void UpdateGameworld(float dT)
+static void update_gameworld(float dT)
 {
-	if (Ent_UpdateAll(dT) != EOK) {
-		Panic("Failed to update Entities");
+	if (update_entities(dT) != EOK) {
+		panic("Failed to update Entities");
 	}
 
-	if (Evt_Process() != EOK) {
-		Panic("Failed to process events");
+	if (process_events() != EOK) {
+		panic("Failed to process events");
 	}
 }
 
 
 /*
- * Mainloop
+ * mainloop
  * Enter the main loop. Each iteration:
  *	- Read user input
- *	- Update gameworld (run AI, etc.)
+ *	- Update gameworld
  *	- Render view
  */
-ecode_t Mainloop()
+ecode_t mainloop()
 {
 	SDL_Event event;
 	bool quit = false;
-	struct Timer gameTimer;
-	struct Timer stepTimer;
+	struct timer gameTimer;
+	struct timer stepTimer;
 	uint32_t frameCount = 0, nextFPS = 0, fps = 0;
 
-	if (R_Init() != EOK) {
-		Trace(CHAN_INFO, "failed to init renderer");
+	if (init_renderer() != EOK) {
+		trace(CHAN_INFO, "failed to init renderer");
 		return EFAIL;
 	}
 
-	if (Ent_Init() != EOK) {
-		Trace(CHAN_INFO, "failed to init entity manager");
+	if (init_entities() != EOK) {
+		trace(CHAN_INFO, "failed to init entity manager");
 		return EFAIL;
 	}
 
@@ -87,10 +87,10 @@ ecode_t Mainloop()
         // test->Render = TestRender;
         // test->Update = TestUpdate;
         // test->updateType = ENT_UPDATE_FRAME;
-        // test->nextUpdate = g_Globals.timeNowMs + 1000;
+        // test->nextUpdate = g_globals.timeNowMs + 1000;
         // Ent_Free(test);
 
-        Timer_Start(&gameTimer);
+        start_timer(&gameTimer);
 
 	while (!quit) {
 		/* input */
@@ -100,7 +100,7 @@ ecode_t Mainloop()
 			} else if (event.type == SDL_KEYUP) {
 				In_SetKeyUp((int32_t) event.key.keysym.scancode);
 			} else if (event.type == SDL_KEYDOWN) {
-				CheckDbgKeys(event.key.keysym.sym);
+				check_dbg_keys(event.key.keysym.sym);
 				In_SetKeyDown((int32_t) event.key.keysym.scancode);
 
 				// FIXME: this is for debugging only; remove it
@@ -111,40 +111,40 @@ ecode_t Mainloop()
 		}
 
 		/* Update gameworld */
-		float dT = Timer_GetTicks(&stepTimer) / 1000.f;
-		g_Globals.timeNowMs = Timer_GetTicks(&gameTimer);
-		UpdateGameworld(dT);
-		Timer_Start(&stepTimer); /* restart */
+		float dT = timer_get_ticks(&stepTimer) / 1000.f;
+		g_globals.timeNowMs = timer_get_ticks(&gameTimer);
+		update_gameworld(dT);
+		start_timer(&stepTimer); /* restart */
 
                 /* FPS */
-                if (nextFPS <= g_Globals.timeNowMs) {
-                        nextFPS = g_Globals.timeNowMs + 1000;
+                if (nextFPS <= g_globals.timeNowMs) {
+                        nextFPS = g_globals.timeNowMs + 1000;
                         fps = frameCount;
                         frameCount = 0;
                 }
 
 		/* Render */
-                R_BeginCommands();
-                R_AddString(FONT_NORMAL, COLOUR_WHITE, 10, 10,
-                        Fmt("FPS: %u - dT: %3.4f - T: %u - M: %lu bytes", fps, dT,
-                        g_Globals.timeNowMs, MemCurrentUsage()));
+                r_begin_commands();
+                r_add_string(FONT_NORMAL, COLOUR_WHITE, 10, 10,
+                        fmt("FPS: %u - dT: %3.4f - T: %u - M: %lu bytes", fps, dT,
+                        g_globals.timeNowMs, MemCurrentUsage()));
 
-                if (Ent_RenderAll() != EOK) {
-                        Panic("Failed to render entities");
+                if (render_all_entities() != EOK) {
+                        panic("Failed to render entities");
                 }
-                R_EndCommands();
+                r_end_commands();
 
-		R_RenderFrame();
+		r_render_frame();
 		frameCount++;
 	}
 
-	if (Ent_Shutdown() != EOK) {
-		Trace(CHAN_INFO, "failed to shutdown entity manager");
+	if (shutdown_entities() != EOK) {
+		trace(CHAN_INFO, "failed to shutdown entity manager");
 		return EFAIL;
 	}
 
-	if (R_Shutdown() != EOK) {
-		Trace(CHAN_INFO, "failed to shutdown renderer");
+	if (shutdown_renderer() != EOK) {
+		trace(CHAN_INFO, "failed to shutdown renderer");
 		return EFAIL;
 	}
 

@@ -8,12 +8,12 @@ struct PoolNode {
 	void *block;
 };
 
-struct MemPool {
+struct mem_pool {
 	struct list_head freeBlocks;
 	struct list_head usedBlocks;
 	size_t blockSize;
 	size_t blockCount;
-	PoolPolicy policy;
+	pool_policy_t policy;
 	const char *debugName;
 };
 
@@ -29,10 +29,10 @@ static struct PoolNode *NewPoolNode(size_t blocksz)
  *	Adds the specified number of new nodes to the pool's free list,
  *	and increments the pool's blockCount accordingly.
  */
-static void AddFreeNodes(MemPool *pool, size_t count, size_t sz)
+static void AddFreeNodes(mem_pool_t *pool, size_t count, size_t sz)
 {
 	if (sz != pool->blockSize) {
-		Panic(Fmt("Block size mismatch in '%s'"));
+		panic(fmt("Block size mismatch in '%s'"));
 	}
 
 	for (size_t i = 0; i < count; i++) {
@@ -50,13 +50,13 @@ static void AddFreeNodes(MemPool *pool, size_t count, size_t sz)
  *	If there are no free blocks available and the pool's policy is
  *	POOL_DYNGROW, then we double the pool's size with AddFreeNodes().
  */
-static void *NextFreeBlock(MemPool *pool)
+static void *NextFreeBlock(mem_pool_t *pool)
 {
 	if (list_empty(&pool->freeBlocks)) {
 		if (pool->policy == POOL_FIXEDSIZE) {
-			Panic(Fmt("'%s' is empty", pool->debugName));
+			panic(fmt("'%s' is empty", pool->debugName));
 		} else {
-			Trace(CHAN_DBG, Fmt("Resizing '%s'", pool->debugName));
+			trace(CHAN_DBG, fmt("Resizing '%s'", pool->debugName));
 			AddFreeNodes(pool, pool->blockCount, pool->blockSize);
 		}
 	}
@@ -75,7 +75,7 @@ static void *NextFreeBlock(MemPool *pool)
 }
 
 // FIXME: This can be removed eventually
-UNUSED static void DebugPool(MemPool *pool)
+UNUSED static void DebugPool(mem_pool_t *pool)
 {
 	size_t u = 0, f = 0;
 
@@ -88,21 +88,21 @@ UNUSED static void DebugPool(MemPool *pool)
                 u++;
         }
 
-	Trace(CHAN_DBG, Fmt("[%s] USED: %u, FREE: %u", pool->debugName, u, f));
+	trace(CHAN_DBG, fmt("[%s] USED: %u, FREE: %u", pool->debugName, u, f));
 }
 
 /*
- * Pool_Create
+ * create_pool
  */
-MemPool *Pool_Create(size_t blockCount,
+mem_pool_t *create_pool(size_t blockCount,
 	size_t blockSize,
-	PoolPolicy policy,
+	pool_policy_t policy,
 	const char *debugName)
 {
 	assert(blockSize > 0);
 	assert(blockCount > 0);
 
-	MemPool *pool = MemAlloc(sizeof(*pool));
+	mem_pool_t *pool = MemAlloc(sizeof(*pool));
 	pool->blockSize = blockSize;
 	pool->policy = policy;
 	pool->debugName = debugName;
@@ -112,20 +112,20 @@ MemPool *Pool_Create(size_t blockCount,
 
 	AddFreeNodes(pool, blockCount, blockSize);
 
-	Trace(CHAN_DBG, Fmt("Pool '%s' %u x %u bytes", debugName,
+	trace(CHAN_DBG, fmt("Pool '%s' %u x %u bytes", debugName,
 		blockCount, blockSize));
 
 	return pool;
 }
 
 /*
- * Pool_Destroy
+ * destroy_pool
  */
-void Pool_Destroy(MemPool *pool)
+void destroy_pool(mem_pool_t *pool)
 {
 	assert(pool != NULL);
 
-        Trace(CHAN_DBG, Fmt("pool '%s'", pool->debugName));
+        trace(CHAN_DBG, fmt("pool '%s'", pool->debugName));
 
         struct PoolNode *i, *safe;
         list_for_each_entry_safe(i, safe, &pool->usedBlocks, list) {
@@ -144,7 +144,7 @@ void Pool_Destroy(MemPool *pool)
 /*
  * PAlloc
  */
-void *PAlloc(MemPool *pool)
+void *PAlloc(mem_pool_t *pool)
 {
 	assert(pool != NULL);
 
@@ -156,7 +156,7 @@ void *PAlloc(MemPool *pool)
 /*
  * PFree
  */
-void PFree(MemPool *pool, void *block)
+void PFree(mem_pool_t *pool, void *block)
 {
 	assert(pool != NULL);
 	assert(block != NULL);
@@ -173,5 +173,5 @@ void PFree(MemPool *pool, void *block)
                 }
         }
 
-	Panic("Invalid block");
+	panic("Invalid block");
 }

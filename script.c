@@ -5,8 +5,8 @@
 static Tcl_Interp *s_Interp = NULL;
 #define BASEDEFS_FILENAME "./res/tcl/basedefs.tcl"
 
-DECLARE_SCRIPT_PROC(ScriptTests) {
-	Trace(CHAN_SCRIPT, "In ScriptTests()");
+SCRIPT_PROCEDURE(ScriptTests) {
+	trace(CHAN_SCRIPT, "In ScriptTests()");
 
 	return TCL_OK;
 }
@@ -16,43 +16,43 @@ DECLARE_SCRIPT_PROC(ScriptTests) {
  * Call after a Tcl API function doesn't return TCL_OK and the result string
  * will be an error message.
  */
-static void PrintError(Tcl_Interp *i)
+static void print_error(Tcl_Interp *i)
 {
-	Trace(CHAN_SCRIPT, Fmt("%s", Tcl_GetStringResult(i)));
+	trace(CHAN_SCRIPT, fmt("%s", Tcl_GetStringResult(i)));
 }
 
 /*
- * Script_Init
+ * init_script
  *	Initialise Tcl and register some of our own core functionality.
  */
-ecode_t Script_Init()
+ecode_t init_script()
 {
 	if (s_Interp != NULL) {
-		Panic("Script module already initialised");
+		panic("Script module already initialised");
 	}
 
 	s_Interp = Tcl_CreateInterp();
 	if (!s_Interp) {
-		Trace(CHAN_SCRIPT, "Failed to create Tcl interpreter");
+		trace(CHAN_SCRIPT, "Failed to create Tcl interpreter");
 		return EFAIL;
 	}
 
-	Script_RegisterCommand(ScriptTests, "scrtests");
+	script_register_command(ScriptTests, "scrtests");
 
 	/* Load and run bootstrap script */
 	if (Tcl_EvalFile(s_Interp, BASEDEFS_FILENAME) != TCL_OK) {
-		Trace(CHAN_SCRIPT, Fmt("Couldn't eval %s", BASEDEFS_FILENAME));
-		PrintError(s_Interp);
+		trace(CHAN_SCRIPT, fmt("Couldn't eval %s", BASEDEFS_FILENAME));
+		print_error(s_Interp);
 		return EFAIL;
 	}
 
 	return EOK;
 }
 
-ecode_t Script_Shutdown()
+ecode_t shutdown_script()
 {
 	if (!s_Interp) {
-		Panic("Script module not initialised");
+		panic("Script module not initialised");
 	}
 
 	Tcl_DeleteInterp(s_Interp);
@@ -62,19 +62,19 @@ ecode_t Script_Shutdown()
 }
 
 /*
- * Script_ExecString
+ * script_execstr
  */
-ecode_t Script_ExecString(const char *str)
+ecode_t script_execstr(const char *str)
 {
 	assert(str != NULL);
 
 	if (!s_Interp) {
-		Panic("Script module not initialised");
+		panic("Script module not initialised");
 	}
 
 	if (Tcl_Eval(s_Interp, str) != TCL_OK) {
-		Trace(CHAN_INFO, Fmt("Failed to eval string '%s'", str));
-		PrintError(s_Interp);
+		trace(CHAN_INFO, fmt("Failed to eval string '%s'", str));
+		print_error(s_Interp);
 		return EFAIL;
 	}
 
@@ -82,16 +82,16 @@ ecode_t Script_ExecString(const char *str)
 }
 
 /*
- * Script_ExecFile
+ * script_execfile
  */
-ecode_t Script_ExecFile(FileHandle handle)
+ecode_t script_execfile(filehandle_t handle)
 {
-	const char *contents = (const char *) Files_GetData(handle);
-	const char *path = Files_GetPath(handle);
+	const char *contents = (const char *) file_get_data(handle);
+	const char *path = file_get_path(handle);
 
 	if (Tcl_Eval(s_Interp, contents) != TCL_OK) {
-		Trace(CHAN_INFO, Fmt("Failed to eval file '%s'", path));
-		PrintError(s_Interp);
+		trace(CHAN_INFO, fmt("Failed to eval file '%s'", path));
+		print_error(s_Interp);
 		return EFAIL;
 	}
 
@@ -99,20 +99,20 @@ ecode_t Script_ExecFile(FileHandle handle)
 }
 
 /*
- * Script_RegisterCommand
+ * script_register_command
  */
-ecode_t Script_RegisterCommand(ScriptCmdFunc fn, const char *name)
+ecode_t script_register_command(ScriptCmdFunc fn, const char *name)
 {
 	assert(fn != NULL);
 	assert(name != NULL);
 
 	if (!s_Interp) {
-		Panic("Script module not initialised");
+		panic("Script module not initialised");
 	}
 
 	if (Tcl_CreateObjCommand(s_Interp, name, fn, NULL, NULL) == NULL) {
-		Script_Shutdown();
-		Panic(Fmt("Failed to register '%s'", name));
+		shutdown_script();
+		panic(fmt("Failed to register '%s'", name));
 	}
 
 	return EOK;

@@ -3,17 +3,17 @@
  */
 #pragma once
 
-typedef enum PoolPolicy {
+typedef enum pool_policy {
 	POOL_FIXEDSIZE,
 	POOL_DYNGROW
-} PoolPolicy;
+} pool_policy_t;
 
-typedef struct MemPool MemPool;
+typedef struct mem_pool mem_pool_t;
 
-MemPool *Pool_Create(size_t blockCount,
+mem_pool_t *create_pool(size_t blockCount,
 	size_t blockSize,
-	PoolPolicy policy,
+	pool_policy_t policy,
 	const char *debugName);
-void Pool_Destroy(MemPool *pool);
-void *PAlloc(MemPool *pool);
-void PFree(MemPool *pool, void *block);
+void destroy_pool(mem_pool_t *pool);
+void *PAlloc(mem_pool_t *pool);
+void PFree(mem_pool_t *pool, void *block);

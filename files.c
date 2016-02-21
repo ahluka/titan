@@ -13,29 +13,29 @@ struct File {
 	char *path;
 	int fd;
 	size_t size;
-	FileHandle handle;
+	filehandle_t handle;
 	uint8_t *data;
 };
 
 #define MAX_OPENFILES	64
 static struct File *s_Files[MAX_OPENFILES] = {NULL};
 
-/* The next handle that will be returned by Files_OpenFile().
+/* The next handle that will be returned by open_file().
  * We start at 1 because we use 0 as invalid.
  */
-static FileHandle s_NextHandle = 1;
+static filehandle_t s_NextHandle = 1;
 
 /* All file access are relative to here */
 static const char *s_FilesRoot = NULL;
 
-const char *Files_GetRoot()
+const char *get_root_path()
 {
         return s_FilesRoot;
 }
 
 /*
  * NextFreeFile
- *	Returns a pointer to the next free File slot, or calls Panic().
+ *	Returns a pointer to the next free File slot, or calls panic().
  */
 static struct File *NextFreeFile()
 {
@@ -44,21 +44,21 @@ static struct File *NextFreeFile()
 			if (s_Files[i] == NULL)
 				s_Files[i] = MemAlloc(sizeof(struct File));
 
-			//Trace(Fmt("selected slot %d", i));
+			//trace(fmt("selected slot %d", i));
 			s_Files[i]->inUse = true;
 			return s_Files[i];
 		}
 	}
 
-	Panic(Fmt("reached MAX_OPENFILES, which is %d", MAX_OPENFILES));
+	panic(fmt("reached MAX_OPENFILES, which is %d", MAX_OPENFILES));
 	return NULL;	/* not reached; shuts up warning */
 }
 
 /*
  * GetFileByHandle
- *	Returns the struct File * associated with the given FileHandle.
+ *	Returns the struct File * associated with the given filehandle_t.
  */
-static struct File *GetFileByHandle(FileHandle handle)
+static struct File *GetFileByHandle(filehandle_t handle)
 {
 	for (int i = 0; i < MAX_OPENFILES; i++) {
 		if (s_Files[i]->handle == handle)
@@ -88,25 +88,25 @@ static void DestroyFile(struct File *f)
 }
 
 /*
- * Files_Init
+ * init_files
  */
 void Files_ListOpen(int argc, char **argv);
-ecode_t Files_Init(const char *rootDir)
+ecode_t init_files(const char *rootDir)
 {
         if (rootDir[strlen(rootDir)-1] != '/')
-                Panic("root directory must end with /");
+                panic("root directory must end with /");
 
-	Trace(CHAN_DBG, Fmt("setting root directory to %s", rootDir));
+	trace(CHAN_DBG, fmt("setting root directory to %s", rootDir));
 	s_FilesRoot = rootDir;
 
 	return EOK;
 }
 
 /*
- * Files_Shutdown
+ * shutdown_files
  *	Close all open files and free all buffers.
  */
-ecode_t Files_Shutdown()
+ecode_t shutdown_files()
 {
 	uint32_t closed = 0;
 	uint32_t used = 0;
@@ -123,20 +123,20 @@ ecode_t Files_Shutdown()
 		s_Files[i] = NULL;
 	}
 
-	Trace(CHAN_DBG,
-		Fmt("freed %u file structures (%u were in use)", closed, used));
+	trace(CHAN_DBG,
+		fmt("freed %u file structures (%u were in use)", closed, used));
 
 	return EOK;
 }
 
 /*
- * Files_OpenFile
+ * open_file
  */
 static void OpenAndRead(struct File *file)
 {
 	file->fd = open(file->path, O_RDONLY);
 	if (file->fd == -1)
-		Panic(Fmt("failed to open %s", file->path));
+		panic(fmt("failed to open %s", file->path));
 
 	struct stat status;
 	fstat(file->fd, &status);
@@ -148,11 +148,11 @@ static void OpenAndRead(struct File *file)
 	 */
 	ssize_t ret = read(file->fd, file->data, file->size);
 	if (ret == -1 || ret < file->size) {
-		Panic(Fmt("read() returned %d", ret));
+		panic(fmt("read() returned %d", ret));
 	}
 }
 
-FileHandle Files_OpenFile(const char *filename)
+filehandle_t open_file(const char *filename)
 {
 	assert(filename != NULL);
 
@@ -163,54 +163,54 @@ FileHandle Files_OpenFile(const char *filename)
 	file->handle = s_NextHandle++;
 	OpenAndRead(file);
 
-	Trace(CHAN_DBG, Fmt("opened %s (handle %u)", fullPath, file->handle));
+	trace(CHAN_DBG, fmt("opened %s (handle %u)", fullPath, file->handle));
 
 	return file->handle;
 }
 
 /*
- * Files_CloseFile
+ * close_file
  */
-void Files_CloseFile(FileHandle handle)
+void close_file(filehandle_t handle)
 {
 	struct File *file = GetFileByHandle(handle);
 	if (!file)
-		Panic(Fmt("no file for handle %u", handle));
+		panic(fmt("no file for handle %u", handle));
 
-	Trace(CHAN_DBG, Fmt("closed %s (handle %u)", file->path, handle));
+	trace(CHAN_DBG, fmt("closed %s (handle %u)", file->path, handle));
 	DestroyFile(file);
 }
 
 /*
- * Files_GetData
+ * file_get_data
  */
-uint8_t *Files_GetData(FileHandle handle)
+uint8_t *file_get_data(filehandle_t handle)
 {
 	struct File *file = GetFileByHandle(handle);
 	if (!file)
-		Panic(Fmt("no file for handle %u", handle));
+		panic(fmt("no file for handle %u", handle));
 
 	return file->data;
 }
 
-size_t Files_GetSize(FileHandle handle)
+size_t file_get_size(filehandle_t handle)
 {
 	struct File *file = GetFileByHandle(handle);
 	if (!file) {
-		Panic(Fmt("no file for handle %u", handle));
+		panic(fmt("no file for handle %u", handle));
 	}
 
 	return file->size;
 }
 
 /*
- * Files_GetPath
+ * file_get_path
  */
-const char *Files_GetPath(FileHandle handle)
+const char *file_get_path(filehandle_t handle)
 {
 	struct File *file = GetFileByHandle(handle);
 	if (!file) {
-		Panic(Fmt("no file for handle %u", handle));
+		panic(fmt("no file for handle %u", handle));
 	}
 
 	return file->path;
@@ -224,7 +224,7 @@ void Files_ListOpen(int argc, char **argv)
 	int totalOpen = 0;
 	size_t totalBytes = 0;
 
-	Trace(CHAN_INFO, "List of open files:");
+	trace(CHAN_INFO, "List of open files:");
 	for (int i = 0; i < MAX_OPENFILES; i++) {
 		if (s_Files[i] == NULL)
 			continue;
@@ -232,12 +232,12 @@ void Files_ListOpen(int argc, char **argv)
 		if (s_Files[i]->inUse) {
 			struct File *f = s_Files[i];
 
-			Trace(CHAN_INFO,
-				Fmt("\t%s (%lu bytes)", f->path, f->size));
+			trace(CHAN_INFO,
+				fmt("\t%s (%lu bytes)", f->path, f->size));
 			totalOpen++;
 			totalBytes += f->size;
 		}
 	}
-	Trace(CHAN_INFO,
-		Fmt("\tTotals: %d open, %lu bytes", totalOpen, totalBytes));
+	trace(CHAN_INFO,
+		fmt("\tTotals: %d open, %lu bytes", totalOpen, totalBytes));
 }

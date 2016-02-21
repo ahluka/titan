@@ -6,46 +6,46 @@
 #include "ini.h"
 #include "files.h"
 
-/* Not using a MemPool here because we need to iterate over the entities
- * all the time. I *could* use a MemPool, but I'd have to either A) change
- * the MemPool API to include iteration, or B) keep an array of pointers
+/* Not using a mem_pool_t here because we need to iterate over the entities
+ * all the time. I *could* use a mem_pool_t, but I'd have to either A) change
+ * the mem_pool_t API to include iteration, or B) keep an array of pointers
  * like this anyway / be redundant.
  */
 #define MAX_ENTITIES	64
-static struct Entity *s_Entities[MAX_ENTITIES] = {NULL};
+static entity_t *s_Entities[MAX_ENTITIES] = {NULL};
 
 #define DEFAULT_ENTDEF_FILE "./res/ent/default.ent"
 
 /*
- * Ent_Init
+ * init_entities
  *	Allocate the Entity pool and set them all to unused, ready for
  *	Ent_New() to make use of them.
  */
-ecode_t Ent_Init()
+ecode_t init_entities()
 {
 	if (s_Entities[0] != NULL) {
-		Trace(CHAN_INFO, "Entity manager already initialised");
+		trace(CHAN_INFO, "Entity manager already initialised");
 		return EFAIL;
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
-		s_Entities[i] = MemAlloc(sizeof(struct Entity));
+		s_Entities[i] = MemAlloc(sizeof(struct entity));
 		s_Entities[i]->inUse = false;
 	}
 
-	Trace(CHAN_DBG, Fmt("Allocated entity pool size %d", MAX_ENTITIES));
+	trace(CHAN_DBG, fmt("Allocated entity pool size %d", MAX_ENTITIES));
 
 	return EOK;
 }
 
 /*
- * Ent_Shutdown
+ * shutdown_entities
  *	Free the Entity pool and NULL it out.
  */
-ecode_t Ent_Shutdown()
+ecode_t shutdown_entities()
 {
 	if (s_Entities[0] == NULL) {
-		Trace(CHAN_INFO, "Already called or Ent_Init not called");
+		trace(CHAN_INFO, "Already called or init_entities not called");
 		return EFAIL;
 	}
 
@@ -58,7 +58,7 @@ ecode_t Ent_Shutdown()
 		s_Entities[i] = NULL;
 	}
 
-	Trace(CHAN_DBG, Fmt("Freed %d entities", MAX_ENTITIES));
+	trace(CHAN_DBG, fmt("Freed %d entities", MAX_ENTITIES));
 
 	return EOK;
 }
@@ -67,7 +67,7 @@ ecode_t Ent_Shutdown()
 static int
 handle_prop(void *usr, const char *sec, const char *key, const char *val)
 {
-        //Trace(CHAN_DBG, Fmt("[%s] %s=%s", sec, key, val));
+        //trace(CHAN_DBG, fmt("[%s] %s=%s", sec, key, val));
 
         struct property_tbl *prop_tbl = usr;
         struct property *prop = MemAlloc(sizeof(*prop));
@@ -83,18 +83,18 @@ handle_prop(void *usr, const char *sec, const char *key, const char *val)
  * load_properties
  *      Load and parse the specified entity definition file.
  */
-static void load_properties(Entity *ent, const char *entfile)
+static void load_properties(entity_t *ent, const char *entfile)
 {
         assert(ent != NULL);
         assert(entfile != NULL);
 
-        Trace(CHAN_DBG, Fmt("loading %s", entfile));
+        trace(CHAN_DBG, fmt("loading %s", entfile));
 
         if (ini_parse(entfile, handle_prop, &ent->properties) < 0) {
-                Panic(Fmt("Failed to parse entity defintion '%s'", entfile));
+                panic(fmt("Failed to parse entity defintion '%s'", entfile));
         }
 
-        Trace(CHAN_DBG, Fmt("loaded %u properties", ent->properties.size));
+        trace(CHAN_DBG, fmt("loaded %u properties", ent->properties.size));
 }
 
 /*
@@ -114,33 +114,33 @@ static void free_property_table(struct property_tbl *ptbl)
 }
 
 /*
- * Update and render stub functions. They just Panic(), because I obviously
+ * Update and render stub functions. They just panic(), because I obviously
  * forgot to replace them.
  */
-ecode_t EntityDefaultUpdate(struct Entity *self, float dT)
+ecode_t EntityDefaultUpdate(entity_t *self, float dT)
 {
         const char *name = SelfProperty("name");
 
-        Panic(Fmt("no update function specified for '%s'", name));
+        panic(fmt("no update function specified for '%s'", name));
 	return EOK;
 }
 
-ecode_t EntityDefaultRender(struct Entity *self)
+ecode_t EntityDefaultRender(entity_t *self)
 {
         const char *name = SelfProperty("name");
 
-        Panic(Fmt("no render function specified for '%s'", name));
+        panic(fmt("no render function specified for '%s'", name));
 	return EOK;
 }
 
-static void set_basic_fields(Entity *ent)
+static void set_basic_fields(entity_t *ent)
 {
-        ent->updateType = ENT_UPDATE_FRAME;
-        ent->nextUpdate = 0;
-        ent->Update = EntityDefaultUpdate;
+        ent->update_type = ENT_UPDATE_FRAME;
+        ent->next_update = 0;
+        ent->update = EntityDefaultUpdate;
 
-        ent->isVisible = true;
-        ent->Render = EntityDefaultRender;
+        ent->visible = true;
+        ent->render = EntityDefaultRender;
 
         INIT_LIST_HEAD(&ent->properties.props);
 }
@@ -148,38 +148,38 @@ static void set_basic_fields(Entity *ent)
 /*
  * Ent_New
  *	Return a pointer to the first unused Entity in the pool.
- *	If we don't find one, Panic().
+ *	If we don't find one, panic().
  */
-Entity *Ent_New()
+entity_t *Ent_New()
 {
 	if (s_Entities[0] == NULL) {
-		Panic("Entity pool not initialised");
+		panic("Entity pool not initialised");
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (!s_Entities[i]->inUse) {
-			Trace(CHAN_DBG, Fmt("Entity slot %d selected", i));
+			trace(CHAN_DBG, fmt("Entity slot %d selected", i));
 
 			s_Entities[i]->inUse = true;
 			return s_Entities[i];
 		}
 	}
 
-	Panic("No free Entities");
+	panic("No free Entities");
 	return NULL; /* not reached; shuts warning up */
 }
 
 /*
  * Ent_Free
  */
-ecode_t Ent_Free(Entity *ent)
+ecode_t Ent_Free(entity_t *ent)
 {
 	assert(ent != NULL);
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 		if (s_Entities[i] == ent) {
-			// Trace(CHAN_DBG,
-			// 	Fmt("marking entity in slot %d as free", i));
+			// trace(CHAN_DBG,
+			// 	fmt("marking entity in slot %d as free", i));
 
                         if (s_Entities[i]->inUse) {
         			s_Entities[i]->inUse = false;
@@ -190,19 +190,19 @@ ecode_t Ent_Free(Entity *ent)
 		}
 	}
 
-	Panic("Invalid Entity pointer");
+	panic("Invalid entity_t pointer");
 	return EFAIL; /* not reached */
 }
 
 /*
  * parse_loaded_properties
  */
-static void parse_loaded_properties(Entity *ent, const char *entfile)
+static void parse_loaded_properties(entity_t *ent, const char *entfile)
 {
         /* Must have a class specified, set name to 'unnamed' if it wasn't */
         ent->class = Ent_GetProperty(ent, "class");
         if (!ent->class) {
-                Panic(Fmt("no class defined in %s", entfile));
+                panic(fmt("no class defined in %s", entfile));
         }
 
         ent->name = Ent_GetProperty(ent, "name");
@@ -224,14 +224,14 @@ static void parse_loaded_properties(Entity *ent, const char *entfile)
 /*
  * Ent_Spawn
  */
-Entity *Ent_Spawn(const char *class)
+entity_t *Ent_Spawn(const char *class)
 {
         assert(class != NULL);
 
-        Entity *ent = Ent_New();
+        entity_t *ent = Ent_New();
         set_basic_fields(ent);
 
-        char *root = sstrcat(Files_GetRoot(), "ent/");
+        char *root = sstrcat(get_root_path(), "ent/");
         char *full = sstrfname(root, class, ".ent");
         load_properties(ent, full);
         parse_loaded_properties(ent, full);
@@ -245,7 +245,7 @@ Entity *Ent_Spawn(const char *class)
 /*
  * Ent_GetProperty
  */
-const char *Ent_GetProperty(Entity *ent, const char *key)
+const char *Ent_GetProperty(entity_t *ent, const char *key)
 {
         assert(ent != NULL);
         assert(key != NULL);
@@ -257,7 +257,7 @@ const char *Ent_GetProperty(Entity *ent, const char *key)
                 }
         }
 
-        Trace(CHAN_GAME, Fmt("Warning: entity has no property '%s'", key));
+        trace(CHAN_GAME, fmt("Warning: entity has no property '%s'", key));
 
         return NULL;
 }
@@ -265,7 +265,7 @@ const char *Ent_GetProperty(Entity *ent, const char *key)
 /*
  * Ent_SetProperty
  */
-void Ent_SetProperty(Entity *ent, const char *key, const char *val)
+void Ent_SetProperty(entity_t *ent, const char *key, const char *val)
 {
         assert(ent != NULL);
         assert(key != NULL);
@@ -283,25 +283,25 @@ void Ent_SetProperty(Entity *ent, const char *key, const char *val)
 }
 
 /*
- * Ent_UpdateAll
+ * update_entities
  *	Update all in-use Entities in the pool.
  */
-static ecode_t UpdateEntity(Entity *ent, float dT)
+static ecode_t UpdateEntity(entity_t *ent, float dT)
 {
-	switch (ent->updateType) {
+	switch (ent->update_type) {
 	case ENT_UPDATE_FRAME:
-		if (ent->Update(ent, dT) != EOK) {
-			Trace(CHAN_GAME,
-				Fmt("entity '%s' failed to update", ent->name));
+		if (ent->update(ent, dT) != EOK) {
+			trace(CHAN_GAME,
+				fmt("entity '%s' failed to update", ent->name));
 			return EFAIL;
 		}
 
 		break;
 	case ENT_UPDATE_SCHED:
-		if (ent->nextUpdate <= g_Globals.timeNowMs) {
-			if (ent->Update(ent, dT) != EOK) {
-				Trace(CHAN_GAME,
-					Fmt("entity '%s' failed to update",
+		if (ent->next_update <= g_globals.timeNowMs) {
+			if (ent->update(ent, dT) != EOK) {
+				trace(CHAN_GAME,
+					fmt("entity '%s' failed to update",
 					ent->name));
 				return EFAIL;
 			}
@@ -313,15 +313,15 @@ static ecode_t UpdateEntity(Entity *ent, float dT)
 	return EOK;
 }
 
-ecode_t Ent_UpdateAll(float dT)
+ecode_t update_entities(float dT)
 {
 	if (s_Entities[0] == NULL) {
-		Trace(CHAN_INFO, "Entity pool not initialised");
+		trace(CHAN_INFO, "Entity pool not initialised");
 		return EFAIL;
 	}
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
-		Entity *ent = s_Entities[i];
+		entity_t *ent = s_Entities[i];
 
 		if (!ent->inUse)
 			continue;
@@ -334,24 +334,24 @@ ecode_t Ent_UpdateAll(float dT)
 }
 
 /*
- * Ent_RenderAll
+ * render_all_entities
  *      Call each Entity's Render() function, giving them all a chance to
  *      submit render commands.
  */
-ecode_t Ent_RenderAll()
+ecode_t render_all_entities()
 {
         if (s_Entities[0] == NULL) {
-                Trace(CHAN_INFO, "Entity pool not initialised");
+                trace(CHAN_INFO, "Entity pool not initialised");
                 return EFAIL;
         }
 
         for (int i = 0; i < MAX_ENTITIES; i++) {
-                Entity *ent = s_Entities[i];
+                entity_t *ent = s_Entities[i];
 
-                if (!ent->inUse || !ent->isVisible)
+                if (!ent->inUse || !ent->visible)
                         continue;
 
-                if (ent->Render(ent) != EOK)
+                if (ent->render(ent) != EOK)
                         return EFAIL;
         }
 

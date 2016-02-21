@@ -19,7 +19,7 @@ struct ConfigData g_Config = {0};
 static int
 INIHandler(void *usr, const char *sec, const char *key, const char *val)
 {
-	// Trace(CHAN_DBG, Fmt("handling [%s] %s=%s", sec, key, val));
+	// trace(CHAN_DBG, fmt("handling [%s] %s=%s", sec, key, val));
 
 	if (MATCH("General", "Game")) {
 		g_Config.gameName = sstrdup(val);
@@ -45,19 +45,19 @@ INIHandler(void *usr, const char *sec, const char *key, const char *val)
 #undef MATCH
 
 /*
- * Config_Load
+ * load_config
  *	Load config data from the given file into g_Config.
  */
-ecode_t Config_Load(const char *filename)
+ecode_t load_config(const char *filename)
 {
 	assert(filename != NULL);
-	Trace(CHAN_INFO, Fmt("Using config file '%s'", filename));
+	trace(CHAN_INFO, fmt("Using config file '%s'", filename));
 
 	g_Config.filename = filename;
 
 	int ret = ini_parse(filename, INIHandler, NULL);
 	if (ret < 0) {
-		Trace(CHAN_INFO, Fmt("INI parse error %d\n", ret));
+		trace(CHAN_INFO, fmt("INI parse error %d\n", ret));
 		return EFAIL;
 	}
 
@@ -65,10 +65,10 @@ ecode_t Config_Load(const char *filename)
 }
 
 /*
- * Config_Save
- *	Write g_Config into the given file and free it.
+ * save_config
+ *	Write g_Config into the given file and free any memory it used.
  */
-ecode_t Config_Save(const char *filename)
+ecode_t save_config(const char *filename)
 {
 	assert(filename != NULL);
 	// TODO: Write it

@@ -2,11 +2,9 @@
 #include "list.h"
 #include "vec.h"
 
-/* Every entity update / render function is given a pointer to itself named
- * self; this macro is defined for convenience. */
+/* If you define every Entity's Update and Render functions first argument
+ * as 'self' then you can use this macro for convenience. */
 #define SelfProperty(key) Ent_GetProperty(self, (key))
-#define TIMENOW_PLUS(ms) g_Globals.timeNowMs + (ms)
-
 
 /* Each Entity has a property table.
  */
@@ -21,12 +19,12 @@ struct property_tbl {
 };
 
 /* Determines how Entities are updated */
-enum EntUpdateType {
+enum ent_update_type {
 	ENT_UPDATE_FRAME,	/* once per frame */
 	ENT_UPDATE_SCHED	/* when game time >= Entity.nextUpdate */
 };
 
-typedef struct Entity {
+typedef struct entity {
 	bool inUse;
 
         /* class is the type of entity, name is the name of the specific
@@ -47,15 +45,15 @@ typedef struct Entity {
         vec2_t vel;
 
 	/* Updating */
-	enum EntUpdateType updateType;
-	uint32_t nextUpdate;
-	ecode_t (*Update)(struct Entity *self, float dT);
+	enum ent_update_type update_type;
+	uint32_t next_update;
+	ecode_t (*update)(struct entity *self, float dT);
 
 	/* Rendering */
-        bool isVisible;
-	ecode_t (*Render)(struct Entity *self);
+        bool visible;
+	ecode_t (*render)(struct entity *self);
 
-} Entity;
+} entity_t;
 
 /* Spawn an entity of the given class into the game world. This loads the
  * entity definition script named from the given parameter "class", so
@@ -64,24 +62,24 @@ typedef struct Entity {
  * stubs (both of which you should replace immediately).
  * After this call, the Entity returned will be processed on the next frame.
  */
-Entity *Ent_Spawn(const char *class);
+entity_t *Ent_Spawn(const char *class);
 
 /* Mark the given Entity as unused and free its property table. */
-ecode_t Ent_Free(Entity *ent);
+ecode_t Ent_Free(entity_t *ent);
 
 /* Get the given property string from the entity's property table.
  * Returns NULL if it can't be found.
  * DO NOT free the string returned, it's allocated from the global string
  * pool and will be freed for you. */
-const char *Ent_GetProperty(Entity *ent, const char *key);
+const char *Ent_GetProperty(entity_t *ent, const char *key);
 
 /* Add the given key / value property to the given entity's property
- * table, or update its value if it already exists. */
-void Ent_SetProperty(Entity *ent, const char *key, const char *val);
+ * table, or update its value if key already exists. */
+void Ent_SetProperty(entity_t *ent, const char *key, const char *val);
 
 
 /* These are called by base modules. */
-ecode_t Ent_Init();
-ecode_t Ent_Shutdown();
-ecode_t Ent_UpdateAll(float dT);
-ecode_t Ent_RenderAll();
+ecode_t init_entities();
+ecode_t shutdown_entities();
+ecode_t update_entities(float dT);
+ecode_t render_all_entities();

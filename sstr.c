@@ -6,7 +6,7 @@
 #define BLOCK_SIZE 128
 #define BLOCK_COUNT 1024
 
-static MemPool *s_Pool = NULL;
+static mem_pool_t *s_Pool = NULL;
 
 /*
  * validate_length
@@ -14,7 +14,7 @@ static MemPool *s_Pool = NULL;
 static void validate_length(const char *str)
 {
         if (strlen(str) >= BLOCK_SIZE)
-                Panic(Fmt("String too large (%s)", str));
+                panic(fmt("String too large (%s)", str));
 }
 
 /*
@@ -23,12 +23,12 @@ static void validate_length(const char *str)
 ecode_t sstr_init()
 {
         if (s_Pool != NULL) {
-                Trace(CHAN_DBG, "sstr already initialised");
+                trace(CHAN_DBG, "sstr already initialised");
                 return EFAIL;
         }
 
         /* Seems best to make this pool fixed size, at least for now. */
-        s_Pool = Pool_Create(BLOCK_COUNT, BLOCK_SIZE, POOL_FIXEDSIZE, "sstr");
+        s_Pool = create_pool(BLOCK_COUNT, BLOCK_SIZE, POOL_FIXEDSIZE, "sstr");
         return EOK;
 }
 
@@ -38,11 +38,11 @@ ecode_t sstr_init()
 ecode_t sstr_shutdown()
 {
         if (s_Pool == NULL) {
-                Trace(CHAN_DBG, "sstr wasn't initialised");
+                trace(CHAN_DBG, "sstr wasn't initialised");
                 return EFAIL;
         }
 
-        Pool_Destroy(s_Pool);
+        destroy_pool(s_Pool);
 
         return EOK;
 }
@@ -89,7 +89,7 @@ char *sstrcat(const char *first, const char *second)
         validate_length(first);
         validate_length(second);
         if (strlen(first) + strlen(second) >= BLOCK_SIZE)
-                Panic("concatenation would overflow");
+                panic("concatenation would overflow");
 
         char *ret = PAlloc(s_Pool);
         strncpy(ret, first, strlen(first));
@@ -112,12 +112,12 @@ char *sstrfname(const char *dir, const char *name, const char *ext)
 
         if (dir) {
                 if (strlen(dir) + namesz >= BLOCK_SIZE)
-                        Panic("dir + name would overflow");
+                        panic("dir + name would overflow");
         }
 
         if (ext) {
                 if (strlen(ext) + namesz >= BLOCK_SIZE)
-                        Panic("name + ext would overflow");
+                        panic("name + ext would overflow");
         }
 
         char *ret = PAlloc(s_Pool);

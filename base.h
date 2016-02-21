@@ -3,7 +3,7 @@
 
 /*
  * The base include file, to be used in most modules.
- * Probably best to include this first in the modules that use it.
+ * Probably best to include this first.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+
 // TODO: Uncomment this for release
 // #define NDEBUG
 #include <assert.h>
@@ -33,11 +34,11 @@ typedef int ecode_t;
  * Very useful; avoids having to have varargs versions of functions that
  * accept arbitrary strings.
  */
-const char *Fmt(const char *format, ...);
+const char *fmt(const char *format, ...);
 
 
-ecode_t InitBase();
-ecode_t ShutdownBase();
+ecode_t init_base();
+ecode_t shutdown_base();
 
 #include "sstr.h"
 

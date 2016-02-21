@@ -14,12 +14,12 @@
 //
 //         surf = IMG_Load(filename);
 //         if (!surf) {
-//                 Panic(Fmt("Failed to load %s", filename));
+//                 panic(fmt("Failed to load %s", filename));
 //         }
 //
 //         ret = SDL_CreateTextureFromSurface(s_state.renderer, surf);
 //         if (!ret) {
-//                 Panic(Fmt("Failed to create texture from %s (%s)", filename,
+//                 panic(fmt("Failed to create texture from %s (%s)", filename,
 //                         SDL_GetError()));
 //         }
 //

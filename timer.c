@@ -4,9 +4,9 @@
 
 
 /*
- * Timer_Init
+ * init_timer
  */
-void Timer_Init(struct Timer *timer)
+void init_timer(struct timer *timer)
 {
 	assert(timer != NULL);
 
@@ -17,9 +17,9 @@ void Timer_Init(struct Timer *timer)
 }
 
 /*
- * Timer_Start
+ * start_timer
  */
-void Timer_Start(struct Timer *timer)
+void start_timer(struct timer *timer)
 {
 	assert(timer != NULL);
 
@@ -31,9 +31,9 @@ void Timer_Start(struct Timer *timer)
 }
 
 /*
- * Timer_Stop
+ * stop_timer
  */
-void Timer_Stop(struct Timer *timer)
+void stop_timer(struct timer *timer)
 {
 	assert(timer != NULL);
 
@@ -43,9 +43,9 @@ void Timer_Stop(struct Timer *timer)
 }
 
 /*
- * Timer_Pause
+ * pause_timer
  */
-void Timer_Pause(struct Timer *timer)
+void pause_timer(struct timer *timer)
 {
 	assert(timer != NULL);
 
@@ -57,9 +57,9 @@ void Timer_Pause(struct Timer *timer)
 }
 
 /*
- * Timer_Unpause
+ * unpause_timer
  */
-void Timer_Unpause(struct Timer *timer)
+void unpause_timer(struct timer *timer)
 {
 	assert(timer != NULL);
 
@@ -71,9 +71,9 @@ void Timer_Unpause(struct Timer *timer)
 }
 
 /*
- * Timer_GetTicks
+ * timer_get_ticks
  */
-uint32_t Timer_GetTicks(struct Timer *timer)
+uint32_t timer_get_ticks(struct timer *timer)
 {
 	assert(timer != NULL);
 
@@ -90,18 +90,18 @@ uint32_t Timer_GetTicks(struct Timer *timer)
 }
 
 /*
- * Timer_IsStarted
+ * timer_is_started
  */
-bool Timer_IsStarted(struct Timer *timer)
+bool timer_is_started(struct timer *timer)
 {
 	assert(timer != NULL);
 	return timer->started;
 }
 
 /*
- * Timer_IsPaused
+ * timer_is_paused
  */
-bool Timer_IsPaused(struct Timer *timer)
+bool timer_is_paused(struct timer *timer)
 {
 	assert(timer != NULL);
 	return timer->paused && timer->started;

@@ -4,9 +4,9 @@
 
 
 /*
- * Fmt
+ * fmt
  */
-const char *Fmt(const char *format, ...)
+const char *fmt(const char *format, ...)
 {
 	va_list args;
 	static char buffer[2][16000];
@@ -24,9 +24,9 @@ const char *Fmt(const char *format, ...)
 }
 
 /*
- * InitBase
+ * init_base
  */
-ecode_t InitBase()
+ecode_t init_base()
 {
         if (sstr_init() != EOK)
                 return EFAIL;
@@ -35,9 +35,9 @@ ecode_t InitBase()
 }
 
 /*
- * ShutdownBase
+ * shutdown_base
  */
-ecode_t ShutdownBase()
+ecode_t shutdown_base()
 {
         if (sstr_shutdown() != EOK)
                 return EFAIL;
