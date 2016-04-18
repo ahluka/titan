@@ -112,7 +112,7 @@ ecode_t script_register_command(ScriptCmdFunc fn, const char *name)
 
 	if (Tcl_CreateObjCommand(s_Interp, name, fn, NULL, NULL) == NULL) {
 		shutdown_script();
-		panic(fmt("Failed to register '%s'", name));
+		panic(fmt("failed to register '%s'", name));
 	}
 
 	return EOK;

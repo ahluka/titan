@@ -9,7 +9,7 @@
 #include "memory.h"
 #include "event.h"
 #include <time.h>
-#include "vec.h"
+#include "map.h"
 
 #define CONFIG_FILENAME "config.ini"
 
@@ -69,7 +69,8 @@ static void check_memory()
 
 	if (usage > 0 || diff != 0) {
 		trace(CHAN_MEM, "====== WARNING ======");
-		trace(CHAN_MEM, fmt("Memory usage on exit: %lu bytes", usage));
+		trace(CHAN_MEM, fmt("Memory usage on exit: %lu %s",
+                        SaneVal(usage), SaneAff(usage)));
 		trace(CHAN_MEM, fmt("%u allocs, %u frees (%u unaccounted for)",
 			allocs, frees, diff));
 		MemStats();
@@ -80,7 +81,8 @@ static void run_tests()
 {
 	// event_t *evt = create_event("test-event", EVENT_BROADCAST | EVENT_QUEUED);
 	// queue_event(evt);
-
+        struct map *test = load_map("maps/test0.map");
+        free_map(test);
 }
 
 /*

@@ -1,53 +1,5 @@
-// #pragma once
-//
-// /*
-//  * ch_hashtable.h
-//  *	Chained hash table.
-//  */
-// typedef struct HashTable HashTable;
-//
-// void HT_Test();
-//
-// /* Create a new hash table and return a pointer to it.
-//  * Given table size should be a prime number; pick one from below.
-//  *
-//  * If HT_MANUAL is specified then you are responsible for freeing the memory
-//  * used by the keys and whatever you store in the table. If HT_FREE_DATA is
-//  * specified, the hash table will automatically pass its keys and values to
-//  * MemFree() as necessary.
-//  *
-//  * If HT_ALLOW_DUPLICATES is specified as the policy, then HT_Add() returns
-//  * EOK when a duplicate is added. If HT_UNIQUE is specified as the policy,
-//  * then HT_Add() returns EFAIL when a duplicate is found.
-//  */
-// enum HTFreeType {
-// 	HT_MANUAL,
-// 	HT_FREE_DATA
-// };
-//
-// enum HTPolicy {
-// 	HT_ALLOW_DUPLICATES,
-// 	HT_UNIQUE
-// };
-//
-// HashTable *HT_Create(uint32_t sizePrime,
-// 	enum HTFreeType freeType,
-// 	enum HTPolicy policy);
-//
-// /* Destroy the given hash table, freeing all memory it used. */
-// void HT_Destroy(HashTable *table);
-//
-// /* Enter the given data into a table. */
-// ecode_t HT_Add(HashTable *table, char *key, void *data);
-//
-// /* Remove the given datum from the table. */
-// ecode_t HT_Remove(HashTable *table, char *key);
-//
-// /* Get a pointer to the data stored with the given key. It will be returned
-//  * in _data. Returns EFAIL if datum doesn't exist within table, EOK otherwise.
-//  */
-// ecode_t HT_Get(HashTable *table, char *key, void **_out);
-//
+#pragma once
+
 // /* All primes between 1 and 4096. Kept here so I can use them as hash table
 //  * sizes for different things.
 //  */

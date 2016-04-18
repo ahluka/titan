@@ -90,7 +90,6 @@ static void DestroyFile(struct File *f)
 /*
  * init_files
  */
-void Files_ListOpen(int argc, char **argv);
 ecode_t init_files(const char *rootDir)
 {
         if (rootDir[strlen(rootDir)-1] != '/')
@@ -214,30 +213,4 @@ const char *file_get_path(filehandle_t handle)
 	}
 
 	return file->path;
-}
-
-/*
- * Files_ListOpen
- */
-void Files_ListOpen(int argc, char **argv)
-{
-	int totalOpen = 0;
-	size_t totalBytes = 0;
-
-	trace(CHAN_INFO, "List of open files:");
-	for (int i = 0; i < MAX_OPENFILES; i++) {
-		if (s_Files[i] == NULL)
-			continue;
-
-		if (s_Files[i]->inUse) {
-			struct File *f = s_Files[i];
-
-			trace(CHAN_INFO,
-				fmt("\t%s (%lu bytes)", f->path, f->size));
-			totalOpen++;
-			totalBytes += f->size;
-		}
-	}
-	trace(CHAN_INFO,
-		fmt("\tTotals: %d open, %lu bytes", totalOpen, totalBytes));
 }

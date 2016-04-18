@@ -7,7 +7,7 @@
 struct ConfigData g_Config = {0};
 
 /*
- * INIHandler
+ * handler
  *	ini_parse() calls this for every key=value pair it successfully
  *	parses.
  * usr: The pointer given to ini_parse(), NULL in this case.
@@ -17,7 +17,7 @@ struct ConfigData g_Config = {0};
 #define MATCH(s, k) strcmp(sec, s) == 0 && strcmp(key, k) == 0
 
 static int
-INIHandler(void *usr, const char *sec, const char *key, const char *val)
+handler(void *usr, const char *sec, const char *key, const char *val)
 {
 	// trace(CHAN_DBG, fmt("handling [%s] %s=%s", sec, key, val));
 
@@ -55,7 +55,7 @@ ecode_t load_config(const char *filename)
 
 	g_Config.filename = filename;
 
-	int ret = ini_parse(filename, INIHandler, NULL);
+	int ret = ini_parse(filename, handler, NULL);
 	if (ret < 0) {
 		trace(CHAN_INFO, fmt("INI parse error %d\n", ret));
 		return EFAIL;

@@ -4,7 +4,7 @@
 #define panic(m) do { _panic(__FILE__, __LINE__, __func__, m); } while (0)
 #define trace(chan,m) do { _trace(__FILE__, __LINE__, __func__, m, chan); } while (0)
 
-/* trace channels. trace messages will only be printed if their channel is
+/* trace channels; trace messages will only be printed if their channel is
  * currently active.
  */
 #define CHAN_INFO	0x1
